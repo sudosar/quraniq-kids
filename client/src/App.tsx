@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { BugNub } from "./components/BugNub";
 import { ProgressProvider } from "./contexts/ProgressContext";
 import Home from "./pages/Home";
 import LevelMap from "./pages/LevelMap";
@@ -33,6 +34,7 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <Router />
+            <BugNub />
           </TooltipProvider>
         </ProgressProvider>
       </ThemeProvider>
