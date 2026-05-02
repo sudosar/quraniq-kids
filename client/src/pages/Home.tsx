@@ -104,7 +104,8 @@ export default function Home() {
         >
           Tap to start your Quran reading journey
         </motion.p>
-      </div>
+        <p className="absolute bottom-4 text-xs text-white/30">v2.1</p>
+    </div>
 
       {/* Floating decorative elements */}
       <motion.div
@@ -122,6 +123,7 @@ export default function Home() {
         animate={{ y: [0, -6, 0], opacity: [0.4, 0.8, 0.4] }}
         transition={{ duration: 2, repeat: Infinity, delay: 1 }}
       />
+      <p className="absolute bottom-4 text-xs text-white/30">v2.1</p>
     </div>
   );
 }
