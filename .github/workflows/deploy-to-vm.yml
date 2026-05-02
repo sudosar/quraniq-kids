@@ -8,6 +8,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: VM Terabix
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -53,4 +54,4 @@ jobs:
             rm -rf /var/www/quraniq-kids/*
             cp -r /tmp/quraniq-kids-deploy/* /var/www/quraniq-kids/
             rm -rf /tmp/quraniq-kids-deploy
-            echo "Deployed QuranIQ Kids at $(date )"
+            echo "Deployed QuranIQ Kids at $(date)"
