@@ -25,8 +25,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build production bundle
-        run: VITE_BASE_URL=/ pnpm exec vite build --outDir dist/public
-        working-directory: client
+        run: VITE_BASE_URL=/ pnpm exec vite build
+        env:
+          VITE_BASE_URL: /
 
       - name: Deploy to VM via SSH
         uses: appleboy/scp-action@v0.1.7
@@ -36,9 +37,9 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           passphrase: ${{ secrets.VM_SSH_PASSPHRASE }}
           port: ${{ secrets.VM_PORT }}
-          source: "client/dist/public/*"
+          source: "dist/public/*"
           target: "/tmp/quraniq-kids-deploy"
-          strip_components: 3
+          strip_components: 2
 
       - name: Extract and activate on VM
         uses: appleboy/ssh-action@v1.0.3
