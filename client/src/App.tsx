@@ -1,0 +1,43 @@
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import NotFound from "@/pages/NotFound";
+import { Route, Switch } from "wouter";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { ProgressProvider } from "./contexts/ProgressContext";
+import Home from "./pages/Home";
+import LevelMap from "./pages/LevelMap";
+import LessonPage from "./pages/LessonPage";
+import LetterExplorer from "./pages/LetterExplorer";
+import LetterPlay from "./pages/LetterPlay";
+
+function Router() {
+  return (
+    <Switch>
+      <Route path="/" component={Home} />
+      <Route path="/levels" component={LevelMap} />
+      <Route path="/explore" component={LetterExplorer} />
+      <Route path="/lesson/:id" component={LessonPage} />
+      <Route path="/play/:lessonId/:letterIndex" component={LetterPlay} />
+      <Route path="/404" component={NotFound} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="light">
+        <ProgressProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </ProgressProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
+}
+
+export default App;
