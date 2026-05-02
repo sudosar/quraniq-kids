@@ -206,7 +206,7 @@ function vitePluginStorageProxy(): Plugin {
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy()];
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/quraniq-kids/' : '/',
+  base: process.env.VITE_BASE_URL || (process.env.NODE_ENV === 'production' ? '/quraniq-kids/' : '/'),
   plugins,
   resolve: {
     alias: {
