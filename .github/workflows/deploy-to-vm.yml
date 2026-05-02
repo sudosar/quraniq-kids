@@ -1,0 +1,56 @@
+name: Build and Deploy QuranIQ Kids to VM
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build production bundle
+        run: VITE_BASE_URL=/ pnpm exec vite build --outDir dist/public
+        working-directory: client
+
+      - name: Deploy to VM via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          passphrase: ${{ secrets.VM_SSH_PASSPHRASE }}
+          port: ${{ secrets.VM_PORT }}
+          source: "client/dist/public/*"
+          target: "/tmp/quraniq-kids-deploy"
+          strip_components: 3
+
+      - name: Extract and activate on VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          passphrase: ${{ secrets.VM_SSH_PASSPHRASE }}
+          port: ${{ secrets.VM_PORT }}
+          script: |
+            rm -rf /var/www/quraniq-kids/*
+            cp -r /tmp/quraniq-kids-deploy/* /var/www/quraniq-kids/
+            rm -rf /tmp/quraniq-kids-deploy
+            echo "Deployed QuranIQ Kids at $(date )"
