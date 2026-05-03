@@ -94,14 +94,66 @@ export function getProgressiveGameSequence(availableDistractorCount: number): Ga
 }
 
 // Sound utilities
+
+// Cache for Arabic voice lookup
+let cachedArabicVoice: SpeechSynthesisVoice | null = null;
+let voicesLoaded = false;
+
+function getArabicVoice(): SpeechSynthesisVoice | null {
+  if (cachedArabicVoice) return cachedArabicVoice;
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length === 0) return null;
+  voicesLoaded = true;
+  // Try to find an Arabic voice, preferring ar-SA, then any ar-*
+  cachedArabicVoice = voices.find(v => v.lang === 'ar-SA') 
+    || voices.find(v => v.lang.startsWith('ar'))
+    || null;
+  return cachedArabicVoice;
+}
+
+// Ensure voices are loaded (Chrome loads them asynchronously)
+if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    cachedArabicVoice = null;
+    getArabicVoice();
+  };
+  // Trigger initial load
+  window.speechSynthesis.getVoices();
+}
+
 export function speakArabic(text: string, rate: number = 0.8) {
-  if ('speechSynthesis' in window) {
+  if (!('speechSynthesis' in window)) return;
+  
+  const doSpeak = () => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ar-SA';
     utterance.rate = rate;
     utterance.pitch = 1.1;
+    
+    // Explicitly set the Arabic voice if available
+    const arabicVoice = getArabicVoice();
+    if (arabicVoice) {
+      utterance.voice = arabicVoice;
+    }
+    
     window.speechSynthesis.speak(utterance);
+  };
+  
+  // On desktop Chrome, voices load asynchronously. Wait for them if needed.
+  if (!voicesLoaded && window.speechSynthesis.getVoices().length === 0) {
+    // Voices not yet loaded — wait for them
+    const handler = () => {
+      window.speechSynthesis.onvoiceschanged = null;
+      doSpeak();
+    };
+    window.speechSynthesis.onvoiceschanged = handler;
+    // Fallback: speak anyway after 500ms if voices never load
+    setTimeout(() => {
+      if (!voicesLoaded) doSpeak();
+    }, 500);
+  } else {
+    doSpeak();
   }
 }
 
