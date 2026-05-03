@@ -11,7 +11,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArabicLetter, getBeginningWords } from '@/lib/curriculum';
-import { speakArabic, playCorrectSound } from '@/lib/gameEngine';
+import { speakArabic, speakArabicIfAllowed, playCorrectSound } from '@/lib/gameEngine';
 
 interface Props {
   letter: ArabicLetter;
@@ -68,7 +68,7 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
   useEffect(() => {
     if (currentCard) {
       const timer = setTimeout(() => {
-        speakArabic(currentCard.word, 0.7);
+        speakArabicIfAllowed(currentCard.word, 0.7);
       }, 500);
       return () => clearTimeout(timer);
     }
