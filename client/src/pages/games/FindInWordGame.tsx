@@ -18,7 +18,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArabicLetter } from '@/lib/curriculum';
-import { speakArabic, playCorrectSound, playWrongSound } from '@/lib/gameEngine';
+import { speakArabic, speakArabicIfAllowed, playCorrectSound, playWrongSound } from '@/lib/gameEngine';
 
 interface Props {
   letter: ArabicLetter;
@@ -63,7 +63,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
   useEffect(() => {
     if (currentWord) {
       const timer = setTimeout(() => {
-        speakArabic(currentWord.word, 0.6);
+        speakArabicIfAllowed(currentWord.word, 0.6);
       }, 600);
       return () => clearTimeout(timer);
     }
