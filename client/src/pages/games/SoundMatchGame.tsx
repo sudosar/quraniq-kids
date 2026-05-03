@@ -12,7 +12,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArabicLetter } from '@/lib/curriculum';
-import { speakArabic, playCorrectSound, playWrongSound, shuffleArray } from '@/lib/gameEngine';
+import { speakArabic, speakArabicIfAllowed, playCorrectSound, playWrongSound, shuffleArray } from '@/lib/gameEngine';
 
 interface Props {
   letter: ArabicLetter;
@@ -79,10 +79,12 @@ export default function SoundMatchGame({ letter, distractorLetters, onComplete }
 
   useEffect(() => {
     if (round && !showResult) {
-      const timer = setTimeout(playSound, 500);
+      const timer = setTimeout(() => {
+        if (round) speakArabicIfAllowed(round.target.letter, 0.7);
+      }, 500);
       return () => clearTimeout(timer);
     }
-  }, [currentRound, round, showResult, playSound]);
+  }, [currentRound, round, showResult]);
 
   const handleSelect = useCallback((optionIndex: number) => {
     if (selected !== null || !round) return;
