@@ -1,19 +1,21 @@
 /**
- * DragToMatchGame - Khan Academy Kids style drag-and-drop
+ * DragToMatchGame - Match the letter to the picture that STARTS with it
  * 
- * Design: Celestial Garden theme
+ * PEDAGOGY:
+ * - Shows the current letter in a big card
+ * - Shows 3 pictures: 1 correct (starts with this letter) + 2 distractors
+ * - Distractors are ALWAYS from OTHER letters' "starts with" words
+ *   (NOT from the same letter's other word cards — that's confusing!)
+ * - This way, the child clearly knows: "Lion starts with أ, Duck starts with ب"
  * 
- * The child sees the current letter and must match it to the correct picture.
- * ALWAYS shows multiple pictures (even for the first letter) — uses other word cards
- * from the same letter or from other letters as distractors.
- * 
- * Uses Framer Motion drag for reliable touch/mouse support.
- * Also supports tap-to-select for toddlers who can't drag well.
+ * For the FIRST letter (no previously learned letters):
+ * - Uses pictures from the NEXT few letters as visual distractors
+ *   (child hasn't learned them yet, but can still distinguish pictures)
  */
 
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { ArabicLetter, arabicLetters } from '@/lib/curriculum';
+import { ArabicLetter, getBeginningWords, arabicLetters } from '@/lib/curriculum';
 import { playCorrectSound, playWrongSound, speakArabic, shuffleArray } from '@/lib/gameEngine';
 
 interface Props {
@@ -34,7 +36,7 @@ interface PictureTarget {
   isCorrect: boolean;
 }
 
-export default function DragToMatchGame({ letter, allLetters, distractorLetters, distractorCount, onComplete }: Props) {
+export default function DragToMatchGame({ letter, distractorLetters, onComplete }: Props) {
   const [round, setRound] = useState(0);
   const [matched, setMatched] = useState(false);
   const [wrongTarget, setWrongTarget] = useState<number | null>(null);
@@ -43,15 +45,16 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
   const [score, setScore] = useState(0);
   
   const targetRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const totalRounds = Math.min(3, letter.wordCards.length);
+  const beginningWords = useMemo(() => getBeginningWords(letter), [letter]);
+  const totalRounds = Math.min(3, beginningWords.length);
   const dragConstraintsRef = useRef<HTMLDivElement>(null);
   
-  // Build picture targets for all rounds — ALWAYS show 3 pictures
+  // Build picture targets — correct answer from current letter, distractors from OTHER letters
   const targets = useMemo(() => {
     const rounds: PictureTarget[][] = [];
     
     for (let r = 0; r < totalRounds; r++) {
-      const correctCard = letter.wordCards[r % letter.wordCards.length];
+      const correctCard = beginningWords[r % beginningWords.length];
       const correct: PictureTarget = {
         word: correctCard.word,
         meaning: correctCard.meaning,
@@ -62,53 +65,43 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
       
       const distractors: PictureTarget[] = [];
       
-      if (distractorCount > 0 && distractorLetters.length > 0) {
-        // Use pictures from previously learned letters
-        const shuffledDistractors = shuffleArray(distractorLetters);
-        for (let i = 0; i < Math.min(2, shuffledDistractors.length); i++) {
-          const dLetter = shuffledDistractors[i];
-          if (dLetter.wordCards.length > 0) {
-            const dCard = dLetter.wordCards[Math.floor(Math.random() * dLetter.wordCards.length)];
+      // Get distractor pictures from OTHER letters' beginning words
+      // First try previously learned letters
+      if (distractorLetters.length > 0) {
+        const shuffled = shuffleArray(distractorLetters);
+        for (const dl of shuffled) {
+          if (distractors.length >= 2) break;
+          const dlWords = getBeginningWords(dl);
+          if (dlWords.length > 0) {
+            const dCard = dlWords[Math.floor(Math.random() * dlWords.length)];
             distractors.push({
               word: dCard.word,
               meaning: dCard.meaning,
               emoji: dCard.emoji,
-              letterId: dLetter.id,
+              letterId: dl.id,
               isCorrect: false,
             });
           }
         }
       }
       
-      // If we still don't have enough distractors (e.g., first letter),
-      // use OTHER word cards from the SAME letter or grab from future letters
-      // (just for picture variety — the child won't be tested on those letters)
+      // If still not enough (first letter or few learned), use OTHER letters
       if (distractors.length < 2) {
-        // First try other word cards from the same letter
-        const otherCards = letter.wordCards.filter((_, idx) => idx !== r);
-        for (const card of shuffleArray(otherCards)) {
+        const otherLetters = shuffleArray(
+          arabicLetters.filter(l => l.id !== letter.id && !distractorLetters.find(d => d.id === l.id))
+        );
+        for (const ol of otherLetters) {
           if (distractors.length >= 2) break;
-          distractors.push({
-            word: card.word,
-            meaning: card.meaning,
-            emoji: card.emoji,
-            letterId: letter.id,
-            isCorrect: false, // These are wrong choices — different pictures
-          });
-        }
-        
-        // If still not enough, grab from other letters (just for pictures)
-        if (distractors.length < 2) {
-          const otherLetters = shuffleArray(allLetters.filter(l => l.id !== letter.id));
-          for (const otherLetter of otherLetters) {
-            if (distractors.length >= 2) break;
-            if (otherLetter.wordCards.length > 0) {
-              const card = otherLetter.wordCards[0];
+          const olWords = getBeginningWords(ol);
+          if (olWords.length > 0) {
+            const card = olWords[Math.floor(Math.random() * olWords.length)];
+            // Make sure we don't duplicate emojis
+            if (!distractors.find(d => d.emoji === card.emoji) && card.emoji !== correct.emoji) {
               distractors.push({
                 word: card.word,
                 meaning: card.meaning,
                 emoji: card.emoji,
-                letterId: otherLetter.id,
+                letterId: ol.id,
                 isCorrect: false,
               });
             }
@@ -120,7 +113,7 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
     }
     
     return rounds;
-  }, [letter, allLetters, distractorLetters, distractorCount, totalRounds]);
+  }, [letter, beginningWords, distractorLetters, totalRounds]);
   
   const currentTargets = targets[round] || targets[0];
   
@@ -137,7 +130,6 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
     targetRefs.current.forEach((ref, idx) => {
       if (!ref) return;
       const rect = ref.getBoundingClientRect();
-      // Very generous hit area for toddlers (expand by 30px)
       if (dropX >= rect.left - 30 && dropX <= rect.right + 30 && 
           dropY >= rect.top - 30 && dropY <= rect.bottom + 30) {
         hitTarget = currentTargets[idx];
@@ -199,7 +191,6 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
         <p className="text-sm text-gray-500 mt-1">
           Which picture starts with <span className="font-bold arabic-text text-xl" style={{ color: letter.color }}>{letter.letter}</span>?
         </p>
-        {/* Round indicator */}
         <div className="flex items-center justify-center gap-2 mt-2">
           {Array.from({ length: totalRounds }).map((_, i) => (
             <div key={i} className={`w-3 h-3 rounded-full transition-all ${
@@ -231,7 +222,6 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
           </span>
         </motion.div>
         
-        {/* Drag hint animation */}
         {!matched && !isDragging && (
           <motion.div
             className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-2xl text-amber-400"
@@ -243,7 +233,7 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
         )}
       </div>
       
-      {/* Picture targets — always 3 */}
+      {/* Picture targets — always 3, distractors from OTHER letters */}
       <div className="grid grid-cols-3 gap-4 w-full max-w-lg">
         <AnimatePresence mode="wait">
           {currentTargets.map((target, idx) => (
@@ -269,7 +259,6 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
               <span className="text-5xl mb-2 pointer-events-none">{target.emoji}</span>
               <span className="text-sm font-bold text-gray-700 pointer-events-none text-center">{target.meaning}</span>
               
-              {/* Success checkmark */}
               {matched && target.isCorrect && (
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
@@ -280,7 +269,6 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
                 </motion.div>
               )}
               
-              {/* Wrong X mark */}
               {wrongTarget === idx && (
                 <motion.div
                   initial={{ scale: 0 }}
@@ -291,7 +279,6 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
                 </motion.div>
               )}
               
-              {/* Drop zone indicator when dragging */}
               {isDragging && !matched && (
                 <motion.div
                   className="absolute inset-0 rounded-3xl border-2 border-dashed border-blue-300 pointer-events-none"
@@ -304,7 +291,6 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
         </AnimatePresence>
       </div>
       
-      {/* Hint text */}
       {showHint && !matched && (
         <motion.p
           initial={{ opacity: 0 }}
@@ -315,7 +301,6 @@ export default function DragToMatchGame({ letter, allLetters, distractorLetters,
         </motion.p>
       )}
       
-      {/* Tap instruction */}
       {!isDragging && !matched && !showHint && (
         <p className="text-center text-gray-400 text-xs mt-3">
           Drag the letter to the picture, or tap the correct one!
