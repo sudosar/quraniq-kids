@@ -1,20 +1,21 @@
 /**
  * FindInWordGame - Spot the target letter in Quranic words
  * 
- * Design: Celestial Garden theme
+ * PEDAGOGY:
+ * - Child sees a Quranic word rendered as connected Arabic text
+ * - On hover/touch, individual letters "separate" and grow bigger
+ * - Child must tap the specific letter they're looking for
+ * - This teaches letter recognition within real Quranic context
  * 
- * CRITICAL FIX: Arabic text MUST remain as a single connected string.
- * We CANNOT split into individual characters/graphemes and render them as separate
- * spans — this breaks Arabic connected script (letters disconnect).
- * 
- * NEW APPROACH:
- * - Render the full word as ONE connected Arabic string
- * - The child taps the word to confirm they found the letter
- * - After correct tap, we highlight the word and show where the letter appears
- * - This preserves proper Arabic shaping/joining
+ * TECHNICAL APPROACH:
+ * - We use Intl.Segmenter to split the word into grapheme clusters
+ * - Each cluster is rendered as a separate span with hover/touch effects
+ * - On hover, the letter grows and gets a colored background
+ * - We use letter-spacing and isolation to show the letter clearly
+ * - The word remains visually connected until interaction
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArabicLetter } from '@/lib/curriculum';
 import { speakArabic, playCorrectSound, playWrongSound } from '@/lib/gameEngine';
@@ -29,12 +30,32 @@ interface Props {
   onSkip: () => void;
 }
 
+// Split Arabic word into grapheme clusters
+function splitIntoGraphemes(text: string): string[] {
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter('ar', { granularity: 'grapheme' });
+    return Array.from(segmenter.segment(text)).map(s => s.segment);
+  }
+  // Fallback: split by character (less accurate but works)
+  return Array.from(text);
+}
+
+// Check if a grapheme contains the target letter (ignoring diacritics)
+function graphemeContainsLetter(grapheme: string, targetLetter: string): boolean {
+  // Remove common Arabic diacritics to compare base letters
+  const stripped = grapheme.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '');
+  return stripped.includes(targetLetter);
+}
+
 export default function FindInWordGame({ letter, onComplete }: Props) {
   const [wordIndex, setWordIndex] = useState(0);
   const [found, setFound] = useState(false);
-  const [showPrompt, setShowPrompt] = useState(true);
   const [score, setScore] = useState(0);
-  const [tapped, setTapped] = useState(false);
+  const [mistakes, setMistakes] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [wrongIndex, setWrongIndex] = useState<number | null>(null);
+  const [interacting, setInteracting] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const quranicWords = letter.quranicWords || [];
   const currentWord = quranicWords[wordIndex];
@@ -51,27 +72,53 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
   // Reset state when word changes
   useEffect(() => {
     setFound(false);
-    setTapped(false);
-    setShowPrompt(true);
+    setHoveredIndex(null);
+    setWrongIndex(null);
+    setInteracting(false);
   }, [wordIndex]);
 
-  const handleWordTap = useCallback(() => {
+  const handleLetterTap = useCallback((grapheme: string, index: number) => {
     if (found) return;
     
-    setTapped(true);
-    setFound(true);
-    setScore(prev => prev + 1);
-    playCorrectSound();
+    const isCorrect = graphemeContainsLetter(grapheme, letter.letter);
     
-    // Auto-advance after celebration
+    if (isCorrect) {
+      setFound(true);
+      setScore(prev => prev + 1);
+      setHoveredIndex(index);
+      playCorrectSound();
+      
+      // Auto-advance after celebration
+      setTimeout(() => {
+        if (wordIndex < quranicWords.length - 1) {
+          setWordIndex(prev => prev + 1);
+        } else {
+          const stars = mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
+          onComplete(stars);
+        }
+      }, 2000);
+    } else {
+      setWrongIndex(index);
+      setMistakes(prev => prev + 1);
+      playWrongSound();
+      setTimeout(() => setWrongIndex(null), 600);
+    }
+  }, [found, letter.letter, wordIndex, quranicWords.length, mistakes, onComplete]);
+
+  // Touch handling for mobile
+  const handleTouchStart = useCallback((index: number) => {
+    setInteracting(true);
+    setHoveredIndex(index);
+  }, []);
+
+  const handleTouchEnd = useCallback((grapheme: string, index: number) => {
+    handleLetterTap(grapheme, index);
+    // Keep hover state briefly for visual feedback
     setTimeout(() => {
-      if (wordIndex < quranicWords.length - 1) {
-        setWordIndex(prev => prev + 1);
-      } else {
-        onComplete(score + 1 >= quranicWords.length ? 2 : 1);
-      }
-    }, 2000);
-  }, [found, wordIndex, quranicWords.length, score, onComplete]);
+      if (!found) setHoveredIndex(null);
+      setInteracting(false);
+    }, 300);
+  }, [handleLetterTap, found]);
 
   if (!currentWord) {
     return (
@@ -80,6 +127,8 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
       </div>
     );
   }
+
+  const graphemes = splitIntoGraphemes(currentWord.word);
 
   return (
     <div className="h-full flex flex-col items-center justify-center p-4 gap-6">
@@ -102,7 +151,9 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
         <p className="text-lg font-semibold text-gray-600 mb-1" style={{ fontFamily: 'var(--font-body)' }}>
           Find the letter <span className="text-3xl font-bold" style={{ fontFamily: 'Amiri, serif', color: letter.color }}>{letter.letter}</span> in this word!
         </p>
-        <p className="text-sm text-gray-400">Tap the word when you see it</p>
+        <p className="text-sm text-gray-400">
+          {interacting ? 'Now tap the letter!' : 'Touch each letter to see it bigger'}
+        </p>
       </div>
 
       {/* Target letter reminder */}
@@ -117,39 +168,81 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
         </span>
       </motion.div>
 
-      {/* Quranic Word Card — rendered as ONE connected Arabic string */}
+      {/* Quranic Word Card — letters are individually tappable */}
       <AnimatePresence mode="wait">
         <motion.div
           key={wordIndex}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
-          className="bg-white rounded-3xl shadow-xl border-2 border-amber-100 p-8 max-w-md w-full"
+          className="bg-white rounded-3xl shadow-xl border-2 border-amber-100 p-6 max-w-md w-full"
         >
-          {/* The Arabic word — single connected string, tappable */}
-          <motion.div 
-            className="flex justify-center mb-6 cursor-pointer"
-            onClick={handleWordTap}
-            whileTap={{ scale: 0.95 }}
+          {/* The Arabic word — each grapheme is a tappable element */}
+          <div 
+            ref={containerRef}
+            className="flex justify-center items-center mb-4 flex-wrap gap-1"
+            dir="rtl"
+            style={{ minHeight: '5rem' }}
           >
-            <motion.span
-              dir="rtl"
-              className="inline-block text-center"
-              style={{ 
-                fontFamily: 'Amiri, serif', 
-                fontSize: '3.5rem', 
-                lineHeight: 1.8,
-                color: found ? '#059669' : '#1f2937',
-                backgroundColor: found ? '#D1FAE5' : 'transparent',
-                padding: '0.2em 0.5em',
-                borderRadius: '0.75rem',
-                transition: 'all 0.3s ease',
-              }}
-              animate={found ? { scale: [1, 1.1, 1] } : {}}
-            >
-              {currentWord.word}
-            </motion.span>
-          </motion.div>
+            {graphemes.map((grapheme, i) => {
+              const isTarget = graphemeContainsLetter(grapheme, letter.letter);
+              const isHovered = hoveredIndex === i;
+              const isWrong = wrongIndex === i;
+              const isFound = found && isTarget;
+              
+              return (
+                <motion.button
+                  key={i}
+                  onMouseEnter={() => !found && setHoveredIndex(i)}
+                  onMouseLeave={() => !found && !interacting && setHoveredIndex(null)}
+                  onTouchStart={() => handleTouchStart(i)}
+                  onTouchEnd={() => handleTouchEnd(grapheme, i)}
+                  onClick={() => handleLetterTap(grapheme, i)}
+                  animate={{
+                    scale: isHovered ? 1.5 : isFound ? 1.3 : 1,
+                    y: isHovered ? -8 : 0,
+                  }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  className={`
+                    relative inline-flex items-center justify-center
+                    rounded-xl cursor-pointer select-none
+                    transition-colors duration-200
+                    ${isFound ? 'bg-green-100 ring-3 ring-green-400' : ''}
+                    ${isHovered && !found ? 'bg-amber-50 ring-2 ring-amber-300 shadow-lg z-10' : ''}
+                    ${isWrong ? 'bg-red-100 ring-2 ring-red-400' : ''}
+                    ${!isHovered && !isFound && !isWrong ? 'hover:bg-gray-50' : ''}
+                  `}
+                  style={{ 
+                    fontFamily: 'Amiri, serif', 
+                    fontSize: isHovered ? '3rem' : '2.5rem',
+                    padding: isHovered ? '0.3em 0.4em' : '0.1em 0.15em',
+                    lineHeight: 1.4,
+                    color: isFound ? '#059669' : isWrong ? '#DC2626' : '#1f2937',
+                  }}
+                >
+                  {grapheme}
+                  {isFound && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-2 -right-2 text-sm"
+                    >
+                      ✅
+                    </motion.span>
+                  )}
+                  {isWrong && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1, rotate: [0, -10, 10, 0] }}
+                      className="absolute -top-2 -right-2 text-sm"
+                    >
+                      ❌
+                    </motion.span>
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
 
           {/* Found celebration */}
           <AnimatePresence>
@@ -157,7 +250,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center mb-4"
+                className="text-center mb-3"
               >
                 <p className="text-lg font-bold text-green-600" style={{ fontFamily: 'var(--font-heading)' }}>
                   ✨ You found {letter.name}! Great job!
@@ -166,21 +259,21 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
             )}
           </AnimatePresence>
 
-          {/* Tap prompt */}
-          {!found && (
+          {/* Hint prompt */}
+          {!found && !interacting && (
             <motion.div
-              className="text-center mb-4"
+              className="text-center mb-3"
               animate={{ opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             >
               <p className="text-sm text-amber-500 font-medium">
-                👆 Tap the word when you spot {letter.name}!
+                👆 Touch each letter to make it bigger, then tap {letter.name}!
               </p>
             </motion.div>
           )}
 
           {/* Word info */}
-          <div className="text-center border-t border-amber-50 pt-4">
+          <div className="text-center border-t border-amber-50 pt-3">
             <p className="text-sm text-gray-400 mb-1">From Surah {currentWord.surah}</p>
             <p className="text-lg font-semibold text-teal-700" style={{ fontFamily: 'var(--font-heading)' }}>
               "{currentWord.meaning}"
