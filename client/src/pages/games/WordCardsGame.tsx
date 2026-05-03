@@ -1,23 +1,16 @@
 /**
- * WordCardsGame - Show Arabic words that start with the current letter
+ * WordCardsGame - Show Arabic words that START with the current letter
  * 
- * Design: Celestial Garden theme
- * 
- * FIXES:
- * - Arabic words are rendered as a SINGLE connected string (no splitting!)
- * - The target letter is highlighted using a colored underline/background
- *   without breaking the word's connected script
- * - Shows letter forms: beginning (ـبـ), middle (ـبـ), end (ـب), isolated (ب)
- * 
- * For each letter, the child sees:
- * - Word cards with emoji pictures
- * - The full Arabic word (properly connected)
- * - Letter position forms (initial, medial, final, isolated)
+ * PEDAGOGY:
+ * - Phase 1: ONLY shows words that BEGIN with the letter
+ * - This reinforces the letter's sound at the start of familiar words
+ * - Letter forms are shown below with the ACTIVE form highlighted prominently
+ * - Middle/end positions are NOT shown until much later
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArabicLetter } from '@/lib/curriculum';
+import { ArabicLetter, getBeginningWords } from '@/lib/curriculum';
 import { speakArabic, playCorrectSound } from '@/lib/gameEngine';
 
 interface Props {
@@ -30,17 +23,7 @@ interface Props {
   onSkip: () => void;
 }
 
-/**
- * Arabic letter forms lookup.
- * Each Arabic letter can appear in 4 forms depending on position in a word:
- * - isolated: standalone
- * - initial: beginning of word (connects to next)
- * - medial: middle of word (connects both sides)
- * - final: end of word (connects to previous)
- * 
- * Some letters (like ا, د, ذ, ر, ز, و) don't connect to the left,
- * so they only have isolated and final forms.
- */
+// Arabic letter forms lookup
 const LETTER_FORMS: Record<string, { isolated: string; initial: string; medial: string; final: string }> = {
   'ا': { isolated: 'ا', initial: 'ا', medial: 'ـا', final: 'ـا' },
   'ب': { isolated: 'ب', initial: 'بـ', medial: 'ـبـ', final: 'ـب' },
@@ -77,8 +60,9 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
   const [showMeaning, setShowMeaning] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const wordCards = letter.wordCards || [];
-  const currentCard = wordCards[Math.min(cardIndex, wordCards.length - 1)];
+  // PHASE 1: Only show words that START with this letter
+  const beginningWords = getBeginningWords(letter);
+  const currentCard = beginningWords[Math.min(cardIndex, beginningWords.length - 1)];
   const letterForms = LETTER_FORMS[letter.letter];
 
   useEffect(() => {
@@ -95,14 +79,14 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
     setIsTransitioning(true);
     setShowMeaning(false);
 
-    if (cardIndex < wordCards.length - 1) {
-      setCardIndex(prev => Math.min(prev + 1, wordCards.length - 1));
+    if (cardIndex < beginningWords.length - 1) {
+      setCardIndex(prev => Math.min(prev + 1, beginningWords.length - 1));
       setTimeout(() => setIsTransitioning(false), 400);
     } else {
       playCorrectSound();
       onComplete(1);
     }
-  }, [cardIndex, wordCards.length, isTransitioning, onComplete]);
+  }, [cardIndex, beginningWords.length, isTransitioning, onComplete]);
 
   const handleTapCard = useCallback(() => {
     setShowMeaning(true);
@@ -119,14 +103,11 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
     );
   }
 
-  // Use the position field from the word card data (set in curriculum)
-  const position = currentCard.position || 'beginning';
-
   return (
     <div className="h-full flex flex-col items-center justify-center p-4 gap-3">
       {/* Progress dots */}
       <div className="flex gap-2 mb-1">
-        {wordCards.map((_, i) => (
+        {beginningWords.map((_, i) => (
           <div
             key={i}
             className={`w-3 h-3 rounded-full transition-all ${
@@ -138,9 +119,9 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
         ))}
       </div>
 
-      {/* Instruction */}
+      {/* Instruction — emphasize "starts with" */}
       <p className="text-sm text-gray-500 font-medium" style={{ fontFamily: 'var(--font-body)' }}>
-        Words with <span className="font-bold arabic-text" style={{ color: letter.color }}>{letter.letter}</span> ({letter.name})
+        Words that start with <span className="font-bold arabic-text text-lg" style={{ color: letter.color }}>{letter.letter}</span> ({letter.name})
       </p>
 
       {/* Word Card */}
@@ -167,28 +148,13 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
               {currentCard.emoji}
             </motion.div>
 
-            {/* Arabic Word — rendered as ONE connected string, NO splitting */}
+            {/* Arabic Word — rendered as ONE connected string */}
             <div 
               className="text-5xl font-bold mb-3 leading-relaxed"
               dir="rtl"
               style={{ fontFamily: 'Amiri, serif' }}
             >
               {currentCard.word}
-            </div>
-
-            {/* Letter position indicator */}
-            <div className="flex items-center justify-center gap-1 mb-2">
-              <span 
-                className="text-xs px-2 py-0.5 rounded-full font-medium"
-                style={{ 
-                  backgroundColor: letter.color + '20', 
-                  color: letter.color,
-                }}
-              >
-                {position === 'beginning' ? '⬅️ at the start' : 
-                 position === 'middle' ? '↔️ in the middle' : 
-                 '➡️ at the end'}
-              </span>
             </div>
 
             {/* Transliteration */}
@@ -222,31 +188,37 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
         </motion.div>
       </AnimatePresence>
 
-      {/* Letter Forms Display — shows how the letter looks in different positions */}
+      {/* Letter Forms Display — INITIAL form highlighted since all words start with this letter */}
       {letterForms && (
         <div className="w-full max-w-sm bg-white/80 rounded-2xl p-3 border border-amber-100 shadow-sm">
-          <p className="text-xs text-gray-400 text-center mb-2 font-medium">Letter forms of {letter.name}:</p>
+          <p className="text-xs text-gray-400 text-center mb-2 font-medium">
+            How {letter.name} looks in words:
+          </p>
           <div className="flex items-center justify-around">
             {[
-              { label: 'Isolated', form: letterForms.isolated },
-              { label: 'Start', form: letterForms.initial },
-              { label: 'Middle', form: letterForms.medial },
-              { label: 'End', form: letterForms.final },
+              { label: 'Alone', form: letterForms.isolated, active: false },
+              { label: 'Start ✓', form: letterForms.initial, active: true },
+              { label: 'Middle', form: letterForms.medial, active: false },
+              { label: 'End', form: letterForms.final, active: false },
             ].map((item, i) => (
-              <div key={i} className="flex flex-col items-center gap-0.5">
+              <div 
+                key={i} 
+                className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-all ${
+                  item.active ? 'bg-amber-50 ring-2 ring-amber-300 scale-110' : ''
+                }`}
+              >
                 <span 
                   className="text-2xl arabic-text font-bold"
                   style={{ 
-                    color: position === 'beginning' && item.label === 'Start' ? letter.color :
-                           position === 'middle' && item.label === 'Middle' ? letter.color :
-                           position === 'end' && item.label === 'End' ? letter.color :
-                           item.label === 'Isolated' && cardIndex === 0 ? letter.color :
-                           '#666'
+                    color: item.active ? letter.color : '#999',
+                    fontSize: item.active ? '1.75rem' : '1.5rem',
                   }}
                 >
                   {item.form}
                 </span>
-                <span className="text-[10px] text-gray-400">{item.label}</span>
+                <span className={`text-[10px] font-medium ${item.active ? 'text-amber-600' : 'text-gray-400'}`}>
+                  {item.label}
+                </span>
               </div>
             ))}
           </div>
@@ -255,7 +227,6 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
 
       {/* Action buttons */}
       <div className="flex items-center gap-3">
-        {/* Listen button */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -267,7 +238,6 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
           Listen
         </motion.button>
 
-        {/* Next button */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -275,7 +245,7 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
           className="px-6 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-white text-base font-bold rounded-full shadow-lg"
           style={{ fontFamily: 'var(--font-heading)' }}
         >
-          {cardIndex < wordCards.length - 1 ? 'Next Word' : 'Done! ✨'}
+          {cardIndex < beginningWords.length - 1 ? 'Next Word' : 'Done! ✨'}
         </motion.button>
       </div>
     </div>
