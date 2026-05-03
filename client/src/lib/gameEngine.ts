@@ -93,15 +93,57 @@ export function getProgressiveGameSequence(availableDistractorCount: number): Ga
   return sequence;
 }
 
-// Sound utilities
+// ============================================================
+// SOUND UTILITIES
+// ============================================================
+
+/**
+ * Robust Arabic speech synthesis that handles Chrome desktop quirks:
+ * 
+ * Chrome desktop issues:
+ * 1. Voices load asynchronously — getVoices() returns [] until onvoiceschanged fires
+ * 2. speechSynthesis.speak() requires a user gesture (click/tap) to work
+ * 3. Chrome has a bug where speech gets "stuck" — cancel() + small delay fixes it
+ * 4. If speak() is called without user gesture, it silently fails AND can block future calls
+ * 
+ * Our solution:
+ * - Always cancel before speaking (clears stuck state)
+ * - Add a small delay after cancel before speaking (Chrome needs this)
+ * - Track whether user has interacted (for auto-play decisions)
+ * - Use onvoiceschanged to cache the Arabic voice
+ * - Fallback: speak without explicit voice if no Arabic voice found
+ */
+
+// Track user interaction for autoplay decisions
+let userHasInteracted = false;
 
 // Cache for Arabic voice lookup
 let cachedArabicVoice: SpeechSynthesisVoice | null = null;
 let voicesLoaded = false;
 
+function markUserInteraction() {
+  userHasInteracted = true;
+}
+
+// Listen for any user interaction to unlock audio
+if (typeof window !== 'undefined') {
+  const interactionEvents = ['click', 'touchstart', 'keydown'];
+  const handler = () => {
+    markUserInteraction();
+    // Remove listeners after first interaction
+    interactionEvents.forEach(evt => window.removeEventListener(evt, handler));
+  };
+  interactionEvents.forEach(evt => window.addEventListener(evt, handler, { once: false, passive: true }));
+}
+
+function loadVoices(): SpeechSynthesisVoice[] {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return [];
+  return window.speechSynthesis.getVoices();
+}
+
 function getArabicVoice(): SpeechSynthesisVoice | null {
   if (cachedArabicVoice) return cachedArabicVoice;
-  const voices = window.speechSynthesis.getVoices();
+  const voices = loadVoices();
   if (voices.length === 0) return null;
   voicesLoaded = true;
   // Try to find an Arabic voice, preferring ar-SA, then any ar-*
@@ -113,23 +155,41 @@ function getArabicVoice(): SpeechSynthesisVoice | null {
 
 // Ensure voices are loaded (Chrome loads them asynchronously)
 if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  // Listen for voices to become available
   window.speechSynthesis.onvoiceschanged = () => {
     cachedArabicVoice = null;
+    voicesLoaded = false;
     getArabicVoice();
   };
-  // Trigger initial load
-  window.speechSynthesis.getVoices();
+  // Trigger initial load attempt
+  getArabicVoice();
 }
 
+/**
+ * Check if the user has interacted with the page (needed for autoplay)
+ */
+export function hasUserInteracted(): boolean {
+  return userHasInteracted;
+}
+
+/**
+ * Speak Arabic text using the Web Speech API.
+ * Handles Chrome desktop quirks with cancel-before-speak pattern.
+ */
 export function speakArabic(text: string, rate: number = 0.8) {
-  if (!('speechSynthesis' in window)) return;
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  
+  const synth = window.speechSynthesis;
+  
+  // Chrome fix: cancel any pending/stuck speech first
+  synth.cancel();
   
   const doSpeak = () => {
-    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ar-SA';
     utterance.rate = rate;
     utterance.pitch = 1.1;
+    utterance.volume = 1.0;
     
     // Explicitly set the Arabic voice if available
     const arabicVoice = getArabicVoice();
@@ -137,24 +197,64 @@ export function speakArabic(text: string, rate: number = 0.8) {
       utterance.voice = arabicVoice;
     }
     
-    window.speechSynthesis.speak(utterance);
+    // Chrome fix: resume in case synthesis is paused
+    synth.resume();
+    synth.speak(utterance);
+    
+    // Chrome has a bug where long utterances get paused after ~15s
+    // For short Arabic letters/words this shouldn't be an issue,
+    // but we add a safety resume just in case
+    const resumeInterval = setInterval(() => {
+      if (!synth.speaking) {
+        clearInterval(resumeInterval);
+      } else {
+        synth.resume();
+      }
+    }, 5000);
+    
+    // Clean up interval after max 10 seconds
+    setTimeout(() => clearInterval(resumeInterval), 10000);
   };
   
-  // On desktop Chrome, voices load asynchronously. Wait for them if needed.
-  if (!voicesLoaded && window.speechSynthesis.getVoices().length === 0) {
-    // Voices not yet loaded — wait for them
-    const handler = () => {
-      window.speechSynthesis.onvoiceschanged = null;
+  // Chrome requires a small delay after cancel() before speak() works
+  // This is the key fix for the "click doesn't play" issue
+  setTimeout(() => {
+    // If voices aren't loaded yet, try to wait for them
+    if (!voicesLoaded && loadVoices().length === 0) {
+      // Voices not yet loaded — set up a one-time handler
+      const onVoicesReady = () => {
+        synth.onvoiceschanged = null;
+        cachedArabicVoice = null;
+        getArabicVoice();
+        doSpeak();
+      };
+      synth.onvoiceschanged = onVoicesReady;
+      
+      // Fallback: speak anyway after 300ms even without voices
+      // (Chrome will use a default voice for the language)
+      setTimeout(() => {
+        if (!voicesLoaded) {
+          synth.onvoiceschanged = null;
+          doSpeak();
+        }
+      }, 300);
+    } else {
       doSpeak();
-    };
-    window.speechSynthesis.onvoiceschanged = handler;
-    // Fallback: speak anyway after 500ms if voices never load
-    setTimeout(() => {
-      if (!voicesLoaded) doSpeak();
-    }, 500);
-  } else {
-    doSpeak();
+    }
+  }, 50); // 50ms delay after cancel — enough for Chrome to reset
+}
+
+/**
+ * Speak Arabic text, but only if user has already interacted.
+ * Use this for auto-play scenarios (e.g., letter reveal animation).
+ * Returns true if speech was attempted, false if blocked.
+ */
+export function speakArabicIfAllowed(text: string, rate: number = 0.8): boolean {
+  if (!userHasInteracted) {
+    return false;
   }
+  speakArabic(text, rate);
+  return true;
 }
 
 export function playCorrectSound() {
