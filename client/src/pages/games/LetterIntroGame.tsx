@@ -3,7 +3,7 @@
  * 
  * An animated, interactive introduction to a new letter.
  * - Letter appears with a dramatic reveal animation
- * - Auto-plays the letter sound
+ * - Auto-plays the letter sound (only if user has previously interacted)
  * - Shows the letter name and pronunciation
  * - Tap the letter to hear it again (with ripple effect)
  * - Tap "Next" to continue after interacting
@@ -12,7 +12,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ArabicLetter } from '@/lib/curriculum';
-import { speakArabic, playCorrectSound } from '@/lib/gameEngine';
+import { speakArabic, speakArabicIfAllowed, playCorrectSound } from '@/lib/gameEngine';
 
 interface Props {
   letter: ArabicLetter;
@@ -29,20 +29,27 @@ export default function LetterIntroGame({ letter, onComplete }: Props) {
   const [tapCount, setTapCount] = useState(0);
   const [showRipple, setShowRipple] = useState(false);
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; color: string }>>([]);
+  const [autoPlayFailed, setAutoPlayFailed] = useState(false);
 
-  // Auto-play sound after reveal
+  // Auto-play sound after reveal — only works if user has previously interacted
   useEffect(() => {
     const timer = setTimeout(() => {
-      speakArabic(letter.letter);
+      const played = speakArabicIfAllowed(letter.letter);
+      if (!played) {
+        // User hasn't interacted yet — show a prompt to tap
+        setAutoPlayFailed(true);
+      }
       setPhase('interact');
     }, 1200);
     return () => clearTimeout(timer);
   }, [letter]);
 
   const handleLetterTap = useCallback(() => {
+    // This is a user gesture — speech will work
     speakArabic(letter.letter);
     setTapCount(prev => prev + 1);
     setShowRipple(true);
+    setAutoPlayFailed(false);
     
     // Create particles
     const newParticles = Array.from({ length: 8 }).map((_, i) => ({
@@ -141,15 +148,15 @@ export default function LetterIntroGame({ letter, onComplete }: Props) {
           </motion.div>
         </motion.button>
 
-        {/* Tap hint */}
+        {/* Tap hint — shown when auto-play failed or user hasn't tapped yet */}
         {phase === 'interact' && tapCount === 0 && (
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="mt-4 text-gray-400 text-sm animate-pulse"
+            className={`mt-4 text-sm ${autoPlayFailed ? 'text-orange-500 font-semibold animate-bounce' : 'text-gray-400 animate-pulse'}`}
           >
-            👆 Tap the letter to hear it!
+            👆 {autoPlayFailed ? 'Tap the letter to hear it!' : 'Tap the letter to hear it!'}
           </motion.p>
         )}
       </div>
