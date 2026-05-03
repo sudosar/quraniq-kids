@@ -9,14 +9,17 @@
  * - Child taps the correct letter bubbles
  * - Wrong bubbles wobble but don't pop
  * 
- * PROGRESSIVE LOGIC:
- * - If child knows 0 other letters: ALL bubbles are the target letter
- * - If child knows 1+ letters: Mix in known distractors (more as they learn more)
+ * PROGRESSIVE DISTRACTORS:
+ * - ALWAYS shows distractors — even for the first letter!
+ * - For the first letter: uses 2-3 other common Arabic letters as visual distractors
+ *   (child hasn't learned them yet, but can distinguish shapes)
+ * - For later letters: uses previously learned letters as distractors
+ * - This makes the game actually challenging and teaches letter discrimination
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArabicLetter } from '@/lib/curriculum';
+import { ArabicLetter, arabicLetters } from '@/lib/curriculum';
 import { playPopSound, playWrongSound, playCorrectSound, shuffleArray } from '@/lib/gameEngine';
 
 interface Props {
@@ -37,7 +40,6 @@ interface Bubble {
   wobble: boolean;
   colorIndex: number;
   size: number;
-  // Animation path parameters
   startX: number;
   startY: number;
   driftXRange: number;
@@ -64,15 +66,15 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
   const generateBubbles = useCallback(() => {
     const allBubbleLetters: Array<{ letter: ArabicLetter; isTarget: boolean }> = [];
     
-    // Always add target letters (more than needed so there's always enough)
+    // Always add target letters
     for (let i = 0; i < 6; i++) {
       allBubbleLetters.push({ letter, isTarget: true });
     }
     
-    // Add distractors from previously learned letters
-    if (distractorCount > 0) {
+    // ALWAYS add distractors — even for the first letter!
+    if (distractorCount > 0 && distractorLetters.length > 0) {
+      // Use previously learned letters as distractors
       const usableDistractors = distractorLetters.slice(0, Math.min(distractorCount, 4));
-      // Add 1-2 copies of each distractor
       usableDistractors.forEach(d => {
         allBubbleLetters.push({ letter: d, isTarget: false });
         if (usableDistractors.length < 3) {
@@ -80,18 +82,23 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
         }
       });
     } else {
-      // First letter: all targets, different sizes for variety
-      for (let i = 0; i < 4; i++) {
-        allBubbleLetters.push({ letter, isTarget: true });
-      }
+      // FIRST LETTER: Use other Arabic letters as visual distractors
+      // Pick 2-3 visually distinct letters the child hasn't learned yet
+      const otherLetters = arabicLetters.filter(l => l.id !== letter.id);
+      const visualDistractors = shuffleArray(otherLetters).slice(0, 3);
+      
+      visualDistractors.forEach(d => {
+        // Add 1-2 copies of each distractor
+        allBubbleLetters.push({ letter: d, isTarget: false });
+        allBubbleLetters.push({ letter: d, isTarget: false });
+      });
     }
 
     const shuffled = shuffleArray(allBubbleLetters);
     
     const newBubbles: Bubble[] = shuffled.map((item, i) => {
-      // Randomize starting positions across the full screen area
-      const startX = 10 + Math.random() * 75; // 10-85% of width
-      const startY = 15 + Math.random() * 65; // 15-80% of height
+      const startX = 10 + Math.random() * 75;
+      const startY = 15 + Math.random() * 65;
       
       return {
         id: i,
@@ -100,15 +107,13 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
         popped: false,
         wobble: false,
         colorIndex: i % BUBBLE_COLORS.length,
-        size: 90 + Math.random() * 30, // 90-120px
+        size: 90 + Math.random() * 30,
         startX,
         startY,
-        // How far the bubble drifts in each direction
-        driftXRange: 20 + Math.random() * 40, // 20-60px drift
-        driftYRange: 15 + Math.random() * 35, // 15-50px drift
-        // Each bubble has its own speed
-        duration: 6 + Math.random() * 8, // 6-14 seconds per cycle
-        delay: i * 0.3, // stagger entry
+        driftXRange: 20 + Math.random() * 40,
+        driftYRange: 15 + Math.random() * 35,
+        duration: 6 + Math.random() * 8,
+        delay: i * 0.3,
       };
     });
 
@@ -128,7 +133,6 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
       const newScore = score + 1;
       setScore(newScore);
       
-      // Create pop particles at the bubble's approximate position
       const newParticles = Array.from({ length: 8 }).map((_, i) => ({
         id: Date.now() + i + Math.random() * 1000,
         x: bubble.startX,
@@ -161,10 +165,7 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
     }
   }, [score, gameReady, onComplete]);
 
-  // Instruction text
-  const instructionText = distractorCount === 0
-    ? `Pop all the ${letter.name} bubbles!`
-    : `Find and pop the ${letter.name} bubbles!`;
+  const instructionText = `Find and pop the ${letter.name} (${letter.letter}) bubbles!`;
 
   return (
     <div ref={containerRef} className="h-full relative overflow-hidden bg-gradient-to-b from-sky-200 via-blue-100 to-indigo-50">
@@ -212,7 +213,6 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
         {bubbles.filter(b => !b.popped).map(bubble => {
           const color = BUBBLE_COLORS[bubble.colorIndex];
           
-          // Create a random floating path using keyframes
           const floatKeyframesX = [
             0,
             bubble.driftXRange * 0.6,
