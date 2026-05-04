@@ -2,17 +2,17 @@
  * FindInWordGame - Spot the target letter in Quranic words
  * 
  * PEDAGOGY:
- * - Child sees a Quranic word rendered as connected Arabic text
- * - On hover/touch, individual letters "separate" and grow bigger
+ * - Child sees a Quranic word rendered as CONNECTED Arabic text (not broken apart)
+ * - On hover/touch, the hovered letter grows bigger with a highlight
  * - Child must tap the specific letter they're looking for
  * - This teaches letter recognition within real Quranic context
  * 
  * TECHNICAL APPROACH:
- * - We use Intl.Segmenter to split the word into grapheme clusters
- * - Each cluster is rendered as a separate span with hover/touch effects
- * - On hover, the letter grows and gets a colored background
- * - We use letter-spacing and isolation to show the letter clearly
- * - The word remains visually connected until interaction
+ * - We render the FULL word as connected text using a single Arabic text block
+ * - Each grapheme cluster is wrapped in an inline <span> so it stays connected
+ *   (Arabic shaping is preserved because the spans are inline within the same text node context)
+ * - On hover/tap, the specific span gets scaled up and highlighted
+ * - We normalize Alif variants (ٱ, أ, إ, آ → ا) for matching
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -40,11 +40,37 @@ function splitIntoGraphemes(text: string): string[] {
   return Array.from(text);
 }
 
-// Check if a grapheme contains the target letter (ignoring diacritics)
+/**
+ * Normalize Arabic letter for comparison.
+ * Maps all Alif variants to bare Alif, strips diacritics, etc.
+ */
+function normalizeArabicLetter(char: string): string {
+  // Strip diacritics (tashkeel)
+  let stripped = char.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0610-\u061A]/g, '');
+  
+  // Normalize Alif variants to bare Alif (ا)
+  // ٱ (U+0671 Alif Wasla) → ا
+  // أ (U+0623 Alif with Hamza Above) → ا
+  // إ (U+0625 Alif with Hamza Below) → ا
+  // آ (U+0622 Alif with Madda) → ا
+  // ٲ (U+0672) → ا
+  // ٳ (U+0673) → ا
+  stripped = stripped.replace(/[\u0622\u0623\u0625\u0671\u0672\u0673]/g, '\u0627');
+  
+  // Normalize other common variants
+  // ة (Ta Marbuta) → ت (for matching purposes)
+  // ى (Alif Maksura) → ي
+  stripped = stripped.replace(/\u0629/g, '\u062A');
+  stripped = stripped.replace(/\u0649/g, '\u064A');
+  
+  return stripped;
+}
+
+// Check if a grapheme contains the target letter (with normalization)
 function graphemeContainsLetter(grapheme: string, targetLetter: string): boolean {
-  // Remove common Arabic diacritics to compare base letters
-  const stripped = grapheme.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '');
-  return stripped.includes(targetLetter);
+  const normalizedGrapheme = normalizeArabicLetter(grapheme);
+  const normalizedTarget = normalizeArabicLetter(targetLetter);
+  return normalizedGrapheme.includes(normalizedTarget);
 }
 
 export default function FindInWordGame({ letter, onComplete }: Props) {
@@ -149,7 +175,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
       {/* Instruction */}
       <div className="text-center">
         <p className="text-lg font-semibold text-gray-600 mb-1" style={{ fontFamily: 'var(--font-body)' }}>
-          Find the letter <span className="text-3xl font-bold" style={{ fontFamily: 'Amiri, serif', color: letter.color }}>{letter.letter}</span> in this word!
+          Find the letter <span className="text-3xl font-bold arabic-text" style={{ color: letter.color }}>{letter.letter}</span> in this word!
         </p>
         <p className="text-sm text-gray-400">
           {interacting ? 'Now tap the letter!' : 'Touch each letter to see it bigger'}
@@ -163,12 +189,12 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
         className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
         style={{ backgroundColor: letter.color + '20', border: `3px solid ${letter.color}` }}
       >
-        <span className="text-3xl font-bold" style={{ fontFamily: 'Amiri, serif', color: letter.color }}>
+        <span className="text-3xl font-bold arabic-text" style={{ color: letter.color }}>
           {letter.letter}
         </span>
       </motion.div>
 
-      {/* Quranic Word Card — letters are individually tappable */}
+      {/* Quranic Word Card — letters are individually tappable but STAY CONNECTED */}
       <AnimatePresence mode="wait">
         <motion.div
           key={wordIndex}
@@ -177,12 +203,21 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
           exit={{ opacity: 0, scale: 0.8 }}
           className="bg-white rounded-3xl shadow-xl border-2 border-amber-100 p-6 max-w-md w-full"
         >
-          {/* The Arabic word — each grapheme is a tappable element */}
+          {/* 
+            The Arabic word — rendered as CONNECTED text.
+            Each grapheme is in an inline <span> so Arabic shaping is preserved.
+            The key insight: using display:inline (not flex/grid) keeps Arabic ligatures connected.
+          */}
           <div 
             ref={containerRef}
-            className="flex justify-center items-center mb-4 flex-wrap gap-1"
+            className="text-center mb-4"
             dir="rtl"
-            style={{ minHeight: '5rem' }}
+            style={{ 
+              minHeight: '5rem',
+              fontFamily: '"Amiri", "Noto Naskh Arabic", serif',
+              fontSize: '3.5rem',
+              lineHeight: 1.8,
+            }}
           >
             {graphemes.map((grapheme, i) => {
               const isTarget = graphemeContainsLetter(grapheme, letter.letter);
@@ -191,55 +226,70 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
               const isFound = found && isTarget;
               
               return (
-                <motion.button
+                <span
                   key={i}
                   onMouseEnter={() => !found && setHoveredIndex(i)}
                   onMouseLeave={() => !found && !interacting && setHoveredIndex(null)}
-                  onTouchStart={() => handleTouchStart(i)}
-                  onTouchEnd={() => handleTouchEnd(grapheme, i)}
-                  onClick={() => handleLetterTap(grapheme, i)}
-                  animate={{
-                    scale: isHovered ? 1.5 : isFound ? 1.3 : 1,
-                    y: isHovered ? -8 : 0,
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    handleTouchStart(i);
                   }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  className={`
-                    relative inline-flex items-center justify-center
-                    rounded-xl cursor-pointer select-none
-                    transition-colors duration-200
-                    ${isFound ? 'bg-green-100 ring-3 ring-green-400' : ''}
-                    ${isHovered && !found ? 'bg-amber-50 ring-2 ring-amber-300 shadow-lg z-10' : ''}
-                    ${isWrong ? 'bg-red-100 ring-2 ring-red-400' : ''}
-                    ${!isHovered && !isFound && !isWrong ? 'hover:bg-gray-50' : ''}
-                  `}
-                  style={{ 
-                    fontFamily: 'Amiri, serif', 
-                    fontSize: isHovered ? '3rem' : '2.5rem',
-                    padding: isHovered ? '0.3em 0.4em' : '0.1em 0.15em',
-                    lineHeight: 1.4,
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    handleTouchEnd(grapheme, i);
+                  }}
+                  onClick={() => handleLetterTap(grapheme, i)}
+                  style={{
+                    display: 'inline',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    // Scale up on hover using CSS transform with transform-origin center
+                    transform: isHovered ? 'scale(1.4) translateY(-4px)' : isFound ? 'scale(1.3)' : 'scale(1)',
+                    transformOrigin: 'center bottom',
+                    transition: 'transform 0.2s ease, color 0.2s ease, background-color 0.2s ease',
+                    // Inline-block needed for transform to work, but we use a trick:
+                    // We set display to inline-block ONLY when hovered to allow transform,
+                    // and back to inline when not hovered to keep Arabic connected
+                    ...(isHovered || isFound || isWrong ? {
+                      display: 'inline-block',
+                      borderRadius: '8px',
+                      padding: '0 4px',
+                      zIndex: 10,
+                    } : {}),
+                    // Colors
                     color: isFound ? '#059669' : isWrong ? '#DC2626' : '#1f2937',
+                    backgroundColor: isFound ? '#D1FAE5' : isHovered ? '#FEF3C7' : isWrong ? '#FEE2E2' : 'transparent',
+                    // Ring effect via box-shadow
+                    boxShadow: isFound ? '0 0 0 3px #34D399' : isHovered ? '0 0 0 2px #FCD34D, 0 4px 12px rgba(0,0,0,0.1)' : isWrong ? '0 0 0 2px #F87171' : 'none',
                   }}
                 >
                   {grapheme}
                   {isFound && (
-                    <motion.span
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute -top-2 -right-2 text-sm"
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-8px',
+                        right: '-8px',
+                        fontSize: '0.8rem',
+                      }}
                     >
                       ✅
-                    </motion.span>
+                    </span>
                   )}
                   {isWrong && (
-                    <motion.span
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1, rotate: [0, -10, 10, 0] }}
-                      className="absolute -top-2 -right-2 text-sm"
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-8px',
+                        right: '-8px',
+                        fontSize: '0.8rem',
+                      }}
                     >
                       ❌
-                    </motion.span>
+                    </span>
                   )}
-                </motion.button>
+                </span>
               );
             })}
           </div>
