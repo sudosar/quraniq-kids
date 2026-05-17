@@ -8,7 +8,7 @@
  * - Middle/end positions are NOT shown until much later
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArabicLetter, getBeginningWords } from '@/lib/curriculum';
 import { speakArabic, speakArabicIfAllowed, playCorrectSound } from '@/lib/gameEngine';
@@ -95,6 +95,69 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
     }
   }, [currentCard]);
 
+  // Split word into graphemes and highlight the target letter
+  const highlightedWord = useMemo(() => {
+    if (!currentCard) return null;
+    
+    // Split into grapheme clusters
+    const splitIntoGraphemes = (text: string): string[] => {
+      if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+        const segmenter = new Intl.Segmenter('ar', { granularity: 'grapheme' });
+        return Array.from(segmenter.segment(text)).map(s => s.segment);
+      }
+      return Array.from(text);
+    };
+    
+    // Normalize for comparison
+    const normalize = (char: string): string => {
+      let s = char.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0610-\u061A]/g, '');
+      s = s.replace(/[\u0622\u0623\u0625\u0671\u0672\u0673]/g, '\u0627');
+      s = s.replace(/\u0629/g, '\u062A');
+      s = s.replace(/\u0649/g, '\u064A');
+      return s;
+    };
+    
+    const graphemes = splitIntoGraphemes(currentCard.word);
+    const normalizedTarget = normalize(letter.letter);
+    
+    return (
+      <>
+        {graphemes.map((g, i) => {
+          const isTarget = normalize(g).includes(normalizedTarget);
+          return (
+            <span
+              key={i}
+              style={{
+                color: isTarget ? letter.color : '#1f2937',
+                fontWeight: isTarget ? 800 : 700,
+                textShadow: isTarget ? `0 0 8px ${letter.color}40` : 'none',
+                position: 'relative',
+                display: 'inline',
+              }}
+            >
+              {g}
+              {isTarget && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    bottom: '-4px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '60%',
+                    height: '3px',
+                    borderRadius: '2px',
+                    backgroundColor: letter.color,
+                    opacity: 0.6,
+                  }}
+                />
+              )}
+            </span>
+          );
+        })}
+      </>
+    );
+  }, [currentCard, letter.letter, letter.color]);
+
   if (!currentCard) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -148,13 +211,13 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
               {currentCard.emoji}
             </motion.div>
 
-            {/* Arabic Word — rendered as ONE connected string */}
+            {/* Arabic Word — with target letter highlighted in color */}
             <div 
               className="text-5xl font-bold mb-3 leading-relaxed"
               dir="rtl"
               style={{ fontFamily: 'Amiri, serif' }}
             >
-              {currentCard.word}
+              {highlightedWord}
             </div>
 
             {/* Transliteration */}
