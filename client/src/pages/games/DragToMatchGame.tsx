@@ -256,8 +256,9 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
                 'bg-white border-gray-200 shadow-md hover:shadow-lg hover:border-amber-200'
               }`}
             >
-              <span className="text-5xl mb-2 pointer-events-none">{target.emoji}</span>
-              <span className="text-sm font-bold text-gray-700 pointer-events-none text-center">{target.meaning}</span>
+              <span className="text-5xl mb-1 pointer-events-none">{target.emoji}</span>
+              <span className="text-base font-bold pointer-events-none text-center arabic-text" style={{ fontFamily: '"Amiri", "Noto Naskh Arabic", serif', color: '#1f2937' }}>{target.word}</span>
+              <span className="text-xs font-medium text-gray-500 pointer-events-none text-center">{target.meaning}</span>
               
               {matched && target.isCorrect && (
                 <motion.div
