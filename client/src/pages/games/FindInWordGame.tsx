@@ -2,22 +2,25 @@
  * FindInWordGame - Spot the target letter in Quranic words
  * 
  * PEDAGOGY:
- * - Child sees a Quranic word rendered as CONNECTED Arabic text (not broken apart)
+ * - Child sees a Quranic word rendered as CONNECTED Arabic text
  * - On hover/touch, the hovered letter grows bigger with a highlight
  * - Child must tap the specific letter they're looking for
- * - This teaches letter recognition within real Quranic context
+ * - After finding the letter, a LETTER FORM GUIDE appears showing
+ *   isolated/initial/medial/final forms of the letter
+ * - A REPLAY WORD animation highlights each letter sequentially
+ *   to teach right-to-left reading flow
  * 
  * TECHNICAL APPROACH:
- * - We render the FULL word as connected text using a single Arabic text block
- * - Each grapheme cluster is wrapped in an inline <span> so it stays connected
- *   (Arabic shaping is preserved because the spans are inline within the same text node context)
- * - On hover/tap, the specific span gets scaled up and highlighted
- * - We normalize Alif variants (ٱ, أ, إ, آ → ا) for matching
+ * - Inline <span> elements preserve Arabic ligatures
+ * - normalizeArabicLetter handles Alif variants for matching
+ * - Letter form guide uses data from letterForms.ts
+ * - Replay animation uses sequential timeouts with highlights
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArabicLetter } from '@/lib/curriculum';
+import { getLetterForms, formLabels } from '@/lib/letterForms';
 import { speakArabic, speakArabicIfAllowed, playCorrectSound, playWrongSound } from '@/lib/gameEngine';
 
 interface Props {
@@ -36,37 +39,20 @@ function splitIntoGraphemes(text: string): string[] {
     const segmenter = new Intl.Segmenter('ar', { granularity: 'grapheme' });
     return Array.from(segmenter.segment(text)).map(s => s.segment);
   }
-  // Fallback: split by character (less accurate but works)
   return Array.from(text);
 }
 
 /**
  * Normalize Arabic letter for comparison.
- * Maps all Alif variants to bare Alif, strips diacritics, etc.
  */
 function normalizeArabicLetter(char: string): string {
-  // Strip diacritics (tashkeel)
   let stripped = char.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0610-\u061A]/g, '');
-  
-  // Normalize Alif variants to bare Alif (ا)
-  // ٱ (U+0671 Alif Wasla) → ا
-  // أ (U+0623 Alif with Hamza Above) → ا
-  // إ (U+0625 Alif with Hamza Below) → ا
-  // آ (U+0622 Alif with Madda) → ا
-  // ٲ (U+0672) → ا
-  // ٳ (U+0673) → ا
   stripped = stripped.replace(/[\u0622\u0623\u0625\u0671\u0672\u0673]/g, '\u0627');
-  
-  // Normalize other common variants
-  // ة (Ta Marbuta) → ت (for matching purposes)
-  // ى (Alif Maksura) → ي
   stripped = stripped.replace(/\u0629/g, '\u062A');
   stripped = stripped.replace(/\u0649/g, '\u064A');
-  
   return stripped;
 }
 
-// Check if a grapheme contains the target letter (with normalization)
 function graphemeContainsLetter(grapheme: string, targetLetter: string): boolean {
   const normalizedGrapheme = normalizeArabicLetter(grapheme);
   const normalizedTarget = normalizeArabicLetter(targetLetter);
@@ -81,10 +67,15 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [wrongIndex, setWrongIndex] = useState<number | null>(null);
   const [interacting, setInteracting] = useState(false);
+  const [showFormGuide, setShowFormGuide] = useState(false);
+  const [replayHighlight, setReplayHighlight] = useState<number | null>(null);
+  const [isReplaying, setIsReplaying] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const replayTimeoutRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const quranicWords = letter.quranicWords || [];
   const currentWord = quranicWords[wordIndex];
+  const letterForms = getLetterForms(letter.letter);
 
   useEffect(() => {
     if (currentWord) {
@@ -101,10 +92,23 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
     setHoveredIndex(null);
     setWrongIndex(null);
     setInteracting(false);
+    setShowFormGuide(false);
+    setReplayHighlight(null);
+    setIsReplaying(false);
+    // Clear any pending replay timeouts
+    replayTimeoutRef.current.forEach(t => clearTimeout(t));
+    replayTimeoutRef.current = [];
   }, [wordIndex]);
 
+  // Cleanup replay timeouts on unmount
+  useEffect(() => {
+    return () => {
+      replayTimeoutRef.current.forEach(t => clearTimeout(t));
+    };
+  }, []);
+
   const handleLetterTap = useCallback((grapheme: string, index: number) => {
-    if (found) return;
+    if (found || isReplaying) return;
     
     const isCorrect = graphemeContainsLetter(grapheme, letter.letter);
     
@@ -114,37 +118,80 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
       setHoveredIndex(index);
       playCorrectSound();
       
-      // Auto-advance after celebration
+      // Show the letter form guide after a brief celebration
       setTimeout(() => {
-        if (wordIndex < quranicWords.length - 1) {
-          setWordIndex(prev => prev + 1);
-        } else {
-          const stars = mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
-          onComplete(stars);
-        }
-      }, 2000);
+        setShowFormGuide(true);
+      }, 800);
     } else {
       setWrongIndex(index);
       setMistakes(prev => prev + 1);
       playWrongSound();
       setTimeout(() => setWrongIndex(null), 600);
     }
-  }, [found, letter.letter, wordIndex, quranicWords.length, mistakes, onComplete]);
+  }, [found, isReplaying, letter.letter]);
+
+  // Advance to next word (called from form guide or after replay)
+  const advanceToNext = useCallback(() => {
+    setShowFormGuide(false);
+    if (wordIndex < quranicWords.length - 1) {
+      setWordIndex(prev => prev + 1);
+    } else {
+      const stars = mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
+      onComplete(stars);
+    }
+  }, [wordIndex, quranicWords.length, mistakes, onComplete]);
+
+  // Replay word animation — highlights each letter from right to left
+  const startReplay = useCallback(() => {
+    if (!currentWord || isReplaying) return;
+    
+    const graphemes = splitIntoGraphemes(currentWord.word);
+    setIsReplaying(true);
+    setShowFormGuide(false);
+    setHoveredIndex(null);
+    
+    // Clear previous timeouts
+    replayTimeoutRef.current.forEach(t => clearTimeout(t));
+    replayTimeoutRef.current = [];
+    
+    // Speak the word
+    speakArabic(currentWord.word, 0.5);
+    
+    // Highlight each grapheme sequentially (RTL order = array order since text is RTL)
+    graphemes.forEach((_, i) => {
+      const timeout = setTimeout(() => {
+        setReplayHighlight(i);
+      }, i * 500 + 200);
+      replayTimeoutRef.current.push(timeout);
+    });
+    
+    // Clear highlight and finish
+    const finishTimeout = setTimeout(() => {
+      setReplayHighlight(null);
+      setIsReplaying(false);
+      // Show form guide again if letter was found
+      if (found) {
+        setShowFormGuide(true);
+      }
+    }, graphemes.length * 500 + 600);
+    replayTimeoutRef.current.push(finishTimeout);
+  }, [currentWord, isReplaying, found]);
 
   // Touch handling for mobile
   const handleTouchStart = useCallback((index: number) => {
+    if (isReplaying) return;
     setInteracting(true);
     setHoveredIndex(index);
-  }, []);
+  }, [isReplaying]);
 
   const handleTouchEnd = useCallback((grapheme: string, index: number) => {
+    if (isReplaying) return;
     handleLetterTap(grapheme, index);
-    // Keep hover state briefly for visual feedback
     setTimeout(() => {
       if (!found) setHoveredIndex(null);
       setInteracting(false);
     }, 300);
-  }, [handleLetterTap, found]);
+  }, [handleLetterTap, found, isReplaying]);
 
   if (!currentWord) {
     return (
@@ -157,7 +204,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
   const graphemes = splitIntoGraphemes(currentWord.word);
 
   return (
-    <div className="h-full flex flex-col items-center justify-center p-4 gap-6">
+    <div className="h-full flex flex-col items-center justify-center p-4 gap-4">
       {/* Progress dots */}
       <div className="flex gap-2">
         {quranicWords.map((_, i) => (
@@ -178,42 +225,40 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
           Find the letter <span className="text-3xl font-bold arabic-text" style={{ color: letter.color }}>{letter.letter}</span> in this word!
         </p>
         <p className="text-sm text-gray-400">
-          {interacting ? 'Now tap the letter!' : 'Touch each letter to see it bigger'}
+          {isReplaying ? 'Watch each letter light up!' :
+           interacting ? 'Now tap the letter!' : 
+           'Touch each letter to see it bigger'}
         </p>
       </div>
 
       {/* Target letter reminder */}
       <motion.div
-        animate={{ scale: [1, 1.1, 1] }}
-        transition={{ duration: 2, repeat: Infinity }}
-        className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
+        animate={{ scale: found ? 1 : [1, 1.1, 1] }}
+        transition={{ duration: 2, repeat: found ? 0 : Infinity }}
+        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
         style={{ backgroundColor: letter.color + '20', border: `3px solid ${letter.color}` }}
       >
-        <span className="text-3xl font-bold arabic-text" style={{ color: letter.color }}>
+        <span className="text-2xl font-bold arabic-text" style={{ color: letter.color }}>
           {letter.letter}
         </span>
       </motion.div>
 
-      {/* Quranic Word Card — letters are individually tappable but STAY CONNECTED */}
+      {/* Quranic Word Card */}
       <AnimatePresence mode="wait">
         <motion.div
           key={wordIndex}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
-          className="bg-white rounded-3xl shadow-xl border-2 border-amber-100 p-6 max-w-md w-full"
+          className="bg-white rounded-3xl shadow-xl border-2 border-amber-100 p-5 max-w-md w-full"
         >
-          {/* 
-            The Arabic word — rendered as CONNECTED text.
-            Each grapheme is in an inline <span> so Arabic shaping is preserved.
-            The key insight: using display:inline (not flex/grid) keeps Arabic ligatures connected.
-          */}
+          {/* The Arabic word — connected text with tappable graphemes */}
           <div 
             ref={containerRef}
-            className="text-center mb-4"
+            className="text-center mb-3"
             dir="rtl"
             style={{ 
-              minHeight: '5rem',
+              minHeight: '4.5rem',
               fontFamily: '"Amiri", "Noto Naskh Arabic", serif',
               fontSize: '3.5rem',
               lineHeight: 1.8,
@@ -224,12 +269,13 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
               const isHovered = hoveredIndex === i;
               const isWrong = wrongIndex === i;
               const isFound = found && isTarget;
+              const isReplayActive = replayHighlight === i;
               
               return (
                 <span
                   key={i}
-                  onMouseEnter={() => !found && setHoveredIndex(i)}
-                  onMouseLeave={() => !found && !interacting && setHoveredIndex(null)}
+                  onMouseEnter={() => !found && !isReplaying && setHoveredIndex(i)}
+                  onMouseLeave={() => !found && !interacting && !isReplaying && setHoveredIndex(null)}
                   onTouchStart={(e) => {
                     e.preventDefault();
                     handleTouchStart(i);
@@ -242,50 +288,38 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                   style={{
                     display: 'inline',
                     position: 'relative',
-                    cursor: 'pointer',
+                    cursor: isReplaying ? 'default' : 'pointer',
                     userSelect: 'none',
-                    // Scale up on hover using CSS transform with transform-origin center
-                    transform: isHovered ? 'scale(1.4) translateY(-4px)' : isFound ? 'scale(1.3)' : 'scale(1)',
+                    transform: isReplayActive ? 'scale(1.35) translateY(-4px)' :
+                               isHovered ? 'scale(1.4) translateY(-4px)' : 
+                               isFound ? 'scale(1.3)' : 'scale(1)',
                     transformOrigin: 'center bottom',
-                    transition: 'transform 0.2s ease, color 0.2s ease, background-color 0.2s ease',
-                    // Inline-block needed for transform to work, but we use a trick:
-                    // We set display to inline-block ONLY when hovered to allow transform,
-                    // and back to inline when not hovered to keep Arabic connected
-                    ...(isHovered || isFound || isWrong ? {
+                    transition: 'transform 0.25s ease, color 0.2s ease, background-color 0.25s ease, box-shadow 0.25s ease',
+                    ...(isHovered || isFound || isWrong || isReplayActive ? {
                       display: 'inline-block',
                       borderRadius: '8px',
                       padding: '0 4px',
                       zIndex: 10,
                     } : {}),
-                    // Colors
-                    color: isFound ? '#059669' : isWrong ? '#DC2626' : '#1f2937',
-                    backgroundColor: isFound ? '#D1FAE5' : isHovered ? '#FEF3C7' : isWrong ? '#FEE2E2' : 'transparent',
-                    // Ring effect via box-shadow
-                    boxShadow: isFound ? '0 0 0 3px #34D399' : isHovered ? '0 0 0 2px #FCD34D, 0 4px 12px rgba(0,0,0,0.1)' : isWrong ? '0 0 0 2px #F87171' : 'none',
+                    color: isFound ? '#059669' : isReplayActive ? '#0D7377' : isWrong ? '#DC2626' : '#1f2937',
+                    backgroundColor: isFound ? '#D1FAE5' : 
+                                     isReplayActive ? '#E0F7FA' :
+                                     isHovered ? '#FEF3C7' : 
+                                     isWrong ? '#FEE2E2' : 'transparent',
+                    boxShadow: isFound ? '0 0 0 3px #34D399' : 
+                               isReplayActive ? '0 0 0 3px #0D9488, 0 4px 16px rgba(13,115,119,0.25)' :
+                               isHovered ? '0 0 0 2px #FCD34D, 0 4px 12px rgba(0,0,0,0.1)' : 
+                               isWrong ? '0 0 0 2px #F87171' : 'none',
                   }}
                 >
                   {grapheme}
-                  {isFound && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: '-8px',
-                        right: '-8px',
-                        fontSize: '0.8rem',
-                      }}
-                    >
+                  {isFound && !isReplaying && (
+                    <span style={{ position: 'absolute', top: '-8px', right: '-8px', fontSize: '0.8rem' }}>
                       ✅
                     </span>
                   )}
                   {isWrong && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: '-8px',
-                        right: '-8px',
-                        fontSize: '0.8rem',
-                      }}
-                    >
+                    <span style={{ position: 'absolute', top: '-8px', right: '-8px', fontSize: '0.8rem' }}>
                       ❌
                     </span>
                   )}
@@ -294,23 +328,117 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
             })}
           </div>
 
-          {/* Found celebration */}
+          {/* Letter Form Guide — shown after finding the letter */}
           <AnimatePresence>
-            {found && (
+            {showFormGuide && letterForms && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-gradient-to-r from-teal-50 to-emerald-50 rounded-2xl p-4 mb-3 border border-teal-100">
+                  <p className="text-sm font-semibold text-teal-700 text-center mb-3" style={{ fontFamily: 'var(--font-heading)' }}>
+                    ✨ {letter.name} has different shapes!
+                  </p>
+                  <div className="flex justify-center gap-2">
+                    {(['isolated', 'initial', 'medial', 'final'] as const).map((form) => (
+                      <motion.div
+                        key={form}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: form === 'isolated' ? 0.1 : form === 'initial' ? 0.25 : form === 'medial' ? 0.4 : 0.55, type: 'spring', stiffness: 300 }}
+                        className="flex flex-col items-center"
+                      >
+                        <div 
+                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center mb-1 shadow-sm"
+                          style={{ 
+                            backgroundColor: 'white',
+                            border: `2px solid ${letter.color}30`,
+                          }}
+                        >
+                          <span 
+                            className="arabic-text"
+                            style={{ 
+                              fontSize: '1.6rem',
+                              color: letter.color,
+                              fontFamily: '"Amiri", "Noto Naskh Arabic", serif',
+                            }}
+                          >
+                            {letterForms[form]}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-medium text-teal-600">
+                          {formLabels[form].en}
+                        </span>
+                        <span className="text-[10px] text-teal-500 arabic-text" style={{ fontFamily: '"Amiri", serif' }}>
+                          {formLabels[form].ar}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Action buttons after form guide */}
+                <div className="flex gap-2 justify-center">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={startReplay}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-teal-50 text-teal-700 rounded-full border border-teal-200 text-sm font-medium"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
+                    <span>▶️</span>
+                    Replay Word
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={advanceToNext}
+                    className="flex items-center gap-1.5 px-5 py-2 text-white rounded-full text-sm font-semibold shadow-md"
+                    style={{ fontFamily: 'var(--font-body)', backgroundColor: letter.color }}
+                  >
+                    {wordIndex < quranicWords.length - 1 ? 'Next Word →' : 'Finish! 🎉'}
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Found celebration (brief, before form guide appears) */}
+          <AnimatePresence>
+            {found && !showFormGuide && !isReplaying && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
                 className="text-center mb-3"
               >
                 <p className="text-lg font-bold text-green-600" style={{ fontFamily: 'var(--font-heading)' }}>
-                  ✨ You found {letter.name}! Great job!
+                  ✨ You found {letter.name}!
                 </p>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Hint prompt */}
-          {!found && !interacting && (
+          {/* Replay animation indicator */}
+          <AnimatePresence>
+            {isReplaying && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-center mb-3"
+              >
+                <p className="text-sm font-semibold text-teal-600" style={{ fontFamily: 'var(--font-heading)' }}>
+                  🔤 Follow each letter...
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Hint prompt (before finding) */}
+          {!found && !interacting && !isReplaying && (
             <motion.div
               className="text-center mb-3"
               animate={{ opacity: [0.5, 1, 0.5] }}
