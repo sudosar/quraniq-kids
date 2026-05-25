@@ -238,6 +238,20 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
                     <p className="text-xl font-bold text-teal-700" style={{ fontFamily: 'var(--font-heading)' }}>
                       {currentCard.meaning}
                     </p>
+                    {/* Quranic reference badge */}
+                    {currentCard.quranicRef && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 rounded-full"
+                      >
+                        <span className="text-sm">📖</span>
+                        <span className="text-xs font-medium text-emerald-700" style={{ fontFamily: 'var(--font-body)' }}>
+                          Found in the Quran — {currentCard.quranicRef}
+                        </span>
+                      </motion.div>
+                    )}
                     <p className="text-xs text-gray-400 mt-1">Tap to hear it again!</p>
                   </div>
                 </motion.div>
