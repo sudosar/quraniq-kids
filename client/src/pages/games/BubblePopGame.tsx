@@ -15,11 +15,17 @@
  *   (child hasn't learned them yet, but can distinguish shapes)
  * - For later letters: uses previously learned letters as distractors
  * - This makes the game actually challenging and teaches letter discrimination
+ * 
+ * ALL LETTER FORMS:
+ * - Target bubbles show the letter in ALL its positional forms (isolated, initial, medial, final)
+ * - This teaches children to recognize the letter regardless of shape
+ * - A small label below each target bubble shows which form it is
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArabicLetter, arabicLetters } from '@/lib/curriculum';
+import { getLetterForms, formLabels, LetterForms } from '@/lib/letterForms';
 import { playPopSound, playWrongSound, playCorrectSound, shuffleArray } from '@/lib/gameEngine';
 
 interface Props {
@@ -34,7 +40,8 @@ interface Props {
 
 interface Bubble {
   id: number;
-  letter: ArabicLetter;
+  displayLetter: string;
+  formLabel: string | null; // e.g., "Start", "Middle" — null for distractors
   isTarget: boolean;
   popped: boolean;
   wobble: boolean;
@@ -54,7 +61,7 @@ const BUBBLE_COLORS = [
   '#06B6D4', '#10B981',
 ];
 
-const TARGET_COUNT = 5;
+const TARGET_COUNT = 6;
 
 export default function BubblePopGame({ letter, distractorLetters, distractorCount, onComplete }: Props) {
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
@@ -63,38 +70,57 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
   const [gameReady, setGameReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Get all forms of the target letter
+  const letterFormsData = useMemo(() => getLetterForms(letter.letter), [letter]);
+
   const generateBubbles = useCallback(() => {
-    const allBubbleLetters: Array<{ letter: ArabicLetter; isTarget: boolean }> = [];
+    const allBubbleItems: Array<{ displayLetter: string; formLabel: string | null; isTarget: boolean }> = [];
     
-    // Always add target letters
-    for (let i = 0; i < 6; i++) {
-      allBubbleLetters.push({ letter, isTarget: true });
+    // Add target letter in ALL its positional forms
+    if (letterFormsData) {
+      const forms: Array<{ key: keyof LetterForms; label: string }> = [
+        { key: 'isolated', label: 'Alone' },
+        { key: 'initial', label: 'Start' },
+        { key: 'medial', label: 'Middle' },
+        { key: 'final', label: 'End' },
+      ];
+      
+      // Add each form at least once, and add extras of isolated/initial for more targets
+      forms.forEach(({ key, label }) => {
+        allBubbleItems.push({ displayLetter: letterFormsData[key], formLabel: label, isTarget: true });
+      });
+      // Add 2 more targets (repeat isolated and initial) to reach 6 total
+      allBubbleItems.push({ displayLetter: letterFormsData.isolated, formLabel: 'Alone', isTarget: true });
+      allBubbleItems.push({ displayLetter: letterFormsData.initial, formLabel: 'Start', isTarget: true });
+    } else {
+      // Fallback: just use the letter itself
+      for (let i = 0; i < 6; i++) {
+        allBubbleItems.push({ displayLetter: letter.letter, formLabel: null, isTarget: true });
+      }
     }
     
     // ALWAYS add distractors — even for the first letter!
     if (distractorCount > 0 && distractorLetters.length > 0) {
-      // Use previously learned letters as distractors
+      // Use previously learned letters as distractors (in their isolated form)
       const usableDistractors = distractorLetters.slice(0, Math.min(distractorCount, 4));
       usableDistractors.forEach(d => {
-        allBubbleLetters.push({ letter: d, isTarget: false });
+        allBubbleItems.push({ displayLetter: d.letter, formLabel: null, isTarget: false });
         if (usableDistractors.length < 3) {
-          allBubbleLetters.push({ letter: d, isTarget: false });
+          allBubbleItems.push({ displayLetter: d.letter, formLabel: null, isTarget: false });
         }
       });
     } else {
       // FIRST LETTER: Use other Arabic letters as visual distractors
-      // Pick 2-3 visually distinct letters the child hasn't learned yet
       const otherLetters = arabicLetters.filter(l => l.id !== letter.id);
       const visualDistractors = shuffleArray(otherLetters).slice(0, 3);
       
       visualDistractors.forEach(d => {
-        // Add 1-2 copies of each distractor
-        allBubbleLetters.push({ letter: d, isTarget: false });
-        allBubbleLetters.push({ letter: d, isTarget: false });
+        allBubbleItems.push({ displayLetter: d.letter, formLabel: null, isTarget: false });
+        allBubbleItems.push({ displayLetter: d.letter, formLabel: null, isTarget: false });
       });
     }
 
-    const shuffled = shuffleArray(allBubbleLetters);
+    const shuffled = shuffleArray(allBubbleItems);
     
     const newBubbles: Bubble[] = shuffled.map((item, i) => {
       const startX = 10 + Math.random() * 75;
@@ -102,7 +128,8 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
       
       return {
         id: i,
-        letter: item.letter,
+        displayLetter: item.displayLetter,
+        formLabel: item.formLabel,
         isTarget: item.isTarget,
         popped: false,
         wobble: false,
@@ -118,7 +145,7 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
     });
 
     setBubbles(newBubbles);
-  }, [letter, distractorLetters, distractorCount]);
+  }, [letter, letterFormsData, distractorLetters, distractorCount]);
 
   useEffect(() => {
     generateBubbles();
@@ -165,7 +192,7 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
     }
   }, [score, gameReady, onComplete]);
 
-  const instructionText = `Find and pop the ${letter.name} (${letter.letter}) bubbles!`;
+  const instructionText = `Pop all forms of ${letter.name} (${letter.letter})!`;
 
   return (
     <div ref={containerRef} className="h-full relative overflow-hidden bg-gradient-to-b from-sky-200 via-blue-100 to-indigo-50">
@@ -179,15 +206,29 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
         </div>
       </div>
 
-      {/* Target letter reminder */}
-      <div className="absolute top-4 right-4 z-20 w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center border-2" style={{ borderColor: letter.color }}>
-        <span className="text-2xl arabic-text font-bold" style={{ color: letter.color }}>{letter.letter}</span>
+      {/* Target letter reminder — show all 4 forms */}
+      <div className="absolute top-4 right-3 z-20 bg-white/95 shadow-lg rounded-2xl px-3 py-2 border-2" style={{ borderColor: letter.color }}>
+        <div className="flex items-center gap-1.5">
+          {letterFormsData && (['isolated', 'initial', 'medial', 'final'] as const).map((form) => (
+            <span 
+              key={form}
+              className="arabic-text font-bold text-lg"
+              style={{ color: letter.color, fontFamily: '"Amiri", "Noto Naskh Arabic", serif' }}
+              title={formLabels[form].en}
+            >
+              {letterFormsData[form]}
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* Instruction at bottom */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 bg-white/90 rounded-2xl px-6 py-3 shadow-lg">
         <p className="text-base font-bold text-gray-700 text-center" style={{ fontFamily: 'var(--font-heading)' }}>
           {instructionText}
+        </p>
+        <p className="text-xs text-gray-500 text-center mt-1">
+          Look for all shapes: alone, start, middle, end!
         </p>
       </div>
 
@@ -280,7 +321,7 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
               onClick={() => handleBubbleTap(bubble)}
             >
               <div
-                className="rounded-full flex items-center justify-center relative cursor-pointer select-none"
+                className="rounded-full flex flex-col items-center justify-center relative cursor-pointer select-none"
                 style={{
                   width: `${bubble.size}px`,
                   height: `${bubble.size}px`,
@@ -298,14 +339,24 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
                 />
                 {/* Letter */}
                 <span 
-                  className="text-4xl md:text-5xl arabic-text font-bold relative z-10" 
+                  className="text-3xl md:text-4xl arabic-text font-bold relative z-10" 
                   style={{ 
                     color: '#1a1a2e', 
-                    textShadow: '0 0 8px rgba(255,255,255,0.9), 0 2px 4px rgba(255,255,255,0.5)' 
+                    textShadow: '0 0 8px rgba(255,255,255,0.9), 0 2px 4px rgba(255,255,255,0.5)',
+                    fontFamily: '"Amiri", "Noto Naskh Arabic", serif',
                   }}
                 >
-                  {bubble.letter.letter}
+                  {bubble.displayLetter}
                 </span>
+                {/* Form label for target bubbles */}
+                {bubble.isTarget && bubble.formLabel && (
+                  <span 
+                    className="text-[9px] font-bold relative z-10 mt-0.5 px-1.5 py-0.5 rounded-full bg-white/70"
+                    style={{ color: '#1a1a2e' }}
+                  >
+                    {bubble.formLabel}
+                  </span>
+                )}
               </div>
             </motion.div>
           );
@@ -328,7 +379,7 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
             >
               <span className="text-6xl block mb-2">🎉</span>
               <p className="text-2xl font-bold text-blue-700" style={{ fontFamily: 'var(--font-heading)' }}>
-                All popped!
+                All forms popped!
               </p>
             </motion.div>
           </motion.div>
