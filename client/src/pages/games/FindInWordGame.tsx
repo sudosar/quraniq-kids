@@ -4,24 +4,26 @@
  * PEDAGOGY:
  * - Child sees a Quranic word rendered as CONNECTED Arabic text
  * - On hover/touch, the hovered letter grows bigger with a highlight
+ *   AND shows its correct positional form (not always isolated)
  * - Child must tap the specific letter they're looking for
  * - After finding the letter, a LETTER FORM GUIDE appears showing
- *   isolated/initial/medial/final forms of the letter
+ *   isolated/initial/medial/final forms with the ACTIVE form highlighted
  * - A REPLAY WORD animation highlights each letter sequentially
  *   to teach right-to-left reading flow
  * 
  * TECHNICAL APPROACH:
  * - Inline <span> elements preserve Arabic ligatures
  * - normalizeArabicLetter handles Alif variants for matching
- * - Letter form guide uses data from letterForms.ts
- * - Replay animation uses sequential timeouts with highlights
+ * - getPositionInWord() determines if a grapheme is initial/medial/final
+ * - Letter form guide highlights the specific shape used in the current word
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArabicLetter } from '@/lib/curriculum';
-import { getLetterForms, formLabels } from '@/lib/letterForms';
+import { getLetterForms, formLabels, arabicLetterForms } from '@/lib/letterForms';
 import { speakArabic, speakArabicIfAllowed, playCorrectSound, playWrongSound } from '@/lib/gameEngine';
+import LetterTracing from '@/components/LetterTracing';
 
 interface Props {
   letter: ArabicLetter;
@@ -59,6 +61,43 @@ function graphemeContainsLetter(grapheme: string, targetLetter: string): boolean
   return normalizedGrapheme.includes(normalizedTarget);
 }
 
+// Non-connecting letters: these don't connect to the letter AFTER them (to the left in RTL)
+const NON_CONNECTING = new Set(['ا', 'أ', 'إ', 'آ', 'ٱ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ', 'ة']);
+
+/**
+ * Determine the positional form of a grapheme within a word.
+ * In Arabic, a letter's form depends on:
+ * - Whether the PREVIOUS letter connects to it (from the right)
+ * - Whether THIS letter connects to the next (to the left)
+ */
+type PositionalForm = 'isolated' | 'initial' | 'medial' | 'final';
+
+function getPositionInWord(graphemes: string[], index: number): PositionalForm {
+  const total = graphemes.length;
+  if (total === 1) return 'isolated';
+  
+  // Check if the previous letter (to the right in RTL = index - 1 in array) connects to this one
+  // A letter connects to the right if the letter before it is NOT a non-connecting letter
+  const prevGrapheme = index > 0 ? graphemes[index - 1] : null;
+  const prevBase = prevGrapheme ? normalizeArabicLetter(prevGrapheme) : null;
+  const prevConnectsToLeft = prevBase ? !NON_CONNECTING.has(prevBase) : false;
+  
+  // Check if THIS letter connects to the next (to the left in RTL = index + 1 in array)
+  const currentBase = normalizeArabicLetter(graphemes[index]);
+  const thisConnectsToLeft = !NON_CONNECTING.has(currentBase);
+  
+  const hasNext = index < total - 1;
+  
+  // Connected from right (previous connects to us) AND connects to left (we connect to next)
+  const connectedFromRight = prevConnectsToLeft;
+  const connectsToLeft = thisConnectsToLeft && hasNext;
+  
+  if (connectedFromRight && connectsToLeft) return 'medial';
+  if (connectedFromRight && !connectsToLeft) return 'final';
+  if (!connectedFromRight && connectsToLeft) return 'initial';
+  return 'isolated';
+}
+
 export default function FindInWordGame({ letter, onComplete }: Props) {
   const [wordIndex, setWordIndex] = useState(0);
   const [found, setFound] = useState(false);
@@ -68,6 +107,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
   const [wrongIndex, setWrongIndex] = useState<number | null>(null);
   const [interacting, setInteracting] = useState(false);
   const [showFormGuide, setShowFormGuide] = useState(false);
+  const [showTracing, setShowTracing] = useState(false);
   const [replayHighlight, setReplayHighlight] = useState<number | null>(null);
   const [isReplaying, setIsReplaying] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -76,6 +116,33 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
   const quranicWords = letter.quranicWords || [];
   const currentWord = quranicWords[wordIndex];
   const letterForms = getLetterForms(letter.letter);
+
+  const graphemes = useMemo(() => {
+    if (!currentWord) return [];
+    return splitIntoGraphemes(currentWord.word);
+  }, [currentWord]);
+
+  // Determine the positional form of the target letter in the current word
+  const targetPositionInWord = useMemo((): PositionalForm => {
+    if (!currentWord || graphemes.length === 0) return 'isolated';
+    
+    // Find the first grapheme that matches the target letter
+    for (let i = 0; i < graphemes.length; i++) {
+      if (graphemeContainsLetter(graphemes[i], letter.letter)) {
+        return getPositionInWord(graphemes, i);
+      }
+    }
+    return 'isolated';
+  }, [currentWord, graphemes, letter.letter]);
+
+  // Get the correct positional form display for hover tooltip
+  const getHoverFormDisplay = useCallback((index: number): { form: string; label: string } | null => {
+    if (!letterForms) return null;
+    const position = getPositionInWord(graphemes, index);
+    const formChar = letterForms[position];
+    const label = formLabels[position].en;
+    return { form: formChar, label };
+  }, [graphemes, letterForms]);
 
   useEffect(() => {
     if (currentWord) {
@@ -93,6 +160,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
     setWrongIndex(null);
     setInteracting(false);
     setShowFormGuide(false);
+    setShowTracing(false);
     setReplayHighlight(null);
     setIsReplaying(false);
     // Clear any pending replay timeouts
@@ -145,7 +213,6 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
   const startReplay = useCallback(() => {
     if (!currentWord || isReplaying) return;
     
-    const graphemes = splitIntoGraphemes(currentWord.word);
     setIsReplaying(true);
     setShowFormGuide(false);
     setHoveredIndex(null);
@@ -175,7 +242,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
       }
     }, graphemes.length * 500 + 600);
     replayTimeoutRef.current.push(finishTimeout);
-  }, [currentWord, isReplaying, found]);
+  }, [currentWord, isReplaying, found, graphemes]);
 
   // Touch handling for mobile
   const handleTouchStart = useCallback((index: number) => {
@@ -200,8 +267,6 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
       </div>
     );
   }
-
-  const graphemes = splitIntoGraphemes(currentWord.word);
 
   return (
     <div className="h-full flex flex-col items-center justify-center p-4 gap-4">
@@ -231,15 +296,22 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
         </p>
       </div>
 
-      {/* Target letter reminder */}
+      {/* Target letter reminder — shows the CORRECT positional form used in this word */}
       <motion.div
         animate={{ scale: found ? 1 : [1, 1.1, 1] }}
         transition={{ duration: 2, repeat: found ? 0 : Infinity }}
-        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
-        style={{ backgroundColor: letter.color + '20', border: `3px solid ${letter.color}` }}
+        className="flex flex-col items-center gap-1"
       >
-        <span className="text-2xl font-bold arabic-text" style={{ color: letter.color }}>
-          {letter.letter}
+        <div
+          className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+          style={{ backgroundColor: letter.color + '20', border: `3px solid ${letter.color}` }}
+        >
+          <span className="text-2xl font-bold arabic-text" style={{ color: letter.color, fontFamily: '"Amiri", "Noto Naskh Arabic", serif' }}>
+            {letterForms ? letterForms[targetPositionInWord] : letter.letter}
+          </span>
+        </div>
+        <span className="text-[10px] font-medium text-gray-400">
+          {formLabels[targetPositionInWord].en} form
         </span>
       </motion.div>
 
@@ -255,7 +327,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
           {/* The Arabic word — connected text with tappable graphemes */}
           <div 
             ref={containerRef}
-            className="text-center mb-3"
+            className="text-center mb-3 relative"
             dir="rtl"
             style={{ 
               minHeight: '4.5rem',
@@ -270,6 +342,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
               const isWrong = wrongIndex === i;
               const isFound = found && isTarget;
               const isReplayActive = replayHighlight === i;
+              const hoverFormInfo = isHovered && !found ? getHoverFormDisplay(i) : null;
               
               return (
                 <span
@@ -288,7 +361,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                   style={{
                     display: 'inline',
                     position: 'relative',
-                    cursor: isReplaying ? 'default' : 'pointer',
+                    cursor: found ? 'default' : 'pointer',
                     userSelect: 'none',
                     transform: isReplayActive ? 'scale(1.35) translateY(-4px)' :
                                isHovered ? 'scale(1.4) translateY(-4px)' : 
@@ -313,6 +386,30 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                   }}
                 >
                   {grapheme}
+                  {/* Hover tooltip showing the positional form name */}
+                  {isHovered && !found && !isReplaying && hoverFormInfo && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-28px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        fontSize: '0.6rem',
+                        fontFamily: 'var(--font-body)',
+                        color: '#6B7280',
+                        backgroundColor: '#FFF',
+                        border: '1px solid #E5E7EB',
+                        borderRadius: '6px',
+                        padding: '2px 6px',
+                        whiteSpace: 'nowrap',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+                        zIndex: 20,
+                        direction: 'ltr',
+                      }}
+                    >
+                      {hoverFormInfo.label}
+                    </span>
+                  )}
                   {isFound && !isReplaying && (
                     <span style={{ position: 'absolute', top: '-8px', right: '-8px', fontSize: '0.8rem' }}>
                       ✅
@@ -328,7 +425,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
             })}
           </div>
 
-          {/* Letter Form Guide — shown after finding the letter */}
+          {/* Letter Form Guide — shown after finding the letter, with ACTIVE form highlighted */}
           <AnimatePresence>
             {showFormGuide && letterForms && (
               <motion.div
@@ -342,45 +439,106 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                     ✨ {letter.name} has different shapes!
                   </p>
                   <div className="flex justify-center gap-2">
-                    {(['isolated', 'initial', 'medial', 'final'] as const).map((form) => (
-                      <motion.div
-                        key={form}
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: form === 'isolated' ? 0.1 : form === 'initial' ? 0.25 : form === 'medial' ? 0.4 : 0.55, type: 'spring', stiffness: 300 }}
-                        className="flex flex-col items-center"
-                      >
-                        <div 
-                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center mb-1 shadow-sm"
-                          style={{ 
-                            backgroundColor: 'white',
-                            border: `2px solid ${letter.color}30`,
-                          }}
+                    {(['isolated', 'initial', 'medial', 'final'] as const).map((form) => {
+                      const isActiveForm = form === targetPositionInWord;
+                      return (
+                        <motion.div
+                          key={form}
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={isActiveForm 
+                            ? { scale: [0, 1.2, 1], opacity: 1 }
+                            : { scale: 1, opacity: 1 }
+                          }
+                          transition={{ delay: form === 'isolated' ? 0.1 : form === 'initial' ? 0.25 : form === 'medial' ? 0.4 : 0.55, type: 'spring', stiffness: 300 }}
+                          className="flex flex-col items-center relative"
                         >
-                          <span 
-                            className="arabic-text"
+                          {/* Arrow pointing to active form */}
+                          {isActiveForm && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -5 }}
+                              animate={{ opacity: 1, y: [0, -4, 0] }}
+                              transition={{ delay: 0.7, duration: 1.2, repeat: Infinity }}
+                              className="absolute -top-5 text-center"
+                              style={{ fontSize: '0.9rem' }}
+                            >
+                              👇
+                            </motion.div>
+                          )}
+                          <motion.div 
+                            className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center mb-1"
+                            animate={isActiveForm ? {
+                              boxShadow: [
+                                `0 0 0px ${letter.color}40, 0 4px 8px rgba(0,0,0,0.1)`,
+                                `0 0 20px ${letter.color}60, 0 4px 12px rgba(0,0,0,0.15)`,
+                                `0 0 0px ${letter.color}40, 0 4px 8px rgba(0,0,0,0.1)`,
+                              ]
+                            } : {}}
+                            transition={isActiveForm ? { duration: 1.5, repeat: Infinity, ease: 'easeInOut' } : {}}
                             style={{ 
-                              fontSize: '1.6rem',
-                              color: letter.color,
-                              fontFamily: '"Amiri", "Noto Naskh Arabic", serif',
+                              backgroundColor: isActiveForm ? letter.color + '20' : 'white',
+                              border: isActiveForm 
+                                ? `3px solid ${letter.color}` 
+                                : `2px solid ${letter.color}20`,
+                              boxShadow: isActiveForm 
+                                ? `0 0 12px ${letter.color}40, 0 4px 8px rgba(0,0,0,0.1)` 
+                                : '0 1px 3px rgba(0,0,0,0.05)',
+                              transform: isActiveForm ? 'scale(1.15)' : 'scale(0.9)',
+                              opacity: isActiveForm ? 1 : 0.5,
                             }}
                           >
-                            {letterForms[form]}
+                            <span 
+                              className="arabic-text"
+                              style={{ 
+                                fontSize: isActiveForm ? '2rem' : '1.3rem',
+                                color: isActiveForm ? letter.color : '#BBB',
+                                fontWeight: isActiveForm ? 700 : 400,
+                                fontFamily: '"Amiri", "Noto Naskh Arabic", serif',
+                              }}
+                            >
+                              {letterForms[form]}
+                            </span>
+                          </motion.div>
+                          <span 
+                            className="text-[10px] font-medium"
+                            style={{ 
+                              color: isActiveForm ? letter.color : '#9CA3AF',
+                              fontWeight: isActiveForm ? 700 : 400,
+                            }}
+                          >
+                            {formLabels[form].en}
+                            {isActiveForm && ' ✓'}
                           </span>
-                        </div>
-                        <span className="text-[10px] font-medium text-teal-600">
-                          {formLabels[form].en}
-                        </span>
-                        <span className="text-[10px] text-teal-500 arabic-text" style={{ fontFamily: '"Amiri", serif' }}>
-                          {formLabels[form].ar}
-                        </span>
-                      </motion.div>
-                    ))}
+                          <span 
+                            className="text-[10px] arabic-text" 
+                            style={{ 
+                              fontFamily: '"Amiri", serif',
+                              color: isActiveForm ? letter.color : '#D1D5DB',
+                            }}
+                          >
+                            {formLabels[form].ar}
+                          </span>
+                        </motion.div>
+                      );
+                    })}
                   </div>
+                  {/* Explanation of which form is used */}
+                  <p className="text-xs text-center text-teal-600 mt-3 font-medium" style={{ fontFamily: 'var(--font-body)' }}>
+                    In this word, {letter.name} uses its <strong>{formLabels[targetPositionInWord].en}</strong> shape
+                  </p>
                 </div>
 
                 {/* Action buttons after form guide */}
-                <div className="flex gap-2 justify-center">
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => { setShowFormGuide(false); setShowTracing(true); }}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-purple-50 text-purple-700 rounded-full border border-purple-200 text-sm font-medium"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
+                    <span>✍️</span>
+                    Trace It
+                  </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -402,6 +560,26 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                   </motion.button>
                 </div>
               </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Trace the Shape mini-game */}
+          <AnimatePresence>
+            {showTracing && letterForms && (
+              <LetterTracing
+                letterForm={letterForms[targetPositionInWord]}
+                formLabel={formLabels[targetPositionInWord].en}
+                letterName={letter.name}
+                letterColor={letter.color}
+                onComplete={() => {
+                  setShowTracing(false);
+                  advanceToNext();
+                }}
+                onSkip={() => {
+                  setShowTracing(false);
+                  advanceToNext();
+                }}
+              />
             )}
           </AnimatePresence>
 
