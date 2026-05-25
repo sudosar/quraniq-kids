@@ -6,7 +6,8 @@
  * - Shows 3 pictures: 1 correct (starts with this letter) + 2 distractors
  * - Distractors are ALWAYS from OTHER letters' "starts with" words
  *   (NOT from the same letter's other word cards — that's confusing!)
- * - This way, the child clearly knows: "Lion starts with أ, Duck starts with ب"
+ * - Arabic word is shown on each card with the TARGET LETTER highlighted
+ *   in its correct positional form (initial since all words start with it)
  * 
  * For the FIRST letter (no previously learned letters):
  * - Uses pictures from the NEXT few letters as visual distractors
@@ -16,6 +17,7 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { ArabicLetter, getBeginningWords, arabicLetters } from '@/lib/curriculum';
+import { getLetterForms, formLabels } from '@/lib/letterForms';
 import { playCorrectSound, playWrongSound, speakArabic, shuffleArray } from '@/lib/gameEngine';
 
 interface Props {
@@ -34,6 +36,113 @@ interface PictureTarget {
   emoji: string;
   letterId: number;
   isCorrect: boolean;
+}
+
+// Split Arabic word into grapheme clusters
+function splitIntoGraphemes(text: string): string[] {
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter('ar', { granularity: 'grapheme' });
+    return Array.from(segmenter.segment(text)).map(s => s.segment);
+  }
+  return Array.from(text);
+}
+
+// Normalize Arabic letter for comparison
+function normalizeArabicLetter(char: string): string {
+  let stripped = char.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0610-\u061A]/g, '');
+  stripped = stripped.replace(/[\u0622\u0623\u0625\u0671\u0672\u0673]/g, '\u0627');
+  stripped = stripped.replace(/\u0629/g, '\u062A');
+  stripped = stripped.replace(/\u0649/g, '\u064A');
+  return stripped;
+}
+
+// Non-connecting letters
+const NON_CONNECTING = new Set(['ا', 'أ', 'إ', 'آ', 'ٱ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ', 'ة']);
+
+type PositionalForm = 'isolated' | 'initial' | 'medial' | 'final';
+
+function getPositionInWord(graphemes: string[], index: number): PositionalForm {
+  const total = graphemes.length;
+  if (total === 1) return 'isolated';
+  
+  const prevGrapheme = index > 0 ? graphemes[index - 1] : null;
+  const prevBase = prevGrapheme ? normalizeArabicLetter(prevGrapheme) : null;
+  const prevConnectsToLeft = prevBase ? !NON_CONNECTING.has(prevBase) : false;
+  
+  const currentBase = normalizeArabicLetter(graphemes[index]);
+  const thisConnectsToLeft = !NON_CONNECTING.has(currentBase);
+  
+  const hasNext = index < total - 1;
+  const connectedFromRight = prevConnectsToLeft;
+  const connectsToLeft = thisConnectsToLeft && hasNext;
+  
+  if (connectedFromRight && connectsToLeft) return 'medial';
+  if (connectedFromRight && !connectsToLeft) return 'final';
+  if (!connectedFromRight && connectsToLeft) return 'initial';
+  return 'isolated';
+}
+
+/**
+ * Render an Arabic word with the target letter highlighted in its positional form
+ */
+function HighlightedArabicWord({ word, targetLetter, letterColor }: { word: string; targetLetter: string; letterColor: string }) {
+  const graphemes = useMemo(() => splitIntoGraphemes(word), [word]);
+  const normalizedTarget = useMemo(() => normalizeArabicLetter(targetLetter), [targetLetter]);
+  const letterFormsData = getLetterForms(targetLetter);
+  
+  // Find the first matching grapheme and its position
+  const matchInfo = useMemo(() => {
+    for (let i = 0; i < graphemes.length; i++) {
+      const normalizedG = normalizeArabicLetter(graphemes[i]);
+      if (normalizedG.includes(normalizedTarget)) {
+        const position = getPositionInWord(graphemes, i);
+        return { index: i, position };
+      }
+    }
+    return null;
+  }, [graphemes, normalizedTarget]);
+
+  return (
+    <span 
+      className="arabic-text block text-center" 
+      dir="rtl" 
+      style={{ fontFamily: '"Amiri", "Noto Naskh Arabic", serif', fontSize: '1.8rem', lineHeight: 1.6 }}
+    >
+      {graphemes.map((g, i) => {
+        const normalizedG = normalizeArabicLetter(g);
+        const isTarget = normalizedG.includes(normalizedTarget);
+        return (
+          <span
+            key={i}
+            style={{
+              color: isTarget ? letterColor : '#1f2937',
+              fontWeight: isTarget ? 700 : 400,
+              textDecoration: isTarget ? 'underline' : 'none',
+              textDecorationColor: isTarget ? letterColor + '60' : 'transparent',
+              textUnderlineOffset: '3px',
+            }}
+          >
+            {g}
+          </span>
+        );
+      })}
+      {/* Show the positional form label for the correct answer */}
+      {matchInfo && letterFormsData && (
+        <span 
+          className="block text-center mt-0.5"
+          style={{ 
+            fontSize: '0.7rem', 
+            color: letterColor, 
+            fontFamily: 'var(--font-body)',
+            direction: 'ltr',
+            fontWeight: 600,
+          }}
+        >
+          {formLabels[matchInfo.position].en} form
+        </span>
+      )}
+    </span>
+  );
 }
 
 export default function DragToMatchGame({ letter, distractorLetters, onComplete }: Props) {
@@ -66,7 +175,6 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
       const distractors: PictureTarget[] = [];
       
       // Get distractor pictures from OTHER letters' beginning words
-      // First try previously learned letters
       if (distractorLetters.length > 0) {
         const shuffled = shuffleArray(distractorLetters);
         for (const dl of shuffled) {
@@ -85,7 +193,7 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
         }
       }
       
-      // If still not enough (first letter or few learned), use OTHER letters
+      // If still not enough, use OTHER letters
       if (distractors.length < 2) {
         const otherLetters = shuffleArray(
           arabicLetters.filter(l => l.id !== letter.id && !distractorLetters.find(d => d.id === l.id))
@@ -95,7 +203,6 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
           const olWords = getBeginningWords(ol);
           if (olWords.length > 0) {
             const card = olWords[Math.floor(Math.random() * olWords.length)];
-            // Make sure we don't duplicate emojis
             if (!distractors.find(d => d.emoji === card.emoji) && card.emoji !== correct.emoji) {
               distractors.push({
                 word: card.word,
@@ -248,7 +355,7 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
               }}
               transition={{ delay: idx * 0.15, type: 'spring' }}
               onClick={() => handleTargetTap(target, idx)}
-              className={`relative flex flex-col items-center justify-center p-4 rounded-3xl border-4 transition-colors min-h-[140px] ${
+              className={`relative flex flex-col items-center justify-center p-3 rounded-3xl border-4 transition-colors min-h-[160px] ${
                 matched && target.isCorrect ? 'bg-green-50 border-green-400 shadow-xl' :
                 wrongTarget === idx ? 'bg-red-50 border-red-400 shadow-lg' :
                 showHint && target.isCorrect ? 'bg-amber-50 border-amber-300 shadow-lg ring-4 ring-amber-200' :
@@ -256,9 +363,28 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
                 'bg-white border-gray-200 shadow-md hover:shadow-lg hover:border-amber-200'
               }`}
             >
-              <span className="text-5xl mb-1 pointer-events-none">{target.emoji}</span>
-              <span className="text-base font-bold pointer-events-none text-center arabic-text" style={{ fontFamily: '"Amiri", "Noto Naskh Arabic", serif', color: '#1f2937' }}>{target.word}</span>
-              <span className="text-xs font-medium text-gray-500 pointer-events-none text-center">{target.meaning}</span>
+              <span className="text-4xl mb-1 pointer-events-none">{target.emoji}</span>
+              
+              {/* Arabic word with target letter highlighted in its positional form */}
+              <div className="pointer-events-none w-full">
+                {target.isCorrect ? (
+                  <HighlightedArabicWord 
+                    word={target.word} 
+                    targetLetter={letter.letter} 
+                    letterColor={letter.color} 
+                  />
+                ) : (
+                  <span 
+                    className="arabic-text block text-center" 
+                    dir="rtl"
+                    style={{ fontFamily: '"Amiri", "Noto Naskh Arabic", serif', fontSize: '1.8rem', color: '#1f2937' }}
+                  >
+                    {target.word}
+                  </span>
+                )}
+              </div>
+              
+              <span className="text-xs font-medium text-gray-500 pointer-events-none text-center mt-0.5">{target.meaning}</span>
               
               {matched && target.isCorrect && (
                 <motion.div
