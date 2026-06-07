@@ -94,13 +94,21 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
       forms.forEach(({ key, label }) => {
         allBubbleItems.push({ displayLetter: letterFormsData[key], formLabel: label, isTarget: true });
       });
-      // Add extra targets to reach 6 total
-      const extraForms = isNonConnecting
-        ? [{ key: 'isolated' as keyof LetterForms, label: 'Alone' }, { key: 'final' as keyof LetterForms, label: 'End' }]
-        : [{ key: 'isolated' as keyof LetterForms, label: 'Alone' }, { key: 'initial' as keyof LetterForms, label: 'Start' }];
-      extraForms.forEach(({ key, label }) => {
-        allBubbleItems.push({ displayLetter: letterFormsData[key], formLabel: label, isTarget: true });
-      });
+      // Add extra targets to reach target count
+      // Non-connecting: 2 forms → triple each = 6 targets
+      // Connecting: 4 forms → add 2 extra = 6 targets
+      if (isNonConnecting) {
+        // Triple the 2 forms to get 6 targets (2 × 3 = 6)
+        forms.forEach(({ key, label }) => {
+          allBubbleItems.push({ displayLetter: letterFormsData[key], formLabel: label, isTarget: true });
+          allBubbleItems.push({ displayLetter: letterFormsData[key], formLabel: label, isTarget: true });
+        });
+      } else {
+        const extraForms = [{ key: 'isolated' as keyof LetterForms, label: 'Alone' }, { key: 'initial' as keyof LetterForms, label: 'Start' }];
+        extraForms.forEach(({ key, label }) => {
+          allBubbleItems.push({ displayLetter: letterFormsData[key], formLabel: label, isTarget: true });
+        });
+      }
     } else {
       // Fallback: just use the letter itself
       for (let i = 0; i < 6; i++) {
