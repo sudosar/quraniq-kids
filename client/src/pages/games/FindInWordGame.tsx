@@ -353,6 +353,9 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
               const isFound = found && isTarget;
               const isReplayActive = replayHighlight === i;
               const hoverFormInfo = isHovered && !found ? getHoverFormDisplay(i) : null;
+              // Show target letters in their correct positional form within the word
+              const position = getPositionInWord(graphemes, i);
+              const displayForm = isTarget && letterForms ? letterForms[position] : grapheme;
               
               return (
                 <span
@@ -395,7 +398,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                                isWrong ? '0 0 0 2px #F87171' : 'none',
                   }}
                 >
-                  {grapheme}
+                  {displayForm}
                   {/* Hover tooltip showing the positional form name */}
                   {isHovered && !found && !isReplaying && hoverFormInfo && (
                     <span
