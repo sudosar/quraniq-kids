@@ -124,18 +124,22 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
     return splitIntoGraphemes(currentWord.word);
   }, [currentWord]);
 
-  // Determine the positional form of the target letter in the current word
-  const targetPositionInWord = useMemo((): PositionalForm => {
-    if (!currentWord || graphemes.length === 0) return 'isolated';
+  // Determine the positional forms of ALL instances of the target letter in the current word
+  const targetPositionsInWord = useMemo((): PositionalForm[] => {
+    if (!currentWord || graphemes.length === 0) return ['isolated'];
     
-    // Find the first grapheme that matches the target letter
+    const positions: PositionalForm[] = [];
     for (let i = 0; i < graphemes.length; i++) {
       if (graphemeContainsLetter(graphemes[i], letter.letter)) {
-        return getPositionInWord(graphemes, i);
+        positions.push(getPositionInWord(graphemes, i));
       }
     }
-    return 'isolated';
+    return positions.length > 0 ? positions : ['isolated'];
   }, [currentWord, graphemes, letter.letter]);
+
+  // Keep targetPositionInWord for backward compat — use the FIRST form (for single-letter games)
+  const targetPositionInWord = targetPositionsInWord[0];
+
 
   // Get the correct positional form display for hover tooltip
   const getHoverFormDisplay = useCallback((index: number): { form: string; label: string } | null => {
@@ -442,7 +446,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                   </p>
                   <div className="flex justify-center gap-2">
                     {(['isolated', 'initial', 'medial', 'final'] as const).map((form) => {
-                      const isActiveForm = form === targetPositionInWord;
+                      const isActiveForm = targetPositionsInWord.includes(form);
                       return (
                         <motion.div
                           key={form}
