@@ -140,6 +140,10 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
   // Keep targetPositionInWord for backward compat — use the FIRST form (for single-letter games)
   const targetPositionInWord = targetPositionsInWord[0];
 
+  // For non-connecting letters, isolated & initial are visually identical (both standalone),
+  // and medial & final are visually identical (both have right-connector only).
+  // Skip redundant forms to avoid confusing kids.
+  const isNonConnecting = NON_CONNECTING.has(letter.letter);
 
   // Get the correct positional form display for hover tooltip
   const getHoverFormDisplay = useCallback((index: number): { form: string; label: string } | null => {
@@ -445,7 +449,9 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                     ✨ {letter.name} has different shapes!
                   </p>
                   <div className="flex justify-center gap-2">
-                    {(['isolated', 'initial', 'medial', 'final'] as const).map((form) => {
+                    {(['isolated', 'initial', 'medial', 'final'] as const)
+                      .filter(form => !isNonConnecting || (form !== 'initial' && form !== 'medial'))
+                      .map((form) => {
                       const isActiveForm = targetPositionsInWord.includes(form);
                       return (
                         <motion.div
