@@ -127,6 +127,10 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
     return forms.size > 0 ? forms : new Set<PositionalForm>(['initial']);
   }, [currentCard, letter.letter]);
 
+  // For non-connecting letters (Alif, Dal, Dhal, Ra, Zay, Waw), medial and final
+  // forms are visually identical — skip "Middle" to avoid confusing kids
+  const isNonConnecting = NON_CONNECTING.has(letter.letter);
+
   useEffect(() => {
     if (currentCard) {
       const timer = setTimeout(() => {
@@ -327,7 +331,7 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
         </motion.div>
       </AnimatePresence>
 
-      {/* Letter Forms Display — INITIAL form highlighted since all words start with this letter */}
+      {/* Letter Forms Display — dynamically highlights forms present in the current word */}
       {letterForms && (
         <div className="w-full max-w-sm bg-white/80 rounded-2xl p-3 border border-amber-100 shadow-sm">
           <p className="text-xs text-gray-400 text-center mb-2 font-medium">
@@ -337,7 +341,7 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
             {([
               { label: 'Alone', form: letterForms.isolated, key: 'isolated' as PositionalForm },
               { label: 'Start', form: letterForms.initial, key: 'initial' as PositionalForm },
-              { label: 'Middle', form: letterForms.medial, key: 'medial' as PositionalForm },
+              ...(isNonConnecting ? [] : [{ label: 'Middle', form: letterForms.medial, key: 'medial' as PositionalForm }]),
               { label: 'End', form: letterForms.final, key: 'final' as PositionalForm },
             ]).map((item, i) => {
               const isActive = activeForms.has(item.key);
