@@ -11,6 +11,7 @@ import LevelMap from "./pages/LevelMap";
 import LessonPage from "./pages/LessonPage";
 import LetterExplorer from "./pages/LetterExplorer";
 import LetterPlay from "./pages/LetterPlay";
+import SkillPlay from "./pages/SkillPlay";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/explore" component={LetterExplorer} />
       <Route path="/lesson/:id" component={LessonPage} />
       <Route path="/play/:lessonId/:letterIndex" component={LetterPlay} />
+      <Route path="/skill/:lessonId" component={SkillPlay} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -53,6 +53,12 @@ export interface Lesson {
   letters?: number[];
   unlockAfter?: number;
   icon: string;
+  // For non-letter "skill" lessons (the reading progression): which
+  // reading game drives the lesson. Letter lessons leave this undefined.
+  // Kept as a local string union to avoid a circular import with gameEngine.
+  skillGame?: 'harakat' | 'combine-letters' | 'word-building' | 'sentence-reading';
+  // A toddler-friendly line the mascot narrates when the lesson opens.
+  intro?: string;
 }
 
 export interface Level {
@@ -296,13 +302,29 @@ export function getDistractorPictures(
 }
 
 // Lessons structure
+//
+// PEDAGOGY — the full Qaida arc:
+//   Stage 1 (lessons 1-5):  recognise all 28 isolated letters
+//   Stage 2 (lesson 6):     harakat — the short-vowel marks
+//   Stage 3 (lesson 7):     blending letters + long vowels (madd)
+//   Stage 4 (lesson 8):     building whole words from sounds
+//   Stage 5 (lesson 9):     reading real Qur'anic phrases
+// The reading lessons (6-9) are "skill" lessons driven by SkillPlay.
 export const lessons: Lesson[] = [
   { id: 1, title: 'First Letters', titleAr: 'الحروف الأولى', description: 'Learn Alif, Ba, Ta', level: 1, type: 'letters', letters: [1, 2, 3, 4, 5], icon: '✨' },
   { id: 2, title: 'More Letters', titleAr: 'حروف أخرى', description: 'Learn Ha, Kha, Dal, Dhal, Ra', level: 1, type: 'letters', letters: [6, 7, 8, 9, 10], unlockAfter: 1, icon: '🌟' },
   { id: 3, title: 'Sun Letters', titleAr: 'الحروف الشمسية', description: 'Learn Zay, Seen, Sheen, Sad, Dad', level: 2, type: 'letters', letters: [11, 12, 13, 14, 15], unlockAfter: 2, icon: '☀️' },
   { id: 4, title: 'Moon Letters', titleAr: 'الحروف القمرية', description: 'Learn Taa, Dhaa, Ayn, Ghayn, Fa', level: 2, type: 'letters', letters: [16, 17, 18, 19, 20], unlockAfter: 3, icon: '🌙' },
   { id: 5, title: 'Final Letters', titleAr: 'الحروف الأخيرة', description: 'Learn Qaf, Kaf, Lam, Meem, Noon, Ha, Waw, Ya', level: 3, type: 'letters', letters: [21, 22, 23, 24, 25, 26, 27, 28], unlockAfter: 4, icon: '🎓' },
-  { id: 6, title: 'Practice Words', titleAr: 'تمرين الكلمات', description: 'Read simple Quranic words', level: 4, type: 'practice', unlockAfter: 5, icon: '📖' },
+  // --- Reading progression (skill lessons) ---
+  { id: 6, title: 'Letter Sounds', titleAr: 'الحركات', description: 'Fatha, Kasra & Damma', level: 4, type: 'harakat', skillGame: 'harakat', letters: [2], unlockAfter: 5, icon: '🎵',
+    intro: 'Now that you know your letters, let us learn the little marks that change how they sound!' },
+  { id: 7, title: 'Blend Sounds', titleAr: 'المدود', description: 'Join letters & long vowels', level: 4, type: 'madd', skillGame: 'combine-letters', letters: [2], unlockAfter: 6, icon: '🔗',
+    intro: 'Two letters can hold hands and make one sound. Let us blend them together!' },
+  { id: 8, title: 'Build Words', titleAr: 'بناء الكلمات', description: 'Make whole words from sounds', level: 4, type: 'practice', skillGame: 'word-building', letters: [2], unlockAfter: 7, icon: '🏗️',
+    intro: 'You can put sounds together to build a whole word. Let us try!' },
+  { id: 9, title: 'Read the Quran', titleAr: 'اقرأ القرآن', description: "Read real Qur'anic words", level: 4, type: 'practice', skillGame: 'sentence-reading', letters: [2], unlockAfter: 8, icon: '📖',
+    intro: "You are ready to read the words of the Qur'an. Bismillah, let us begin!" },
 ];
 
 // Levels structure
@@ -310,7 +332,7 @@ export const levels: Level[] = [
   { id: 1, title: 'Seedling', description: 'Plant the seeds of knowledge', color: '#4CAF50', lessons: [1, 2] },
   { id: 2, title: 'Sprout', description: 'Watch your knowledge grow', color: '#FF9800', lessons: [3, 4] },
   { id: 3, title: 'Blossom', description: 'Your garden is blooming', color: '#9C27B0', lessons: [5] },
-  { id: 4, title: 'Harvest', description: 'Reap the fruits of learning', color: '#F44336', lessons: [6] },
+  { id: 4, title: 'Harvest', description: 'Begin to read the Quran', color: '#F44336', lessons: [6, 7, 8, 9] },
 ];
 
 // Helper: Get letters for a specific lesson

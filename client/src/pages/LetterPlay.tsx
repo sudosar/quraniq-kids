@@ -29,6 +29,7 @@ import HarakatGame from './games/HarakatGame';
 import CombineLettersGame from './games/CombineLettersGame';
 import WordBuildingGame from './games/WordBuildingGame';
 import SentenceReadingGame from './games/SentenceReadingGame';
+import InstructionBar from '@/components/InstructionBar';
 
 const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/mascot-moon-4TKGwbdD2xAUvRBjLqdhwG.webp';
 
@@ -264,6 +265,11 @@ export default function LetterPlay() {
           {currentLetter.name} • {currentGame?.title || 'Loading...'}
         </span>
       </div>
+
+      {/* Spoken instruction — the mascot reads it aloud for non-readers */}
+      {!showTransition && currentGame && (
+        <InstructionBar text={currentGame.description} />
+      )}
 
       {/* Game area */}
       <div className="flex-1 relative" style={{ minHeight: '60vh' }}>

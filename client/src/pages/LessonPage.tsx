@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, Play, Lock } from 'lucide-react';
 import { lessons, getLettersForLesson } from '@/lib/curriculum';
 import { useProgress } from '@/contexts/ProgressContext';
+import InstructionBar from '@/components/InstructionBar';
 
 const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/mascot-moon-4TKGwbdD2xAUvRBjLqdhwG.webp';
 
@@ -29,8 +30,10 @@ export default function LessonPage() {
     return null;
   }
 
-  // For non-letter lessons, show a coming soon message
+  // Reading-progression "skill" lessons: a narrated intro that launches
+  // the SkillPlay runner (harakat, blending, words, reading).
   if (lesson.type !== 'letters') {
+    const isDone = completedLessons.includes(lessonId);
     return (
       <div className="min-h-screen bg-gradient-to-b from-amber-50 to-teal-50 flex flex-col">
         <header className="flex items-center gap-3 px-4 py-4">
@@ -39,11 +42,40 @@ export default function LessonPage() {
           </button>
           <h1 className="text-xl font-bold text-gray-800" style={{ fontFamily: 'var(--font-heading)' }}>{lesson.title}</h1>
         </header>
-        <div className="flex-1 flex flex-col items-center justify-center px-6">
-          <span className="text-6xl mb-4">{lesson.icon}</span>
-          <h2 className="text-2xl font-bold text-gray-700 mb-2" style={{ fontFamily: 'var(--font-heading)' }}>{lesson.title}</h2>
+
+        {/* Mascot narrates the lesson intro aloud */}
+        <InstructionBar text={lesson.intro || lesson.description} />
+
+        <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-8">
+          <motion.span
+            className="text-7xl mb-4"
+            initial={{ scale: 0, rotate: -20 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 14 }}
+          >
+            {lesson.icon}
+          </motion.span>
+          <h2 className="text-2xl font-bold text-gray-700 mb-1" style={{ fontFamily: 'var(--font-heading)' }}>{lesson.title}</h2>
+          <p className="text-lg text-gray-500 arabic-text mb-1">{lesson.titleAr}</p>
           <p className="text-gray-500 text-center mb-8">{lesson.description}</p>
-          <p className="text-sm text-gray-400 text-center">Coming soon! This lesson is under development.</p>
+
+          {lesson.skillGame ? (
+            <motion.button
+              onClick={() => navigate(`/skill/${lessonId}`)}
+              className="px-12 py-5 bg-gradient-to-r from-amber-400 to-amber-500 text-white text-2xl font-bold rounded-full shadow-lg active:scale-95 transition-all"
+              style={{ fontFamily: 'var(--font-heading)' }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {isDone ? 'Play Again' : "Let's Read!"}
+            </motion.button>
+          ) : (
+            <p className="text-sm text-gray-400 text-center">Coming soon! This lesson is under development.</p>
+          )}
+
+          {isDone && (
+            <p className="mt-4 text-sm text-green-600 font-semibold">✓ You already finished this lesson!</p>
+          )}
         </div>
       </div>
     );
