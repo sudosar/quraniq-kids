@@ -340,7 +340,7 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
           <div className="flex items-center justify-around">
             {([
               { label: 'Alone', form: letterForms.isolated, key: 'isolated' as PositionalForm },
-              { label: 'Start', form: letterForms.initial, key: 'initial' as PositionalForm },
+              ...(isNonConnecting ? [] : [{ label: 'Start', form: letterForms.initial, key: 'initial' as PositionalForm }]),
               ...(isNonConnecting ? [] : [{ label: 'Middle', form: letterForms.medial, key: 'medial' as PositionalForm }]),
               { label: 'End', form: letterForms.final, key: 'final' as PositionalForm },
             ]).map((item, i) => {
