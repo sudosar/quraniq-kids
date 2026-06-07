@@ -90,10 +90,12 @@ function getPositionInWord(graphemes: string[], index: number): PositionalForm {
   
   // Connected from right (previous connects to us) AND connects to left (we connect to next)
   const connectedFromRight = prevConnectsToLeft;
+  // Even if a letter is non-connecting (e.g. Alif at word end), if it was preceded by
+  // a connector, its form is FINAL not isolated — it just lacks the left-connector tail.
   const connectsToLeft = thisConnectsToLeft && hasNext;
-  
+
   if (connectedFromRight && connectsToLeft) return 'medial';
-  if (connectedFromRight && !connectsToLeft) return 'final';
+  if (connectedFromRight && !connectsToLeft) return 'final'; // right-connector present → final even for non-connectors
   if (!connectedFromRight && connectsToLeft) return 'initial';
   return 'isolated';
 }

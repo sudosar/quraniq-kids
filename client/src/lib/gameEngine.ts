@@ -263,6 +263,16 @@ export function cancelSpeech() {
 }
 
 /**
+ * Check if English narration (voice guide) is currently in progress.
+ * Used to queue Arabic speech so it doesn't interrupt mascot instructions.
+ */
+export function isEnglishSpeaking(): boolean {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
+  const synth = window.speechSynthesis;
+  return synth.speaking;
+}
+
+/**
  * Speak a short English instruction aloud (the "voice guide").
  * No-ops if the user hasn't interacted yet (autoplay policy) or if muted.
  * Returns true if speech was attempted.
@@ -273,6 +283,8 @@ export function speakEnglish(text: string, rate: number = 0.95): boolean {
   if (!userHasInteracted) return false;
 
   const synth = window.speechSynthesis;
+  // Only cancel Arabic speech — don't interrupt other English narration mid-sentence
+  const wasSpeaking = synth.speaking;
   synth.cancel();
   setTimeout(() => {
     const utterance = new SpeechSynthesisUtterance(text);
@@ -319,68 +331,53 @@ export function speakArabic(text: string, rate: number = 0.8) {
   
   const synth = window.speechSynthesis;
   
-  // Chrome fix: cancel any pending/stuck speech first
-  synth.cancel();
-  
+  // Helper: speak the Arabic text. Handles voice loading quirks.
   const doSpeak = () => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ar-SA';
-    utterance.rate = rate;
-    utterance.pitch = 1.1;
-    utterance.volume = 1.0;
+    // Chrome fix: cancel any pending/stuck speech first
+    synth.cancel();
     
-    // Explicitly set the Arabic voice if available
-    const arabicVoice = getArabicVoice();
-    if (arabicVoice) {
-      utterance.voice = arabicVoice;
-    }
-    
-    // Chrome fix: resume in case synthesis is paused
-    synth.resume();
-    synth.speak(utterance);
-    
-    // Chrome has a bug where long utterances get paused after ~15s
-    // For short Arabic letters/words this shouldn't be an issue,
-    // but we add a safety resume just in case
-    const resumeInterval = setInterval(() => {
-      if (!synth.speaking) {
-        clearInterval(resumeInterval);
-      } else {
-        synth.resume();
-      }
-    }, 5000);
-    
-    // Clean up interval after max 10 seconds
-    setTimeout(() => clearInterval(resumeInterval), 10000);
+    setTimeout(() => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ar-SA';
+      utterance.rate = rate;
+      utterance.pitch = 1.1;
+      utterance.volume = 1.0;
+      
+      const arabicVoice = getArabicVoice();
+      if (arabicVoice) utterance.voice = arabicVoice;
+      
+      synth.resume();
+      synth.speak(utterance);
+      
+      // Safety: keep synthesis resumed in case Chrome pauses long utterances
+      const resumeInterval = setInterval(() => {
+        if (!synth.speaking) {
+          clearInterval(resumeInterval);
+        } else {
+          synth.resume();
+        }
+      }, 5000);
+      
+      setTimeout(() => clearInterval(resumeInterval), 10000);
+    }, 50); // 50ms delay after cancel — enough for Chrome to reset
   };
   
-  // Chrome requires a small delay after cancel() before speak() works
-  // This is the key fix for the "click doesn't play" issue
-  setTimeout(() => {
-    // If voices aren't loaded yet, try to wait for them
-    if (!voicesLoaded && loadVoices().length === 0) {
-      // Voices not yet loaded — set up a one-time handler
-      const onVoicesReady = () => {
-        synth.onvoiceschanged = null;
-        cachedArabicVoice = null;
-        getArabicVoice();
+  // If English narration (voice guide) is in progress, don't interrupt it.
+  // Queue Arabic speech to fire after the English finishes (up to 3s).
+  if (synth.speaking) {
+    let waited = 0;
+    const checkInterval = setInterval(() => {
+      waited += 100;
+      if (!synth.speaking || waited >= 3000) {
+        clearInterval(checkInterval);
         doSpeak();
-      };
-      synth.onvoiceschanged = onVoicesReady;
-      
-      // Fallback: speak anyway after 300ms even without voices
-      // (Chrome will use a default voice for the language)
-      setTimeout(() => {
-        if (!voicesLoaded) {
-          synth.onvoiceschanged = null;
-          doSpeak();
-        }
-      }, 300);
-    } else {
-      doSpeak();
-    }
-  }, 50); // 50ms delay after cancel — enough for Chrome to reset
+      }
+    }, 100);
+  } else {
+    doSpeak();
+  }
 }
+
 
 /**
  * Speak Arabic text, but only if user has already interacted.
