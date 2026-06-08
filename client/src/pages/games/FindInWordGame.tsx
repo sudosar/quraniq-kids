@@ -355,7 +355,10 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
               const hoverFormInfo = isHovered && !found ? getHoverFormDisplay(i) : null;
               // Show target letters in their correct positional form within the word
               const position = getPositionInWord(graphemes, i);
-              const displayForm = isTarget && letterForms ? letterForms[position] : grapheme;
+              // Always show the ORIGINAL grapheme to preserve hamza variants and diacritics.
+              // The letterForms lookup strips these (e.g. إِ → ا), causing letters to vanish.
+              // Positional form info is shown in the form guide below, not by replacing the text.
+              const displayForm = grapheme;
               
               return (
                 <span
@@ -381,8 +384,15 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                                isFound ? 'scale(1.3)' : 'scale(1)',
                     transformOrigin: 'center bottom',
                     transition: 'transform 0.25s ease, color 0.2s ease, background-color 0.25s ease, box-shadow 0.25s ease',
-                    ...(isHovered || isFound || isWrong || isReplayActive ? {
+                    ...(isHovered || isWrong || isReplayActive ? {
                       display: 'inline-block',
+                      borderRadius: '8px',
+                      padding: '0 4px',
+                      zIndex: 10,
+                    } : {}),
+                    // When found, keep display:inline to preserve Arabic cursive connections.
+                    // inline-block breaks ligatures and causes adjacent letters to visually disappear.
+                    ...(isFound ? {
                       borderRadius: '8px',
                       padding: '0 4px',
                       zIndex: 10,
