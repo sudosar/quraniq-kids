@@ -390,11 +390,13 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                       padding: '0 4px',
                       zIndex: 10,
                     } : {}),
-                    // When found, keep display:inline to preserve Arabic cursive connections.
-                    // inline-block breaks ligatures and causes adjacent letters to visually disappear.
+                    // Found state: use inline-block for the highlight, but position it as a
+                    // float/overlay so the Arabic text can still form ligatures/cursor joins.
+                    // We use display:inline with a pseudo-element background for the highlight.
                     ...(isFound ? {
+                      position: 'relative',
                       borderRadius: '8px',
-                      padding: '0 4px',
+                      padding: '0 6px',
                       zIndex: 10,
                     } : {}),
                     color: isFound ? '#059669' : isReplayActive ? '#0D7377' : isWrong ? '#DC2626' : '#1f2937',
