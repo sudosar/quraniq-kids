@@ -36,7 +36,7 @@ const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquP
 export default function LetterPlay() {
   const params = useParams<{ lessonId: string; letterIndex: string }>();
   const [, navigate] = useLocation();
-  const { addStars, completeActivity, completeLesson, completedLessons } = useProgress();
+  const { addStars, completeActivity, completeLesson, completedLessons, recordLetterResult } = useProgress();
   
   const lessonId = parseInt(params.lessonId || '1');
   const letterIdx = parseInt(params.letterIndex || '0');
@@ -85,6 +85,9 @@ export default function LetterPlay() {
     } else {
       // All games for this letter complete
       completeActivity(lessonId, `letter-${currentLetter.id}`);
+      // Count finishing the letter as one good rep toward mastery; the
+      // spaced-repetition Review will keep it fresh from here.
+      recordLetterResult(currentLetter.id, true);
       
       if (letterIdx < lessonLetters.length - 1) {
         setShowTransition(true);
@@ -100,7 +103,7 @@ export default function LetterPlay() {
         setShowLessonComplete(true);
       }
     }
-  }, [gameIndex, gameSequence.length, letterIdx, lessonLetters.length, lessonId, currentLetter.id, addStars, completeActivity, completeLesson, navigate]);
+  }, [gameIndex, gameSequence.length, letterIdx, lessonLetters.length, lessonId, currentLetter.id, addStars, completeActivity, completeLesson, recordLetterResult, navigate]);
 
   const handleSkip = useCallback(() => {
     if (gameIndex < gameSequence.length - 1) {

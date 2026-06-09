@@ -16,7 +16,7 @@ const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquP
 
 export default function LevelMap() {
   const [, navigate] = useLocation();
-  const { completedLessons, stars } = useProgress();
+  const { completedLessons, stars, masteryStats } = useProgress();
 
   const totalLessons = lessons.length;
   const completedCount = completedLessons.length;
@@ -81,6 +81,42 @@ export default function LevelMap() {
           </div>
         </div>
       </motion.div>
+
+      {/* Daily Review — spaced repetition. Only shown once letters are due. */}
+      {masteryStats.due > 0 && (
+        <motion.div
+          className="max-w-lg mx-auto px-4 pt-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <motion.button
+            onClick={() => navigate('/review')}
+            className="w-full flex items-center gap-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-2xl px-5 py-4 shadow-lg"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <motion.span
+              className="text-3xl"
+              animate={{ rotate: [0, 15, -15, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              🔁
+            </motion.span>
+            <div className="flex-1 text-left">
+              <p className="font-bold text-lg leading-tight" style={{ fontFamily: 'var(--font-heading)' }}>Daily Review</p>
+              <p className="text-white/85 text-sm">
+                {masteryStats.due} letter{masteryStats.due === 1 ? '' : 's'} ready to practise 🌙
+              </p>
+            </div>
+            <span className="text-2xl">→</span>
+          </motion.button>
+          {masteryStats.introduced > 0 && (
+            <p className="text-center text-xs text-gray-400 mt-2">
+              {masteryStats.mastered} of {masteryStats.introduced} letters mastered
+            </p>
+          )}
+        </motion.div>
+      )}
 
       {/* Levels */}
       <div className="relative z-10 max-w-lg mx-auto px-4 pb-8 pt-4">
