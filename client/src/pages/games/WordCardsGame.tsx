@@ -13,6 +13,55 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArabicLetter, getBeginningWords } from '@/lib/curriculum';
 import { speakArabic, speakArabicIfAllowed, playCorrectSound } from '@/lib/gameEngine';
 
+// --- Grapheme & positional form utilities (duplicated from FindInWordGame — should be shared) ---
+
+function splitIntoGraphemes(text: string): string[] {
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter('ar', { granularity: 'grapheme' });
+    return Array.from(segmenter.segment(text)).map(s => s.segment);
+  }
+  return Array.from(text);
+}
+
+function normalizeArabicLetter(char: string): string {
+  let stripped = char.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0610-\u061A]/g, '');
+  stripped = stripped.replace(/[\u0622\u0623\u0625\u0671\u0672\u0673]/g, '\u0627');
+  stripped = stripped.replace(/\u0629/g, '\u062A');
+  stripped = stripped.replace(/\u0649/g, '\u064A');
+  return stripped;
+}
+
+function graphemeContainsLetter(grapheme: string, targetLetter: string): boolean {
+  const normalizedGrapheme = normalizeArabicLetter(grapheme);
+  const normalizedTarget = normalizeArabicLetter(targetLetter);
+  return normalizedGrapheme.includes(normalizedTarget);
+}
+
+const NON_CONNECTING = new Set(['ا', 'أ', 'إ', 'آ', 'ٱ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ', 'ة']);
+
+type PositionalForm = 'isolated' | 'initial' | 'medial' | 'final';
+
+function getPositionInWord(graphemes: string[], index: number): PositionalForm {
+  const total = graphemes.length;
+  if (total === 1) return 'isolated';
+  
+  const prevGrapheme = index > 0 ? graphemes[index - 1] : null;
+  const prevBase = prevGrapheme ? normalizeArabicLetter(prevGrapheme) : null;
+  const prevConnectsToLeft = prevBase ? !NON_CONNECTING.has(prevBase) : false;
+  
+  const currentBase = normalizeArabicLetter(graphemes[index]);
+  const thisConnectsToLeft = !NON_CONNECTING.has(currentBase);
+  
+  const hasNext = index < total - 1;
+  const connectedFromRight = prevConnectsToLeft;
+  const connectsToLeft = thisConnectsToLeft && hasNext;
+
+  if (connectedFromRight && connectsToLeft) return 'medial';
+  if (connectedFromRight && !connectsToLeft) return 'final';
+  if (!connectedFromRight && connectsToLeft) return 'initial';
+  return 'isolated';
+}
+
 interface Props {
   letter: ArabicLetter;
   allLetters: ArabicLetter[];
@@ -64,6 +113,23 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
   const beginningWords = getBeginningWords(letter);
   const currentCard = beginningWords[Math.min(cardIndex, beginningWords.length - 1)];
   const letterForms = LETTER_FORMS[letter.letter];
+
+  // Compute which positional forms the target letter actually takes in the current word
+  const activeForms = useMemo((): Set<PositionalForm> => {
+    if (!currentCard) return new Set<PositionalForm>(['initial']);
+    const graphemes = splitIntoGraphemes(currentCard.word);
+    const forms = new Set<PositionalForm>();
+    for (let i = 0; i < graphemes.length; i++) {
+      if (graphemeContainsLetter(graphemes[i], letter.letter)) {
+        forms.add(getPositionInWord(graphemes, i));
+      }
+    }
+    return forms.size > 0 ? forms : new Set<PositionalForm>(['initial']);
+  }, [currentCard, letter.letter]);
+
+  // For non-connecting letters (Alif, Dal, Dhal, Ra, Zay, Waw), medial and final
+  // forms are visually identical — skip "Middle" to avoid confusing kids
+  const isNonConnecting = NON_CONNECTING.has(letter.letter);
 
   useEffect(() => {
     if (currentCard) {
@@ -265,39 +331,42 @@ export default function WordCardsGame({ letter, onComplete }: Props) {
         </motion.div>
       </AnimatePresence>
 
-      {/* Letter Forms Display — INITIAL form highlighted since all words start with this letter */}
+      {/* Letter Forms Display — dynamically highlights forms present in the current word */}
       {letterForms && (
         <div className="w-full max-w-sm bg-white/80 rounded-2xl p-3 border border-amber-100 shadow-sm">
           <p className="text-xs text-gray-400 text-center mb-2 font-medium">
             How {letter.name} looks in words:
           </p>
           <div className="flex items-center justify-around">
-            {[
-              { label: 'Alone', form: letterForms.isolated, active: false },
-              { label: 'Start ✓', form: letterForms.initial, active: true },
-              { label: 'Middle', form: letterForms.medial, active: false },
-              { label: 'End', form: letterForms.final, active: false },
-            ].map((item, i) => (
+            {([
+              { label: 'Alone', form: letterForms.isolated, key: 'isolated' as PositionalForm },
+              ...(isNonConnecting ? [] : [{ label: 'Start', form: letterForms.initial, key: 'initial' as PositionalForm }]),
+              ...(isNonConnecting ? [] : [{ label: 'Middle', form: letterForms.medial, key: 'medial' as PositionalForm }]),
+              { label: 'End', form: letterForms.final, key: 'final' as PositionalForm },
+            ]).map((item, i) => {
+              const isActive = activeForms.has(item.key);
+              return (
               <div 
                 key={i} 
                 className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-all ${
-                  item.active ? 'bg-amber-50 ring-2 ring-amber-300 scale-110' : ''
+                  isActive ? 'bg-amber-50 ring-2 ring-amber-300 scale-110' : ''
                 }`}
               >
                 <span 
                   className="text-2xl arabic-text font-bold"
                   style={{ 
-                    color: item.active ? letter.color : '#999',
-                    fontSize: item.active ? '1.75rem' : '1.5rem',
+                    color: isActive ? letter.color : '#999',
+                    fontSize: isActive ? '1.75rem' : '1.5rem',
                   }}
                 >
                   {item.form}
                 </span>
-                <span className={`text-[10px] font-medium ${item.active ? 'text-amber-600' : 'text-gray-400'}`}>
-                  {item.label}
+                <span className={`text-[10px] font-medium ${isActive ? 'text-amber-600' : 'text-gray-400'}`}>
+                  {item.label}{isActive ? ' ✓' : ''}
                 </span>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

@@ -28,6 +28,9 @@ import { ArabicLetter, arabicLetters } from '@/lib/curriculum';
 import { getLetterForms, formLabels, LetterForms } from '@/lib/letterForms';
 import { playPopSound, playWrongSound, playCorrectSound, shuffleArray } from '@/lib/gameEngine';
 
+// Non-connecting letters: isolated & initial are identical, medial & final are identical
+const NON_CONNECTING = new Set(['ا', 'أ', 'إ', 'آ', 'ٱ', 'د', 'ذ', 'ر', 'ز', 'و', 'ؤ', 'ة']);
+
 interface Props {
   letter: ArabicLetter;
   allLetters: ArabicLetter[];
@@ -76,22 +79,36 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
   const generateBubbles = useCallback(() => {
     const allBubbleItems: Array<{ displayLetter: string; formLabel: string | null; isTarget: boolean }> = [];
     
-    // Add target letter in ALL its positional forms
+    // Add target letter in its positional forms
+    // For non-connecting letters, skip 'initial' and 'medial' (visually identical to isolated/final)
     if (letterFormsData) {
+      const isNonConnecting = NON_CONNECTING.has(letter.letter);
       const forms: Array<{ key: keyof LetterForms; label: string }> = [
         { key: 'isolated', label: 'Alone' },
-        { key: 'initial', label: 'Start' },
-        { key: 'medial', label: 'Middle' },
+        ...(isNonConnecting ? [] : [{ key: 'initial' as keyof LetterForms, label: 'Start' }]),
+        ...(isNonConnecting ? [] : [{ key: 'medial' as keyof LetterForms, label: 'Middle' }]),
         { key: 'final', label: 'End' },
       ];
       
-      // Add each form at least once, and add extras of isolated/initial for more targets
+      // Add each form at least once
       forms.forEach(({ key, label }) => {
         allBubbleItems.push({ displayLetter: letterFormsData[key], formLabel: label, isTarget: true });
       });
-      // Add 2 more targets (repeat isolated and initial) to reach 6 total
-      allBubbleItems.push({ displayLetter: letterFormsData.isolated, formLabel: 'Alone', isTarget: true });
-      allBubbleItems.push({ displayLetter: letterFormsData.initial, formLabel: 'Start', isTarget: true });
+      // Add extra targets to reach target count
+      // Non-connecting: 2 forms → triple each = 6 targets
+      // Connecting: 4 forms → add 2 extra = 6 targets
+      if (isNonConnecting) {
+        // Triple the 2 forms to get 6 targets (2 × 3 = 6)
+        forms.forEach(({ key, label }) => {
+          allBubbleItems.push({ displayLetter: letterFormsData[key], formLabel: label, isTarget: true });
+          allBubbleItems.push({ displayLetter: letterFormsData[key], formLabel: label, isTarget: true });
+        });
+      } else {
+        const extraForms = [{ key: 'isolated' as keyof LetterForms, label: 'Alone' }, { key: 'initial' as keyof LetterForms, label: 'Start' }];
+        extraForms.forEach(({ key, label }) => {
+          allBubbleItems.push({ displayLetter: letterFormsData[key], formLabel: label, isTarget: true });
+        });
+      }
     } else {
       // Fallback: just use the letter itself
       for (let i = 0; i < 6; i++) {
@@ -206,10 +223,12 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
         </div>
       </div>
 
-      {/* Target letter reminder — show all 4 forms */}
+      {/* Target letter reminder — show relevant forms only */}
       <div className="absolute top-4 right-3 z-20 bg-white/95 shadow-lg rounded-2xl px-3 py-2 border-2" style={{ borderColor: letter.color }}>
         <div className="flex items-center gap-1.5">
-          {letterFormsData && (['isolated', 'initial', 'medial', 'final'] as const).map((form) => (
+          {letterFormsData && (['isolated', 'initial', 'medial', 'final'] as const)
+            .filter(form => !NON_CONNECTING.has(letter.letter) || (form !== 'initial' && form !== 'medial'))
+            .map((form) => (
             <span 
               key={form}
               className="arabic-text font-bold text-lg"

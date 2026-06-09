@@ -90,10 +90,12 @@ function getPositionInWord(graphemes: string[], index: number): PositionalForm {
   
   // Connected from right (previous connects to us) AND connects to left (we connect to next)
   const connectedFromRight = prevConnectsToLeft;
+  // Even if a letter is non-connecting (e.g. Alif at word end), if it was preceded by
+  // a connector, its form is FINAL not isolated — it just lacks the left-connector tail.
   const connectsToLeft = thisConnectsToLeft && hasNext;
-  
+
   if (connectedFromRight && connectsToLeft) return 'medial';
-  if (connectedFromRight && !connectsToLeft) return 'final';
+  if (connectedFromRight && !connectsToLeft) return 'final'; // right-connector present → final even for non-connectors
   if (!connectedFromRight && connectsToLeft) return 'initial';
   return 'isolated';
 }
@@ -122,18 +124,26 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
     return splitIntoGraphemes(currentWord.word);
   }, [currentWord]);
 
-  // Determine the positional form of the target letter in the current word
-  const targetPositionInWord = useMemo((): PositionalForm => {
-    if (!currentWord || graphemes.length === 0) return 'isolated';
+  // Determine the positional forms of ALL instances of the target letter in the current word
+  const targetPositionsInWord = useMemo((): PositionalForm[] => {
+    if (!currentWord || graphemes.length === 0) return ['isolated'];
     
-    // Find the first grapheme that matches the target letter
+    const positions: PositionalForm[] = [];
     for (let i = 0; i < graphemes.length; i++) {
       if (graphemeContainsLetter(graphemes[i], letter.letter)) {
-        return getPositionInWord(graphemes, i);
+        positions.push(getPositionInWord(graphemes, i));
       }
     }
-    return 'isolated';
+    return positions.length > 0 ? positions : ['isolated'];
   }, [currentWord, graphemes, letter.letter]);
+
+  // Keep targetPositionInWord for backward compat — use the FIRST form (for single-letter games)
+  const targetPositionInWord = targetPositionsInWord[0];
+
+  // For non-connecting letters, isolated & initial are visually identical (both standalone),
+  // and medial & final are visually identical (both have right-connector only).
+  // Skip redundant forms to avoid confusing kids.
+  const isNonConnecting = NON_CONNECTING.has(letter.letter);
 
   // Get the correct positional form display for hover tooltip
   const getHoverFormDisplay = useCallback((index: number): { form: string; label: string } | null => {
@@ -343,6 +353,9 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
               const isFound = found && isTarget;
               const isReplayActive = replayHighlight === i;
               const hoverFormInfo = isHovered && !found ? getHoverFormDisplay(i) : null;
+              // Show target letters in their correct positional form within the word
+              const position = getPositionInWord(graphemes, i);
+              const displayForm = isTarget && letterForms ? letterForms[position] : grapheme;
               
               return (
                 <span
@@ -385,7 +398,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                                isWrong ? '0 0 0 2px #F87171' : 'none',
                   }}
                 >
-                  {grapheme}
+                  {displayForm}
                   {/* Hover tooltip showing the positional form name */}
                   {isHovered && !found && !isReplaying && hoverFormInfo && (
                     <span
@@ -439,8 +452,10 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                     ✨ {letter.name} has different shapes!
                   </p>
                   <div className="flex justify-center gap-2">
-                    {(['isolated', 'initial', 'medial', 'final'] as const).map((form) => {
-                      const isActiveForm = form === targetPositionInWord;
+                    {(['isolated', 'initial', 'medial', 'final'] as const)
+                      .filter(form => !isNonConnecting || (form !== 'initial' && form !== 'medial'))
+                      .map((form) => {
+                      const isActiveForm = targetPositionsInWord.includes(form);
                       return (
                         <motion.div
                           key={form}
