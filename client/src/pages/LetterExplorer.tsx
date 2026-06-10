@@ -11,9 +11,12 @@ import { useLocation } from 'wouter';
 import { arabicLetters } from '@/lib/curriculum';
 import { ChevronLeft, X, Volume2 } from 'lucide-react';
 import TracingCanvas from '@/components/TracingCanvas';
+import { useProgress } from '@/contexts/ProgressContext';
+import { MAX_STRENGTH, isMastered } from '@/lib/mastery';
 
 export default function LetterExplorer() {
   const [, navigate] = useLocation();
+  const { getLetterMastery, masteryStats } = useProgress();
   const [selectedLetter, setSelectedLetter] = useState<typeof arabicLetters[0] | null>(null);
 
   const speakLetter = (letter: string) => {
@@ -46,30 +49,67 @@ export default function LetterExplorer() {
         </div>
       </div>
 
+      {/* Mastery summary — turns this from a flat grid into a progress library */}
+      {masteryStats.introduced > 0 && (
+        <div className="max-w-lg mx-auto px-4 pt-4">
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+            <span className="font-bold text-teal-700">{masteryStats.mastered}</span>
+            <span>of {arabicLetters.length} letters mastered</span>
+            <span className="text-gray-300">·</span>
+            <span className="font-bold text-amber-600">{masteryStats.introduced}</span>
+            <span>started</span>
+          </div>
+        </div>
+      )}
+
       {/* Letter grid */}
       <div className="max-w-lg mx-auto px-4 py-6">
         <div className="grid grid-cols-4 gap-3">
-          {arabicLetters.map((letter, idx) => (
-            <motion.button
-              key={letter.id}
-              onClick={() => {
-                setSelectedLetter(letter);
-                speakLetter(letter.letter);
-              }}
-              className="aspect-square rounded-2xl bg-white border-2 border-amber-100 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-all"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: idx * 0.02 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <span className="arabic-text text-3xl" style={{ color: letter.color }}>
-                {letter.letter}
-              </span>
-              <span className="text-[10px] text-gray-500 mt-1 font-medium">
-                {letter.name}
-              </span>
-            </motion.button>
-          ))}
+          {arabicLetters.map((letter, idx) => {
+            const mastery = getLetterMastery(letter.id);
+            const mastered = mastery ? isMastered(mastery) : false;
+            const strength = mastery?.strength ?? 0;
+            return (
+              <motion.button
+                key={letter.id}
+                onClick={() => {
+                  setSelectedLetter(letter);
+                  speakLetter(letter.letter);
+                }}
+                className={`relative aspect-square rounded-2xl bg-white border-2 shadow-sm flex flex-col items-center justify-center hover:shadow-md transition-all ${
+                  mastered ? 'border-green-300' : mastery ? 'border-amber-200' : 'border-gray-100'
+                }`}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.02 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                {/* Mastered badge */}
+                {mastered && (
+                  <span className="absolute top-1 right-1 text-xs">⭐</span>
+                )}
+                <span
+                  className="arabic-text text-3xl"
+                  style={{ color: mastery ? letter.color : '#cbd5e1' }}
+                >
+                  {letter.letter}
+                </span>
+                <span className="text-[10px] text-gray-500 mt-1 font-medium">
+                  {letter.name}
+                </span>
+                {/* Strength pips */}
+                <div className="flex gap-0.5 mt-1 h-1">
+                  {Array.from({ length: MAX_STRENGTH }).map((_, i) => (
+                    <span
+                      key={i}
+                      className="w-1 h-1 rounded-full"
+                      style={{ backgroundColor: i < strength ? letter.color : '#e5e7eb' }}
+                    />
+                  ))}
+                </div>
+              </motion.button>
+            );
+          })}
         </div>
       </div>
 

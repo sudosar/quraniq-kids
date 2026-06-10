@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { useLocation } from 'wouter';
 import { useProgress } from '@/contexts/ProgressContext';
 import { levels, lessons, isLessonUnlocked } from '@/lib/curriculum';
-import { Star, Lock, ChevronLeft, CheckCircle2, BookOpen, Map, Search } from 'lucide-react';
+import { Star, Lock, ChevronLeft, CheckCircle2, BookOpen, Map, RotateCw } from 'lucide-react';
 
 const PATTERN_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/pattern-tile-Wv3JDcUDf6Y9TQjZuHwneK.webp';
 const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/mascot-moon-4TKGwbdD2xAUvRBjLqdhwG.webp';
@@ -192,26 +192,31 @@ export default function LevelMap() {
       {/* Bottom navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-amber-100 px-4 py-2 safe-area-pb">
         <div className="flex items-center justify-around max-w-lg mx-auto">
-          <button 
+          <button
             className="flex flex-col items-center gap-0.5 py-1 px-4 text-teal-600"
             onClick={() => navigate('/levels')}
           >
             <Map className="w-5 h-5" />
             <span className="text-[10px] font-bold" style={{ fontFamily: 'var(--font-heading)' }}>Journey</span>
           </button>
-          <button 
-            className="flex flex-col items-center gap-0.5 py-1 px-4 text-gray-400"
-            onClick={() => navigate('/explore')}
-          >
-            <Search className="w-5 h-5" />
-            <span className="text-[10px] font-bold" style={{ fontFamily: 'var(--font-heading)' }}>Explore</span>
-          </button>
-          <button 
+          <button
             className="flex flex-col items-center gap-0.5 py-1 px-4 text-gray-400"
             onClick={() => navigate('/explore')}
           >
             <BookOpen className="w-5 h-5" />
             <span className="text-[10px] font-bold" style={{ fontFamily: 'var(--font-heading)' }}>Letters</span>
+          </button>
+          <button
+            className="relative flex flex-col items-center gap-0.5 py-1 px-4 text-gray-400"
+            onClick={() => navigate('/review')}
+          >
+            <RotateCw className="w-5 h-5" />
+            <span className="text-[10px] font-bold" style={{ fontFamily: 'var(--font-heading)' }}>Review</span>
+            {masteryStats.due > 0 && (
+              <span className="absolute top-0 right-2 min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-bold flex items-center justify-center">
+                {masteryStats.due}
+              </span>
+            )}
           </button>
         </div>
       </div>
