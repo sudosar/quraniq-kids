@@ -324,7 +324,7 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
           className={`w-28 h-28 rounded-3xl flex items-center justify-center shadow-xl border-4 cursor-grab active:cursor-grabbing ${
             matched ? 'bg-green-100 border-green-400' : 'bg-white border-amber-300'
           }`}
-          style={{ touchAction: 'none' }}
+          style={{ touchAction: 'none', zIndex: 50 }}
         >
           <span className="text-6xl arabic-text font-bold select-none pointer-events-none" style={{ color: letter.color }}>
             {letter.letter}
@@ -343,7 +343,8 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
       </div>
       
       {/* Picture targets — always 3, distractors from OTHER letters */}
-      <div className="grid grid-cols-3 gap-4 w-full max-w-lg">
+      {/* isolation: prevent letter's scale/boxShadow stacking context from shifting flex layout */}
+      <div className="grid grid-cols-3 gap-4 w-full max-w-lg" style={{ isolation: 'isolate' }}>
         <AnimatePresence mode="wait">
           {currentTargets.map((target, idx) => (
             <motion.div
