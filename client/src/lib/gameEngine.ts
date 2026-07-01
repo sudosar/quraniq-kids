@@ -82,6 +82,16 @@ const allGames: GameConfig[] = [
 ];
 
 /**
+ * READING_GAMES — lookup map for the reading-progression skill lessons.
+ * SkillPlay uses this to find the GameConfig for harakat, combine-letters, etc.
+ */
+export const READING_GAMES: Record<string, GameConfig> = Object.fromEntries(
+  allGames
+    .filter(g => ['harakat', 'combine-letters', 'word-building', 'sentence-reading'].includes(g.type))
+    .map(g => [g.type, g])
+);
+
+/**
  * Get the appropriate game sequence based on how many letters the child already knows.
  * This is the core progressive logic.
  */
