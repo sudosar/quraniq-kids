@@ -180,6 +180,113 @@ export function hasUserInteracted(): boolean {
   return userHasInteracted;
 }
 
+// ============================================================
+// NARRATION (English voice guide for non-reading toddlers)
+// ============================================================
+//
+// Toddlers (ages 2-6) cannot read on-screen instructions. Every game
+// screen should SPEAK its instruction aloud. This layer narrates short
+// English phrases ("Tap the letter to hear it!") using the Web Speech
+// API. It is designed to be drop-in replaceable with recorded mascot
+// voice-over later: pass an `audioUrl` to `narrate()` and it will play
+// the recording instead of the synthetic voice.
+//
+// A global mute (the "voice guide" toggle) is persisted to localStorage
+// so a parent can turn the talking on/off once for the whole app.
+const NARRATION_MUTE_KEY = 'quraniq-kids-voice-muted';
+let cachedEnglishVoice: SpeechSynthesisVoice | null = null;
+function getEnglishVoice(): SpeechSynthesisVoice | null {
+  if (cachedEnglishVoice) return cachedEnglishVoice;
+  const voices = loadVoices();
+  if (voices.length === 0) return null;
+  // Prefer a clear, kid-friendly English voice; fall back to any en-*.
+  cachedEnglishVoice =
+    voices.find(v => /en-US/i.test(v.lang) && /female|samantha|zira|google us english/i.test(v.name)) ||
+    voices.find(v => v.lang === 'en-US') ||
+    voices.find(v => v.lang.startsWith('en')) ||
+    null;
+  return cachedEnglishVoice;
+}
+/** Whether the parent has muted the spoken voice guide. */
+export function isVoiceMuted(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.localStorage.getItem(NARRATION_MUTE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+/** Mute / unmute the spoken voice guide. Broadcasts a change event so toggles update. */
+export function setVoiceMuted(muted: boolean) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(NARRATION_MUTE_KEY, muted ? '1' : '0');
+  } catch {
+    /* ignore */
+  }
+  if (muted) cancelSpeech();
+  window.dispatchEvent(new CustomEvent('quraniq-voice-muted-changed', { detail: muted }));
+}
+/** Stop any in-progress speech immediately. */
+export function cancelSpeech() {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+}
+/**
+ * Check if English narration (voice guide) is currently in progress.
+ * Used to queue Arabic speech so it doesn't interrupt mascot instructions.
+ */
+export function isEnglishSpeaking(): boolean {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
+  const synth = window.speechSynthesis;
+  return synth.speaking;
+}
+/**
+ * Speak a short English instruction aloud (the "voice guide").
+ * No-ops if the user hasn't interacted yet (autoplay policy) or if muted.
+ * Returns true if speech was attempted.
+ */
+export function speakEnglish(text: string, rate: number = 0.95): boolean {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
+  if (isVoiceMuted()) return false;
+  if (!userHasInteracted) return false;
+  const synth = window.speechSynthesis;
+  // Only cancel Arabic speech — don't interrupt other English narration mid-sentence
+  synth.cancel();
+  setTimeout(() => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = rate; // slightly slow & clear for little ones
+    utterance.pitch = 1.15;
+    utterance.volume = 1.0;
+    const voice = getEnglishVoice();
+    if (voice) utterance.voice = voice;
+    synth.resume();
+    synth.speak(utterance);
+  }, 50);
+  return true;
+}
+/**
+ * Narrate an instruction. Prefers a recorded audio clip when provided
+ * (drop-in path for professional mascot voice-over); otherwise falls
+ * back to synthetic English speech. Respects the global mute.
+ */
+export function narrate(opts: { text: string; audioUrl?: string; rate?: number }): void {
+  if (isVoiceMuted()) return;
+  if (opts.audioUrl) {
+    try {
+      const audio = new Audio(opts.audioUrl);
+      audio.play().catch(() => {
+        // Autoplay blocked or file missing — fall back to TTS.
+        speakEnglish(opts.text, opts.rate);
+      });
+      return;
+    } catch {
+      /* fall through to TTS */
+    }
+  }
+  speakEnglish(opts.text, opts.rate);
+}
 /**
  * Speak Arabic text using the Web Speech API.
  * Handles Chrome desktop quirks with cancel-before-speak pattern.
@@ -189,67 +296,45 @@ export function speakArabic(text: string, rate: number = 0.8) {
   
   const synth = window.speechSynthesis;
   
-  // Chrome fix: cancel any pending/stuck speech first
-  synth.cancel();
-  
+  // Helper: speak the Arabic text. Handles voice loading quirks.
   const doSpeak = () => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ar-SA';
-    utterance.rate = rate;
-    utterance.pitch = 1.1;
-    utterance.volume = 1.0;
-    
-    // Explicitly set the Arabic voice if available
-    const arabicVoice = getArabicVoice();
-    if (arabicVoice) {
-      utterance.voice = arabicVoice;
-    }
-    
-    // Chrome fix: resume in case synthesis is paused
-    synth.resume();
-    synth.speak(utterance);
-    
-    // Chrome has a bug where long utterances get paused after ~15s
-    // For short Arabic letters/words this shouldn't be an issue,
-    // but we add a safety resume just in case
-    const resumeInterval = setInterval(() => {
-      if (!synth.speaking) {
-        clearInterval(resumeInterval);
-      } else {
-        synth.resume();
-      }
-    }, 5000);
-    
-    // Clean up interval after max 10 seconds
-    setTimeout(() => clearInterval(resumeInterval), 10000);
-  };
-  
-  // Chrome requires a small delay after cancel() before speak() works
-  // This is the key fix for the "click doesn't play" issue
-  setTimeout(() => {
-    // If voices aren't loaded yet, try to wait for them
-    if (!voicesLoaded && loadVoices().length === 0) {
-      // Voices not yet loaded — set up a one-time handler
-      const onVoicesReady = () => {
-        synth.onvoiceschanged = null;
-        cachedArabicVoice = null;
-        getArabicVoice();
-        doSpeak();
-      };
-      synth.onvoiceschanged = onVoicesReady;
-      
-      // Fallback: speak anyway after 300ms even without voices
-      // (Chrome will use a default voice for the language)
-      setTimeout(() => {
-        if (!voicesLoaded) {
-          synth.onvoiceschanged = null;
-          doSpeak();
+    // Chrome fix: cancel any pending/stuck speech first
+    synth.cancel();
+    setTimeout(() => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ar-SA';
+      utterance.rate = rate;
+      utterance.pitch = 1.1;
+      utterance.volume = 1.0;
+      const arabicVoice = getArabicVoice();
+      if (arabicVoice) utterance.voice = arabicVoice;
+      synth.resume();
+      synth.speak(utterance);
+      // Safety: keep synthesis resumed in case Chrome pauses long utterances
+      const resumeInterval = setInterval(() => {
+        if (!synth.speaking) {
+          clearInterval(resumeInterval);
+        } else {
+          synth.resume();
         }
-      }, 300);
-    } else {
-      doSpeak();
-    }
-  }, 50); // 50ms delay after cancel — enough for Chrome to reset
+      }, 5000);
+      setTimeout(() => clearInterval(resumeInterval), 10000);
+    }, 50); // 50ms delay after cancel — enough for Chrome to reset
+  };
+  // If English narration (voice guide) is in progress, don't interrupt it.
+  // Queue Arabic speech to fire after the English finishes (up to 3s).
+  if (synth.speaking) {
+    let waited = 0;
+    const checkInterval = setInterval(() => {
+      waited += 100;
+      if (!synth.speaking || waited >= 3000) {
+        clearInterval(checkInterval);
+        doSpeak();
+      }
+    }, 100);
+  } else {
+    doSpeak();
+  }
 }
 
 /**
@@ -264,6 +349,7 @@ export function speakArabicIfAllowed(text: string, rate: number = 0.8): boolean 
   speakArabic(text, rate);
   return true;
 }
+
 
 export function playCorrectSound() {
   try {
