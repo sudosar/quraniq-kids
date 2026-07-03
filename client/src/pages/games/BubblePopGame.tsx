@@ -52,6 +52,7 @@ interface Bubble {
   size: number;
   startX: number;
   startY: number;
+  zIndex: number;
   driftXRange: number;
   driftYRange: number;
   duration: number;
@@ -154,6 +155,7 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
         size: 90 + Math.random() * 30,
         startX,
         startY,
+        zIndex: 10 + Math.floor(Math.random() * 8),
         driftXRange: 20 + Math.random() * 40,
         driftYRange: 15 + Math.random() * 35,
         duration: 6 + Math.random() * 8,
@@ -295,10 +297,11 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
           return (
             <motion.div
               key={bubble.id}
-              className="absolute z-10"
+              className="absolute"
               style={{
                 left: `${bubble.startX}%`,
                 top: `${bubble.startY}%`,
+                zIndex: bubble.zIndex,
               }}
               initial={{ scale: 0, opacity: 0 }}
               animate={bubble.wobble ? {

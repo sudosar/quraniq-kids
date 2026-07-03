@@ -62,47 +62,34 @@ export interface GameConfig {
   minDistractors: number;       // minimum known letters needed
 }
 
-// ------------------------------------------------------------------
-// LETTER-RECOGNITION GAMES
-// These run inside each LETTER lesson. They teach the child to see,
-// hear, trace and recognise a single letter. They must NOT include the
-// reading-skill games (harakat, blending, words, sentences) — in real
-// Qaida those come AFTER all the isolated letters are known, so they are
-// staged as their own lessons (see READING_GAMES + curriculum skill
-// lessons) instead of being crammed onto every letter.
-// ------------------------------------------------------------------
+// All possible games in progressive order
 const allGames: GameConfig[] = [
-  { type: 'letter-intro', title: 'Meet the Letter', description: 'Tap the big letter to hear how it sounds!', icon: '✨', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
-  { type: 'word-cards', title: 'Word Time', description: 'Look at words that start with this letter!', icon: '🖼️', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
-  { type: 'tracing', title: 'Trace It', description: 'Use your finger to trace the letter!', icon: '✏️', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
-  { type: 'find-in-word', title: 'Find the Letter', description: 'Can you spot the letter hiding in the word?', icon: '🔍', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
-  { type: 'drag-to-match', title: 'Match the Picture', description: 'Drag the letter to the picture it belongs to!', icon: '🎯', difficulty: 1, requiresDistractors: false, minDistractors: 0 }, // works solo or with distractors
-  { type: 'letter-slot', title: 'Complete the Word', description: 'Pick the letter that fills the empty space!', icon: '🧩', difficulty: 2, requiresDistractors: true, minDistractors: 1 },
-  { type: 'sort-letters', title: 'Sort Letters', description: 'Put each letter into the right basket!', icon: '🧺', difficulty: 2, requiresDistractors: true, minDistractors: 1 },
-  { type: 'bubble-pop', title: 'Bubble Pop', description: 'Pop only the bubbles with the right letter!', icon: '🫧', difficulty: 1, requiresDistractors: false, minDistractors: 0 }, // works with or without distractors
-  { type: 'sound-match', title: 'Sound Match', description: 'Listen, then tap the letter that makes the sound!', icon: '🔊', difficulty: 2, requiresDistractors: true, minDistractors: 1 },
-  { type: 'catch-game', title: 'Letter Catch', description: 'Catch the right letters as they fall!', icon: '🎪', difficulty: 2, requiresDistractors: true, minDistractors: 2 },
-  { type: 'memory-match', title: 'Memory Match', description: 'Flip the cards to find the matching pairs!', icon: '🃏', difficulty: 2, requiresDistractors: true, minDistractors: 2 },
+  { type: 'letter-intro', title: 'Meet the Letter', description: 'See and hear the letter come alive!', icon: '✨', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
+  { type: 'word-cards', title: 'Word Time', description: 'See words that start with this letter!', icon: '🖼️', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
+  { type: 'tracing', title: 'Trace It', description: 'Draw the letter with sparkles!', icon: '✏️', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
+  { type: 'find-in-word', title: 'Find the Letter', description: 'Spot the letter in Quranic words!', icon: '🔍', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
+  { type: 'drag-to-match', title: 'Match the Picture', description: 'Drag the letter to its picture!', icon: '🎯', difficulty: 1, requiresDistractors: false, minDistractors: 0 }, // works solo or with distractors
+  { type: 'letter-slot', title: 'Complete the Word', description: 'Fill in the missing letter!', icon: '🧩', difficulty: 2, requiresDistractors: true, minDistractors: 1 },
+  { type: 'sort-letters', title: 'Sort Letters', description: 'Put letters in the right basket!', icon: '🧺', difficulty: 2, requiresDistractors: true, minDistractors: 1 },
+  { type: 'bubble-pop', title: 'Bubble Pop', description: 'Pop the right letter bubbles!', icon: '🫧', difficulty: 1, requiresDistractors: false, minDistractors: 0 }, // works with or without distractors
+  { type: 'sound-match', title: 'Sound Match', description: 'Which letter makes this sound?', icon: '🔊', difficulty: 2, requiresDistractors: true, minDistractors: 1 },
+  { type: 'harakat', title: 'Letter Sounds', description: 'Learn fatha, kasra & damma!', icon: '🎵', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
+  { type: 'combine-letters', title: 'Combine Letters', description: 'Blend sounds together!', icon: '🔗', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
+  { type: 'word-building', title: 'Build Words', description: 'Build Quranic words from syllables!', icon: '🏗️', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
+  { type: 'sentence-reading', title: 'Read the Quran', description: 'Read Quranic phrases word by word!', icon: '📖', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
+  { type: 'catch-game', title: 'Letter Catch', description: 'Catch the falling letters!', icon: '🎪', difficulty: 2, requiresDistractors: true, minDistractors: 2 },
+  { type: 'memory-match', title: 'Memory Match', description: 'Find the matching pairs!', icon: '🃏', difficulty: 2, requiresDistractors: true, minDistractors: 2 },
 ];
 
-// ------------------------------------------------------------------
-// READING-SKILL GAMES (the "missing middle" of Qaida)
-// These are sequenced AFTER the letters as their own lessons, in proper
-// Qaida order: harakat (short vowels) → blending → building words →
-// reading Quranic phrases. Each is driven by SkillPlay across the
-// letters the child already knows. Keyed by GameType for lookup.
-// ------------------------------------------------------------------
-export const READING_GAMES: Record<string, GameConfig> = {
-  'harakat': { type: 'harakat', title: 'Letter Sounds', description: 'Learn how the little marks change the sound — fatha, kasra and damma!', icon: '🎵', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
-  'combine-letters': { type: 'combine-letters', title: 'Blend Sounds', description: 'Watch two letters join together to make one sound!', icon: '🔗', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
-  'word-building': { type: 'word-building', title: 'Build Words', description: 'Put the sounds together to build a whole word!', icon: '🏗️', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
-  'sentence-reading': { type: 'sentence-reading', title: 'Read the Quran', description: "Read the words of the Qur'an, one at a time!", icon: '📖', difficulty: 1, requiresDistractors: false, minDistractors: 0 },
-};
-
-/** Look up the metadata for a reading-skill game by its type. */
-export function getReadingGame(type: GameType): GameConfig | undefined {
-  return READING_GAMES[type];
-}
+/**
+ * READING_GAMES — lookup map for the reading-progression skill lessons.
+ * SkillPlay uses this to find the GameConfig for harakat, combine-letters, etc.
+ */
+export const READING_GAMES: Record<string, GameConfig> = Object.fromEntries(
+  allGames
+    .filter(g => ['harakat', 'combine-letters', 'word-building', 'sentence-reading'].includes(g.type))
+    .map(g => [g.type, g])
+);
 
 /**
  * Get the appropriate game sequence based on how many letters the child already knows.
@@ -216,11 +203,8 @@ export function hasUserInteracted(): boolean {
 //
 // A global mute (the "voice guide" toggle) is persisted to localStorage
 // so a parent can turn the talking on/off once for the whole app.
-
 const NARRATION_MUTE_KEY = 'quraniq-kids-voice-muted';
-
 let cachedEnglishVoice: SpeechSynthesisVoice | null = null;
-
 function getEnglishVoice(): SpeechSynthesisVoice | null {
   if (cachedEnglishVoice) return cachedEnglishVoice;
   const voices = loadVoices();
@@ -233,7 +217,6 @@ function getEnglishVoice(): SpeechSynthesisVoice | null {
     null;
   return cachedEnglishVoice;
 }
-
 /** Whether the parent has muted the spoken voice guide. */
 export function isVoiceMuted(): boolean {
   if (typeof window === 'undefined') return false;
@@ -243,7 +226,6 @@ export function isVoiceMuted(): boolean {
     return false;
   }
 }
-
 /** Mute / unmute the spoken voice guide. Broadcasts a change event so toggles update. */
 export function setVoiceMuted(muted: boolean) {
   if (typeof window === 'undefined') return;
@@ -255,13 +237,11 @@ export function setVoiceMuted(muted: boolean) {
   if (muted) cancelSpeech();
   window.dispatchEvent(new CustomEvent('quraniq-voice-muted-changed', { detail: muted }));
 }
-
 /** Stop any in-progress speech immediately. */
 export function cancelSpeech() {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
 }
-
 /**
  * Check if English narration (voice guide) is currently in progress.
  * Used to queue Arabic speech so it doesn't interrupt mascot instructions.
@@ -271,7 +251,6 @@ export function isEnglishSpeaking(): boolean {
   const synth = window.speechSynthesis;
   return synth.speaking;
 }
-
 /**
  * Speak a short English instruction aloud (the "voice guide").
  * No-ops if the user hasn't interacted yet (autoplay policy) or if muted.
@@ -281,10 +260,8 @@ export function speakEnglish(text: string, rate: number = 0.95): boolean {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
   if (isVoiceMuted()) return false;
   if (!userHasInteracted) return false;
-
   const synth = window.speechSynthesis;
   // Only cancel Arabic speech — don't interrupt other English narration mid-sentence
-  const wasSpeaking = synth.speaking;
   synth.cancel();
   setTimeout(() => {
     const utterance = new SpeechSynthesisUtterance(text);
@@ -299,7 +276,6 @@ export function speakEnglish(text: string, rate: number = 0.95): boolean {
   }, 50);
   return true;
 }
-
 /**
  * Narrate an instruction. Prefers a recorded audio clip when provided
  * (drop-in path for professional mascot voice-over); otherwise falls
@@ -321,7 +297,6 @@ export function narrate(opts: { text: string; audioUrl?: string; rate?: number }
   }
   speakEnglish(opts.text, opts.rate);
 }
-
 /**
  * Speak Arabic text using the Web Speech API.
  * Handles Chrome desktop quirks with cancel-before-speak pattern.
@@ -335,20 +310,16 @@ export function speakArabic(text: string, rate: number = 0.8) {
   const doSpeak = () => {
     // Chrome fix: cancel any pending/stuck speech first
     synth.cancel();
-    
     setTimeout(() => {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ar-SA';
       utterance.rate = rate;
       utterance.pitch = 1.1;
       utterance.volume = 1.0;
-      
       const arabicVoice = getArabicVoice();
       if (arabicVoice) utterance.voice = arabicVoice;
-      
       synth.resume();
       synth.speak(utterance);
-      
       // Safety: keep synthesis resumed in case Chrome pauses long utterances
       const resumeInterval = setInterval(() => {
         if (!synth.speaking) {
@@ -357,11 +328,9 @@ export function speakArabic(text: string, rate: number = 0.8) {
           synth.resume();
         }
       }, 5000);
-      
       setTimeout(() => clearInterval(resumeInterval), 10000);
     }, 50); // 50ms delay after cancel — enough for Chrome to reset
   };
-  
   // If English narration (voice guide) is in progress, don't interrupt it.
   // Queue Arabic speech to fire after the English finishes (up to 3s).
   if (synth.speaking) {
@@ -378,7 +347,6 @@ export function speakArabic(text: string, rate: number = 0.8) {
   }
 }
 
-
 /**
  * Speak Arabic text, but only if user has already interacted.
  * Use this for auto-play scenarios (e.g., letter reveal animation).
@@ -391,6 +359,7 @@ export function speakArabicIfAllowed(text: string, rate: number = 0.8): boolean 
   speakArabic(text, rate);
   return true;
 }
+
 
 export function playCorrectSound() {
   try {
