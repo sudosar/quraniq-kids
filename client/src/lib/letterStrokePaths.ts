@@ -135,15 +135,18 @@ const strokePaths: Record<string, LetterStrokeData> = {
     strokes: [
       {
         points: [
-          { x: 0.75, y: 0.35 },
-          { x: 0.65, y: 0.25 },
-          { x: 0.5, y: 0.2 },
-          { x: 0.35, y: 0.25 },
-          { x: 0.25, y: 0.4 },
-          { x: 0.3, y: 0.55 },
-          { x: 0.45, y: 0.6 },
-          { x: 0.6, y: 0.55 },
-          { x: 0.7, y: 0.45 },
+          // Ba's bowl opens RIGHT (⟃ shape, not C shape)
+          // Start at top-left, curve right → down → left → up, ending near the opening
+          { x: 0.25, y: 0.28 },  // top-left of bowl
+          { x: 0.38, y: 0.20 },  // curve up-right
+          { x: 0.55, y: 0.17 }, // top-center of bowl
+          { x: 0.68, y: 0.22 },  // top-right of bowl
+          { x: 0.74, y: 0.35 },  // right side
+          { x: 0.76, y: 0.50 },  // bottom-right corner
+          { x: 0.68, y: 0.62 },  // bottom-center
+          { x: 0.52, y: 0.66 },  // bottom-left curve
+          { x: 0.36, y: 0.58 },  // mid-left of bowl
+          { x: 0.28, y: 0.44 },  // upper-left of bowl, near the opening
         ],
         type: 'main',
         label: 'Draw the bowl shape',
