@@ -236,7 +236,7 @@ export default function SortLettersGame({ letter, distractorLetters, onComplete 
             {/* Picture card showing word with highlighted letter */}
             {leftWords[0] && (
               <div className="flex flex-col items-center gap-1 cursor-pointer"
-                onClick={() => speakArabic(sides.left.letter)}
+                onClick={() => speakArabic(leftWords[0]?.word ?? sides.left.letter)}
               >
                 <span className="text-3xl">{leftWords[0].emoji}</span>
                 <HighlightedWord
@@ -277,7 +277,7 @@ export default function SortLettersGame({ letter, distractorLetters, onComplete 
             {/* Picture card showing word with highlighted letter */}
             {rightWords[0] && (
               <div className="flex flex-col items-center gap-1 cursor-pointer"
-                onClick={() => speakArabic(sides.right.letter)}
+                onClick={() => speakArabic(rightWords[0]?.word ?? sides.right.letter)}
               >
                 <span className="text-3xl">{rightWords[0].emoji}</span>
                 <HighlightedWord

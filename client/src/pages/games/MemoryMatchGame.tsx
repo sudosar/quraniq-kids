@@ -160,9 +160,11 @@ export default function MemoryMatchGame({ letter, distractorLetters, distractorC
     setFlippedCards(newFlipped);
     playPopSound();
 
-    // Pronounce the letter when a card is revealed (issue #8)
+    // Pronounce the letter or word when a card is revealed (issue #8, #14)
     if (card.type === 'arabic') {
       speakArabic(card.letter, 0.75);
+    } else if (card.type === 'emoji' && card.word) {
+      speakArabic(card.word, 0.75);
     }
 
     if (newFlipped.length === 2) {
