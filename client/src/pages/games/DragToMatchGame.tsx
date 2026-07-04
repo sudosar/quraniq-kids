@@ -291,7 +291,7 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
   }, [matched, isDragging, handleCorrect]);
 
   return (
-    <div ref={dragConstraintsRef} className="h-full flex flex-col items-center justify-between py-4 px-4 select-none overflow-hidden relative">
+    <div ref={dragConstraintsRef} className="h-full flex flex-col items-center justify-between py-4 px-4 select-none relative" style={{ overflow: 'hidden', touchAction: 'none', WebkitOverflowScrolling: 'touch' }}>
       {/* Instruction */}
       <div className="text-center mb-2 z-10">
         <h2 className="text-lg font-bold text-gray-700" style={{ fontFamily: 'var(--font-heading)' }}>
@@ -315,16 +315,16 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
           key={`letter-${round}`}
           drag
           dragSnapToOrigin
-          dragElastic={0.5}
+          dragElastic={0}
           dragMomentum={false}
           onDragStart={() => setIsDragging(true)}
           onDragEnd={handleDragEnd}
-          whileDrag={{ scale: 1.3, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
-          whileTap={{ scale: 1.1 }}
+          whileDrag={{ scale: 1.2, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
+          whileTap={{ scale: 1.05 }}
           className={`w-28 h-28 rounded-3xl flex items-center justify-center shadow-xl border-4 cursor-grab active:cursor-grabbing ${
             matched ? 'bg-green-100 border-green-400' : 'bg-white border-amber-300'
           }`}
-          style={{ touchAction: 'none', zIndex: 50 }}
+          style={{ touchAction: 'none', zIndex: 50, WebkitTapHighlightColor: 'transparent' }}
         >
           <span className="text-6xl arabic-text font-bold select-none pointer-events-none" style={{ color: letter.color }}>
             {letter.letter}
