@@ -172,15 +172,18 @@ const strokePaths: Record<string, LetterStrokeData> = {
     strokes: [
       {
         points: [
-          { x: 0.75, y: 0.35 },
-          { x: 0.65, y: 0.25 },
-          { x: 0.5, y: 0.2 },
-          { x: 0.35, y: 0.25 },
-          { x: 0.25, y: 0.4 },
-          { x: 0.3, y: 0.55 },
-          { x: 0.45, y: 0.6 },
-          { x: 0.6, y: 0.55 },
-          { x: 0.7, y: 0.45 },
+          // Ta's bowl opens RIGHT (⟃ shape, not C shape)
+          // Start at top-left, curve right → down → left → up, ending at the opening
+          { x: 0.25, y: 0.32 },  // top-left of bowl
+          { x: 0.38, y: 0.24 },  // curve up-right
+          { x: 0.55, y: 0.20 },  // top-center of bowl
+          { x: 0.68, y: 0.26 },  // top-right of bowl
+          { x: 0.74, y: 0.38 },  // right side
+          { x: 0.76, y: 0.52 },  // bottom-right corner
+          { x: 0.68, y: 0.64 },  // bottom-center
+          { x: 0.52, y: 0.68 },  // bottom-left curve
+          { x: 0.36, y: 0.60 },  // mid-left of bowl
+          { x: 0.28, y: 0.48 },  // upper-left of bowl, near the opening
         ],
         type: 'main',
         label: 'Draw the bowl shape',
@@ -216,15 +219,18 @@ const strokePaths: Record<string, LetterStrokeData> = {
     strokes: [
       {
         points: [
-          { x: 0.75, y: 0.4 },
-          { x: 0.65, y: 0.3 },
-          { x: 0.5, y: 0.25 },
-          { x: 0.35, y: 0.3 },
-          { x: 0.25, y: 0.45 },
-          { x: 0.3, y: 0.6 },
-          { x: 0.45, y: 0.65 },
-          { x: 0.6, y: 0.6 },
-          { x: 0.7, y: 0.5 },
+          // Tha's bowl opens RIGHT (⟃ shape, not C shape)
+          // Start at top-left, curve right → down → left → up, ending at the opening
+          { x: 0.25, y: 0.38 },  // top-left of bowl
+          { x: 0.38, y: 0.28 },  // curve up-right
+          { x: 0.55, y: 0.24 },  // top-center of bowl
+          { x: 0.68, y: 0.30 },  // top-right of bowl
+          { x: 0.74, y: 0.42 },  // right side
+          { x: 0.76, y: 0.55 },  // bottom-right corner
+          { x: 0.68, y: 0.66 },  // bottom-center
+          { x: 0.52, y: 0.70 },  // bottom-left curve
+          { x: 0.36, y: 0.62 },  // mid-left of bowl
+          { x: 0.28, y: 0.50 },  // upper-left of bowl, near the opening
         ],
         type: 'main',
         label: 'Draw the bowl shape',
@@ -794,18 +800,22 @@ const strokePaths: Record<string, LetterStrokeData> = {
     strokes: [
       {
         points: [
-          { x: 0.7, y: 0.25 },
-          { x: 0.6, y: 0.18 },
-          { x: 0.45, y: 0.15 },
-          { x: 0.3, y: 0.2 },
-          { x: 0.25, y: 0.32 },
-          { x: 0.25, y: 0.48 },
-          { x: 0.35, y: 0.58 },
-          { x: 0.5, y: 0.58 },
-          { x: 0.65, y: 0.5 },
-          { x: 0.7, y: 0.35 },
-          { x: 0.7, y: 0.55 },
-          { x: 0.7, y: 0.75 },
+          // Qaf's bowl opens RIGHT (⟃ shape, not C shape)
+          // Start at top-left of bowl, curve right → down → left → up, ending at opening
+          { x: 0.25, y: 0.28 },  // top-left of bowl
+          { x: 0.38, y: 0.20 },  // curve up-right
+          { x: 0.55, y: 0.17 },  // top-center of bowl
+          { x: 0.68, y: 0.22 },  // top-right of bowl
+          { x: 0.74, y: 0.35 },  // right side
+          { x: 0.76, y: 0.50 },  // bottom-right corner
+          { x: 0.68, y: 0.62 },  // bottom-center
+          { x: 0.52, y: 0.66 },  // bottom-left curve
+          { x: 0.36, y: 0.58 },  // mid-left of bowl
+          { x: 0.28, y: 0.44 },  // upper-left of bowl, near the opening
+          // Then draw the tail downward from the right side
+          { x: 0.72, y: 0.50 },  // right side, below bowl
+          { x: 0.72, y: 0.65 },  // tail mid
+          { x: 0.72, y: 0.78 },  // tail bottom
         ],
         type: 'main',
         label: 'Draw the bowl',
@@ -1020,17 +1030,22 @@ const strokePaths: Record<string, LetterStrokeData> = {
     strokes: [
       {
         points: [
-          { x: 0.7, y: 0.35 },
-          { x: 0.6, y: 0.25 },
-          { x: 0.45, y: 0.2 },
-          { x: 0.3, y: 0.25 },
-          { x: 0.25, y: 0.38 },
-          { x: 0.3, y: 0.52 },
-          { x: 0.45, y: 0.58 },
-          { x: 0.6, y: 0.5 },
-          { x: 0.65, y: 0.35 },
-          { x: 0.65, y: 0.55 },
-          { x: 0.65, y: 0.75 },
+          // Ya's bowl opens RIGHT (⟃ shape, not C shape)
+          // Start at top-left, curve right → down → left → up, ending at the opening
+          { x: 0.25, y: 0.35 },  // top-left of bowl
+          { x: 0.38, y: 0.27 },  // curve up-right
+          { x: 0.55, y: 0.22 },  // top-center of bowl
+          { x: 0.68, y: 0.28 },  // top-right of bowl
+          { x: 0.74, y: 0.40 },  // right side
+          { x: 0.76, y: 0.54 },  // bottom-right corner
+          { x: 0.68, y: 0.64 },  // bottom-center
+          { x: 0.52, y: 0.68 },  // bottom-left curve
+          { x: 0.36, y: 0.60 },  // mid-left of bowl
+          { x: 0.28, y: 0.48 },  // upper-left of bowl, near the opening
+          // Then draw the tail downward from the right side
+          { x: 0.72, y: 0.52 },  // right side, below bowl
+          { x: 0.72, y: 0.66 },  // tail mid
+          { x: 0.72, y: 0.78 },  // tail bottom
         ],
         type: 'main',
         label: 'Draw the bowl',
