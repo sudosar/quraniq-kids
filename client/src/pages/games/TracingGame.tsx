@@ -143,13 +143,21 @@ export default function TracingGame({ letter, onComplete }: Props) {
     // Clear
     ctx.clearRect(0, 0, canvasSize, canvasSize);
 
-    // Draw faint letter guide
+    // Draw faint full-letter ghost behind the trace path so kids see the
+    // whole letter shape for context (e.g. so Ba's bowl alone doesn't read
+    // as "inverted C" — the dot below and overall silhouette tell them what
+    // they're building toward). Visible but clearly subordinate to the
+    // active dotted stroke. Stroke outline + fill combo keeps it readable
+    // even on a light background.
     ctx.save();
     ctx.font = `bold ${canvasSize * 0.65}px "Amiri", "Noto Naskh Arabic", serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = `${letter.color}12`;
+    ctx.fillStyle = `${letter.color}28`;
+    ctx.strokeStyle = `${letter.color}55`;
+    ctx.lineWidth = canvasSize * 0.006;
     ctx.fillText(letter.letter, canvasSize / 2, canvasSize / 2);
+    ctx.strokeText(letter.letter, canvasSize / 2, canvasSize / 2);
     ctx.restore();
 
     // Draw all strokes
@@ -553,7 +561,7 @@ export default function TracingGame({ letter, onComplete }: Props) {
           ✏️ Trace the letter!
         </h3>
         <p className="text-sm text-gray-400">
-          Follow the arrow along the dotted line
+          Follow the arrow — the faint letter shows the whole shape
         </p>
       </motion.div>
 
