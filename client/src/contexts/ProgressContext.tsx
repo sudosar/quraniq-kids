@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
 import {
   LetterMastery,
   MasteryMap,
@@ -9,6 +10,8 @@ import {
   getMasteryStats,
 } from '@/lib/mastery';
 import { getLettersForLesson } from '@/lib/curriculum';
+import { DailyProgress, DAILY_GOAL_MOONS, addDailyMoons, currentDaily, isGoalMet } from '@/lib/garden';
+import { narrate } from '@/lib/gameEngine';
 
 interface ProgressState {
   completedLessons: number[];
@@ -18,6 +21,8 @@ interface ProgressState {
   streakDays: number;
   lastPlayDate: string | null;
   letterMastery: MasteryMap; // letterId -> mastery (spaced repetition)
+  daily: DailyProgress;      // moons earned today, toward the daily goal
+  goalDaysMet: number;       // lifetime count of days the daily goal was reached
 }
 
 interface ProgressContextType extends ProgressState {
@@ -34,6 +39,10 @@ interface ProgressContextType extends ProgressState {
   getLetterMastery: (letterId: number) => LetterMastery | undefined;
   getDueLetters: () => number[];
   masteryStats: MasteryStats;
+  // Daily goal
+  dailyMoons: number;
+  dailyGoal: number;
+  dailyGoalMet: boolean;
 }
 
 const defaultState: ProgressState = {
@@ -44,6 +53,8 @@ const defaultState: ProgressState = {
   streakDays: 0,
   lastPlayDate: null,
   letterMastery: {},
+  daily: currentDaily(undefined),
+  goalDaysMet: 0,
 };
 
 const STORAGE_KEY = 'quraniq-kids-progress';
@@ -75,6 +86,9 @@ function loadProgress(): ProgressState {
       if (!parsed.letterMastery) {
         parsed.letterMastery = seedMasteryFromLessons(parsed.completedLessons || []);
       }
+      // Older saves predate the daily goal.
+      parsed.daily = currentDaily(parsed.daily);
+      parsed.goalDaysMet = parsed.goalDaysMet ?? 0;
       // Check streak
       const today = new Date().toDateString();
       const yesterday = new Date(Date.now() - 86400000).toDateString();
@@ -90,6 +104,18 @@ function loadProgress(): ProgressState {
     // ignore
   }
   return { ...defaultState, lastPlayDate: new Date().toDateString(), streakDays: 1 };
+}
+
+/** Award moons: total, today's tally, and count the day if the goal was just crossed. */
+function withMoons(prev: ProgressState, count: number): ProgressState {
+  const daily = addDailyMoons(prev.daily, count);
+  const justMet = !isGoalMet(prev.daily) && isGoalMet(daily);
+  return {
+    ...prev,
+    stars: prev.stars + count,
+    daily,
+    goalDaysMet: prev.goalDaysMet + (justMet ? 1 : 0),
+  };
 }
 
 const ProgressContext = createContext<ProgressContextType | null>(null);
@@ -120,14 +146,14 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       if (prev.completedLessons.includes(lessonId)) return prev;
       return {
         ...prev,
+        ...withMoons(prev, 3), // 3 moons per lesson completion
         completedLessons: [...prev.completedLessons, lessonId],
-        stars: prev.stars + 3, // 3 stars per lesson completion
       };
     });
   }, []);
 
   const addStars = useCallback((count: number) => {
-    setState(prev => ({ ...prev, stars: prev.stars + count }));
+    setState(prev => withMoons(prev, count));
   }, []);
 
   const setCurrentLesson = useCallback((lessonId: number) => {
@@ -135,7 +161,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const resetProgress = useCallback(() => {
-    setState({ ...defaultState, lastPlayDate: new Date().toDateString(), streakDays: 1 });
+    setState({ ...defaultState, daily: currentDaily(undefined), lastPlayDate: new Date().toDateString(), streakDays: 1 });
   }, []);
 
   const isLessonComplete = useCallback((lessonId: number) => {
@@ -179,6 +205,21 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
 
   const masteryStats = getMasteryStats(state.letterMastery);
 
+  // ---- Daily goal ----
+
+  const dailyMoons = currentDaily(state.daily).moons;
+  const dailyGoalMet = dailyMoons >= DAILY_GOAL_MOONS;
+
+  // Celebrate the moment the goal is reached (not on load).
+  const prevGoalDays = useRef(state.goalDaysMet);
+  useEffect(() => {
+    if (state.goalDaysMet > prevGoalDays.current) {
+      toast.success("Today's goal reached! 🌙 Mashallah!");
+      narrate({ text: 'Mashallah! You reached your goal for today!' });
+    }
+    prevGoalDays.current = state.goalDaysMet;
+  }, [state.goalDaysMet]);
+
   return (
     <ProgressContext.Provider value={{
       ...state,
@@ -194,6 +235,9 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       getLetterMastery,
       getDueLetters,
       masteryStats,
+      dailyMoons,
+      dailyGoal: DAILY_GOAL_MOONS,
+      dailyGoalMet,
     }}>
       {children}
     </ProgressContext.Provider>

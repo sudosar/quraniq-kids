@@ -8,6 +8,7 @@
 import { motion } from 'framer-motion';
 import { useLocation } from 'wouter';
 import { useProgress } from '@/contexts/ProgressContext';
+import ProgressRing from '@/components/ProgressRing';
 import { levels, lessons, isLessonUnlocked } from '@/lib/curriculum';
 import { Star, Lock, ChevronLeft, CheckCircle2, BookOpen, Map, RotateCw } from 'lucide-react';
 
@@ -16,7 +17,7 @@ const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquP
 
 export default function LevelMap() {
   const [, navigate] = useLocation();
-  const { completedLessons, stars, masteryStats } = useProgress();
+  const { completedLessons, stars, masteryStats, dailyMoons, dailyGoal, dailyGoalMet } = useProgress();
 
   const totalLessons = lessons.length;
   const completedCount = completedLessons.length;
@@ -78,6 +79,27 @@ export default function LevelMap() {
                 transition={{ duration: 0.8, delay: 0.3 }}
               />
             </div>
+          </div>
+
+          {/* Daily goal ring — earn N moons today */}
+          <div className="flex flex-col items-center flex-shrink-0" aria-label={`Today's goal: ${Math.min(dailyMoons, dailyGoal)} of ${dailyGoal} moons`}>
+            <ProgressRing
+              progress={Math.min(100, (dailyMoons / dailyGoal) * 100)}
+              size={52}
+              strokeWidth={5}
+              color={dailyGoalMet ? '#10B981' : '#F5A623'}
+            >
+              <motion.span
+                className="text-xl"
+                animate={dailyGoalMet ? { scale: [1, 1.2, 1] } : {}}
+                transition={{ duration: 1.2, repeat: dailyGoalMet ? Infinity : 0, repeatDelay: 1.5 }}
+              >
+                {dailyGoalMet ? '🌟' : '🌙'}
+              </motion.span>
+            </ProgressRing>
+            <span className="text-[10px] font-bold text-gray-500 mt-0.5">
+              {dailyGoalMet ? 'Goal met!' : `${dailyMoons}/${dailyGoal} today`}
+            </span>
           </div>
         </div>
       </motion.div>

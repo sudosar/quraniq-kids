@@ -1,8 +1,9 @@
 /**
- * Letter Explorer Page - QuranIQ Kids
+ * Letter Garden (Letter Explorer) - QuranIQ Kids
  * Design: Celestial Garden theme
- * Full alphabet explorer with all 28 letters in a grid
- * Tap any letter to see details, hear sound, and trace
+ * All 28 letters as garden plots that grow with mastery
+ * (soil → seed → sprout → leaves → flower → full bloom).
+ * Tap any letter to see details, hear sound, and trace.
  */
 
 import { useState } from 'react';
@@ -12,7 +13,8 @@ import { arabicLetters } from '@/lib/curriculum';
 import { ChevronLeft, X, Volume2 } from 'lucide-react';
 import TracingCanvas from '@/components/TracingCanvas';
 import { useProgress } from '@/contexts/ProgressContext';
-import { MAX_STRENGTH, isMastered } from '@/lib/mastery';
+import { isMastered } from '@/lib/mastery';
+import { getPlantStage } from '@/lib/garden';
 
 export default function LetterExplorer() {
   const [, navigate] = useLocation();
@@ -42,25 +44,36 @@ export default function LetterExplorer() {
           </button>
           
           <h1 className="text-xl font-bold text-teal-800" style={{ fontFamily: 'var(--font-heading)' }}>
-            All Letters
+            My Letter Garden
           </h1>
 
           <div className="w-12" /> {/* Spacer */}
         </div>
       </div>
 
-      {/* Mastery summary — turns this from a flat grid into a progress library */}
-      {masteryStats.introduced > 0 && (
-        <div className="max-w-lg mx-auto px-4 pt-4">
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-            <span className="font-bold text-teal-700">{masteryStats.mastered}</span>
-            <span>of {arabicLetters.length} letters mastered</span>
-            <span className="text-gray-300">·</span>
-            <span className="font-bold text-amber-600">{masteryStats.introduced}</span>
-            <span>started</span>
-          </div>
+      {/* Garden summary */}
+      <div className="max-w-lg mx-auto px-4 pt-4">
+        <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+          {masteryStats.introduced === 0 ? (
+            <span>Learn a letter to plant your first seed 🌰</span>
+          ) : (
+            <>
+              <span className="font-bold text-pink-600">🌷 {masteryStats.mastered}</span>
+              <span>blooming</span>
+              <span className="text-gray-300">·</span>
+              <span className="font-bold text-green-700">🌱 {masteryStats.introduced - masteryStats.mastered}</span>
+              <span>growing</span>
+              <span className="text-gray-300">·</span>
+              <span>{arabicLetters.length - masteryStats.introduced} to plant</span>
+            </>
+          )}
         </div>
-      )}
+        {masteryStats.due > 0 && (
+          <p className="text-center text-xs text-amber-600 mt-1">
+            {masteryStats.due} plant{masteryStats.due === 1 ? ' needs' : 's need'} watering — try today's Review 💧
+          </p>
+        )}
+      </div>
 
       {/* Letter grid */}
       <div className="max-w-lg mx-auto px-4 py-6">
@@ -68,7 +81,7 @@ export default function LetterExplorer() {
           {arabicLetters.map((letter, idx) => {
             const mastery = getLetterMastery(letter.id);
             const mastered = mastery ? isMastered(mastery) : false;
-            const strength = mastery?.strength ?? 0;
+            const plant = getPlantStage(mastery?.strength);
             return (
               <motion.button
                 key={letter.id}
@@ -84,10 +97,15 @@ export default function LetterExplorer() {
                 transition={{ delay: idx * 0.02 }}
                 whileTap={{ scale: 0.9 }}
               >
-                {/* Mastered badge */}
-                {mastered && (
-                  <span className="absolute top-1 right-1 text-xs">⭐</span>
-                )}
+                {/* The letter's plant, growing with mastery */}
+                {plant.emoji && <motion.span
+                  className="absolute top-1 right-1 text-base leading-none"
+                  aria-label={plant.label}
+                  animate={mastered ? { rotate: [0, -8, 8, 0] } : {}}
+                  transition={{ duration: 2.5, repeat: mastered ? Infinity : 0 }}
+                >
+                  {plant.emoji}
+                </motion.span>}
                 <span
                   className="arabic-text text-3xl"
                   style={{ color: mastery ? letter.color : '#cbd5e1' }}
@@ -97,16 +115,6 @@ export default function LetterExplorer() {
                 <span className="text-[10px] text-gray-500 mt-1 font-medium">
                   {letter.name}
                 </span>
-                {/* Strength pips */}
-                <div className="flex gap-0.5 mt-1 h-1">
-                  {Array.from({ length: MAX_STRENGTH }).map((_, i) => (
-                    <span
-                      key={i}
-                      className="w-1 h-1 rounded-full"
-                      style={{ backgroundColor: i < strength ? letter.color : '#e5e7eb' }}
-                    />
-                  ))}
-                </div>
               </motion.button>
             );
           })}
@@ -154,7 +162,11 @@ export default function LetterExplorer() {
                   </h2>
                   <p className="text-sm text-gray-500 arabic-text">{selectedLetter.nameAr}</p>
                   <p className="text-sm text-gray-600 mt-1">{selectedLetter.sound}</p>
-                  
+                  <p className="text-xs text-gray-400 mt-1">
+                    {getPlantStage(getLetterMastery(selectedLetter.id)?.strength).emoji}{' '}
+                    {getPlantStage(getLetterMastery(selectedLetter.id)?.strength).label}
+                  </p>
+
                   {/* Sound button */}
                   <button
                     onClick={() => speakLetter(selectedLetter.letter)}
