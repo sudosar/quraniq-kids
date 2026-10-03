@@ -11,9 +11,8 @@ import { useProgress } from '@/contexts/ProgressContext';
 import ProgressRing from '@/components/ProgressRing';
 import { levels, lessons, isLessonUnlocked } from '@/lib/curriculum';
 import { Star, Lock, ChevronLeft, CheckCircle2, BookOpen, Map, RotateCw } from 'lucide-react';
+import { MASCOT, PATTERN_TILE } from '@/lib/assets';
 
-const PATTERN_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/pattern-tile-Wv3JDcUDf6Y9TQjZuHwneK.webp';
-const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/mascot-moon-4TKGwbdD2xAUvRBjLqdhwG.webp';
 
 export default function LevelMap() {
   const [, navigate] = useLocation();
@@ -27,8 +26,8 @@ export default function LevelMap() {
     <div className="min-h-screen relative pb-24" style={{ background: '#FFF8E7' }}>
       {/* Pattern background */}
       <div 
-        className="absolute inset-0 opacity-[0.06]"
-        style={{ backgroundImage: `url(${PATTERN_BG})`, backgroundSize: '300px' }}
+        className="absolute inset-0 opacity-[0.06] pointer-events-none"
+        style={{ backgroundImage: `url(${PATTERN_TILE})`, backgroundSize: '72px' }}
       />
 
       {/* Header */}
@@ -55,7 +54,7 @@ export default function LevelMap() {
 
       {/* Mascot helper + progress */}
       <motion.div 
-        className="flex justify-center pt-4 pb-2 px-4"
+        className="relative z-10 flex justify-center pt-4 pb-2 px-4"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -107,7 +106,7 @@ export default function LevelMap() {
       {/* Daily Review — spaced repetition. Only shown once letters are due. */}
       {masteryStats.due > 0 && (
         <motion.div
-          className="max-w-lg mx-auto px-4 pt-2"
+          className="relative z-10 max-w-lg mx-auto px-4 pt-2"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >

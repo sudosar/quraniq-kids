@@ -8,10 +8,9 @@
 import { motion } from 'framer-motion';
 import { useLocation } from 'wouter';
 import { useProgress } from '@/contexts/ProgressContext';
+import { MASCOT } from '@/lib/assets';
 
 
-const HERO_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/hero-bg-5JM2iqrNbMBGRJFUy5rBv3.webp';
-const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/mascot-moon-4TKGwbdD2xAUvRBjLqdhwG.webp';
 
 export default function Home() {
   const [, navigate] = useLocation();
@@ -20,9 +19,10 @@ export default function Home() {
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center">
       {/* Background */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${HERO_BG})` }}
+      {/* Dusk sky: deep teal night fading to a warm amber horizon */}
+      <div
+        className="absolute inset-0"
+        style={{ background: 'linear-gradient(180deg, #0B3D4A 0%, #0D7377 45%, #3FA796 70%, #F5C76B 100%)' }}
       />
       
       {/* Overlay for readability */}

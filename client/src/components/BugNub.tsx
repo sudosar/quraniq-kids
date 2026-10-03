@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback } from "react";
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 
-const GITHUB_TOKEN = "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";
 const REPO_OWNER = "sudosar";
 const REPO_NAME = "quraniq-kids";
 
@@ -66,91 +65,40 @@ export function BugNub() {
     }
   }, []);
 
-  const submitBug = useCallback(async () => {
+  // No credentials ship in the browser bundle: the report opens as a
+  // pre-filled GitHub issue for the reporter to submit, and the screenshot
+  // is downloaded so they can attach it.
+  const submitBug = useCallback(() => {
     const description = descriptionRef.current?.value?.trim() || "No description provided";
-    setState((s) => ({ ...s, isSubmitting: true }));
 
-    try {
-      // Upload screenshot as base64 in the issue body
-      const currentUrl = window.location.href;
-      const userAgent = navigator.userAgent;
-      const timestamp = new Date().toISOString();
-      const screenSize = `${window.innerWidth}x${window.innerHeight}`;
-
-      let body = `## Bug Report\n\n`;
-      body += `**Description:** ${description}\n\n`;
-      body += `**URL:** ${currentUrl}\n`;
-      body += `**Screen:** ${screenSize}\n`;
-      body += `**Time:** ${timestamp}\n`;
-      body += `**Device:** ${userAgent}\n\n`;
-
-      if (state.screenshot) {
-        // Upload the image to the repo as a blob and get a URL
-        const base64Data = state.screenshot.split(",")[1];
-        
-        // Create a unique filename
-        const filename = `bug-screenshots/bug-${Date.now()}.png`;
-        
-        // Upload to repo
-        const uploadResp = await fetch(
-          `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filename}`,
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `token ${GITHUB_TOKEN}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              message: `Bug screenshot: ${description.slice(0, 50)}`,
-              content: base64Data,
-              branch: "main",
-            }),
-          }
-        );
-
-        if (uploadResp.ok) {
-          const uploadData = await uploadResp.json();
-          const imageUrl = uploadData.content.download_url;
-          body += `## Screenshot\n\n![Screenshot](${imageUrl})\n`;
-        } else {
-          // Fallback: embed as base64 (GitHub renders it but it's large)
-          body += `## Screenshot\n\n<details><summary>Click to view screenshot</summary>\n\n![Screenshot](${state.screenshot})\n\n</details>\n`;
-        }
-      }
-
-      // Create the issue
-      const issueResp = await fetch(
-        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `token ${GITHUB_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            title: `🐛 Bug: ${description.slice(0, 80)}`,
-            body,
-            labels: ["bug", "user-reported"],
-          }),
-        }
-      );
-
-      if (issueResp.ok) {
-        setState((s) => ({ ...s, isSubmitting: false, submitted: true }));
-        setTimeout(() => {
-          setState({ isOpen: false, isCapturing: false, isSubmitting: false, screenshot: null, submitted: false });
-        }, 2000);
-      } else {
-        const errData = await issueResp.json();
-        console.error("Failed to create issue:", errData);
-        alert("Failed to submit bug report. Please try again.");
-        setState((s) => ({ ...s, isSubmitting: false }));
-      }
-    } catch (err) {
-      console.error("Bug submission error:", err);
-      alert("Failed to submit bug report. Please try again.");
-      setState((s) => ({ ...s, isSubmitting: false }));
+    let body = `## Bug Report\n\n`;
+    body += `**Description:** ${description}\n\n`;
+    body += `**URL:** ${window.location.href}\n`;
+    body += `**Screen:** ${window.innerWidth}x${window.innerHeight}\n`;
+    body += `**Time:** ${new Date().toISOString()}\n`;
+    body += `**Device:** ${navigator.userAgent}\n\n`;
+    if (state.screenshot) {
+      body += `## Screenshot\n\n_A screenshot was downloaded to your device — drag or paste it here._\n`;
     }
+
+    const params = new URLSearchParams({
+      title: `🐛 Bug: ${description.slice(0, 80)}`,
+      body,
+      labels: "bug,user-reported",
+    });
+    window.open(`https://github.com/${REPO_OWNER}/${REPO_NAME}/issues/new?${params}`, "_blank", "noopener");
+
+    if (state.screenshot) {
+      const a = document.createElement("a");
+      a.href = state.screenshot;
+      a.download = `bug-${Date.now()}.png`;
+      a.click();
+    }
+
+    setState((s) => ({ ...s, submitted: true }));
+    setTimeout(() => {
+      setState({ isOpen: false, isCapturing: false, isSubmitting: false, screenshot: null, submitted: false });
+    }, 2500);
   }, [state.screenshot]);
 
   const close = () => {
@@ -164,7 +112,7 @@ export function BugNub() {
         <button
           onClick={captureScreenshot}
           disabled={state.isCapturing}
-          className="fixed bottom-4 right-4 w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 active:scale-90 shadow-lg flex items-center justify-center transition-all duration-200 border-2 border-red-300"
+          className="fixed bottom-24 right-3 w-11 h-11 rounded-full bg-red-500 hover:bg-red-600 active:scale-90 shadow-lg flex items-center justify-center transition-all duration-200 border-2 border-red-300"
           title="Report a bug"
         >
           {state.isCapturing ? (
@@ -192,8 +140,8 @@ export function BugNub() {
             {state.submitted ? (
               <div className="p-8 text-center">
                 <div className="text-5xl mb-3">✅</div>
-                <p className="text-lg font-semibold text-green-600">Bug reported!</p>
-                <p className="text-sm text-gray-500 mt-1">Thank you for helping us improve.</p>
+                <p className="text-lg font-semibold text-green-600">Almost done!</p>
+                <p className="text-sm text-gray-500 mt-1">Tap Submit on the GitHub page that opened.</p>
               </div>
             ) : (
               <div className="p-4 space-y-3">
@@ -233,12 +181,12 @@ export function BugNub() {
                       <span className="animate-spin">⏳</span> Submitting...
                     </>
                   ) : (
-                    <>📤 Submit Bug Report</>
+                    <>📤 Continue on GitHub</>
                   )}
                 </button>
 
                 <p className="text-xs text-gray-400 text-center">
-                  Screenshot + page info will be attached automatically
+                  Page info is filled in for you; the screenshot downloads so you can attach it
                 </p>
               </div>
             )}

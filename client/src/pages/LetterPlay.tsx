@@ -30,8 +30,8 @@ import CombineLettersGame from './games/CombineLettersGame';
 import WordBuildingGame from './games/WordBuildingGame';
 import SentenceReadingGame from './games/SentenceReadingGame';
 import InstructionBar from '@/components/InstructionBar';
+import { MASCOT } from '@/lib/assets';
 
-const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/mascot-moon-4TKGwbdD2xAUvRBjLqdhwG.webp';
 
 export default function LetterPlay() {
   const params = useParams<{ lessonId: string; letterIndex: string }>();

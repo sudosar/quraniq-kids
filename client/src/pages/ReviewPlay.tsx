@@ -18,8 +18,8 @@ import InstructionBar from '@/components/InstructionBar';
 import SoundMatchGame from './games/SoundMatchGame';
 import DragToMatchGame from './games/DragToMatchGame';
 import BubblePopGame from './games/BubblePopGame';
+import { MASCOT } from '@/lib/assets';
 
-const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/mascot-moon-4TKGwbdD2xAUvRBjLqdhwG.webp';
 
 const SESSION_SIZE = 6;
 // Quiz games suitable for review. 'sound-match' needs ≥1 distractor.

@@ -4,8 +4,8 @@
  */
 
 import { motion } from 'framer-motion';
+import { MASCOT } from '@/lib/assets';
 
-const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/mascot-moon-4TKGwbdD2xAUvRBjLqdhwG.webp';
 
 interface MascotBubbleProps {
   message: string;

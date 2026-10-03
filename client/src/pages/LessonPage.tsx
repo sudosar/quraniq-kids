@@ -13,8 +13,8 @@ import { ArrowLeft, CheckCircle2, Play, Lock } from 'lucide-react';
 import { lessons, getLettersForLesson } from '@/lib/curriculum';
 import { useProgress } from '@/contexts/ProgressContext';
 import InstructionBar from '@/components/InstructionBar';
+import { MASCOT } from '@/lib/assets';
 
-const MASCOT = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663317811558/JhGQquPdHPqw2LEAWe34js/mascot-moon-4TKGwbdD2xAUvRBjLqdhwG.webp';
 
 export default function LessonPage() {
   const params = useParams<{ id: string }>();
