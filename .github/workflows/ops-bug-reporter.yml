@@ -38,4 +38,4 @@ jobs:
           script_stop: true
           command_timeout: 10m
           script: |
-            bash /tmp/bug-reporter-pkg/install.sh
+            BUG_REPORTER_TOKEN='${{ secrets.BUG_REPORTER_TOKEN }}' bash /tmp/bug-reporter-pkg/install.sh
