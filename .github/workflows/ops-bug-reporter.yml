@@ -1,0 +1,41 @@
+name: Ops - Bug Reporter Install
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    environment: VM Terabix
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy server payload to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          passphrase: ${{ secrets.VM_SSH_PASSPHRASE }}
+          port: ${{ secrets.VM_PORT }}
+          source: "server/*"
+          target: "/tmp/bug-reporter-pkg"
+          strip_components: 1
+          overwrite: true
+
+      - name: Install bug reporter on VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          passphrase: ${{ secrets.VM_SSH_PASSPHRASE }}
+          port: ${{ secrets.VM_PORT }}
+          script_stop: true
+          command_timeout: 10m
+          script: |
+            bash /tmp/bug-reporter-pkg/install.sh
