@@ -1,0 +1,64 @@
+name: Generate audio clips
+
+# Generates the Edge-TTS Arabic clip set and commits it back to the
+# branch it was run from. The clips cannot be produced from a normal
+# PR (they are binary files synthesised by a script), so generation is
+# a deliberate, manually dispatched step:
+#   Actions -> "Generate audio clips" -> Run workflow.
+# A push to main by this workflow then triggers the normal deploy.
+on:
+  workflow_dispatch:
+    inputs:
+      voice:
+        description: "Edge-TTS Arabic voice"
+        type: choice
+        options:
+          - ar-SA-ZariyahNeural
+          - ar-SA-HamedNeural
+        default: ar-SA-ZariyahNeural
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install edge-tts
+        run: pip install edge-tts
+
+      - name: Generate clips and manifest
+        run: |
+          pnpm exec tsx scripts/list-audio-clips.ts > clips.json
+          python3 scripts/generate-audio.py --clips clips.json --voice "${{ inputs.voice }}"
+
+      - name: Commit generated audio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add client/public/audio client/src/lib/audioClips.generated.ts
+          if git diff --cached --quiet; then
+            echo "No audio changes to commit"
+          else
+            git commit -m "feat: generate Arabic audio clips (${{ inputs.voice }})"
+            git push
+          fi
