@@ -23,7 +23,7 @@ interface Props {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -123,6 +123,7 @@ export default function SortLettersGame({ letter, distractorLetters, onComplete 
   const [showCorrect, setShowCorrect] = useState(false);
   const [completed, setCompleted] = useState(false);
 
+  const mistakesRef = useRef(0);
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
 
@@ -160,11 +161,12 @@ export default function SortLettersGame({ letter, distractorLetters, onComplete 
             setCurrentIdx(prev => prev + 1);
           } else {
             setCompleted(true);
-            onComplete(2);
+            onComplete(2, mistakesRef.current);
           }
         }, 800);
       } else {
         // Wrong bucket
+        mistakesRef.current += 1;
         setShowWrong(true);
         playWrongSound();
         setTimeout(() => setShowWrong(false), 800);

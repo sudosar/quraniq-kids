@@ -58,9 +58,12 @@ export default function ReviewPlay() {
     return pool[index % pool.length];
   }, [index, distractorLetters.length]);
 
-  const handleResult = useCallback((stars: number) => {
+  const handleResult = useCallback((stars: number, mistakes?: number) => {
     if (!currentLetter) return;
-    const correct = stars > 0;
+    // A review game is only a pass when it was played without mistakes.
+    // (Deriving this from stars was meaningless: games always award
+    // stars on completion, so every review used to record "correct".)
+    const correct = mistakes !== undefined ? mistakes === 0 : stars > 0;
     recordLetterResult(currentLetter.id, correct);
     if (correct) setCorrectCount(c => c + 1);
     setStarsEarned(s => s + stars);

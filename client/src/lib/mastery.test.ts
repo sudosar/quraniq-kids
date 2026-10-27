@@ -6,6 +6,8 @@ import {
   isMastered,
   getDueLetterIds,
   getMasteryStats,
+  summariseLetterPerformance,
+  ensureIntroduced,
   MASTERED_STRENGTH,
   MAX_STRENGTH,
   type MasteryMap,
@@ -47,6 +49,27 @@ describe('mastery spaced repetition', () => {
     expect(m.strength).toBe(MAX_STRENGTH);
     expect(isMastered(m)).toBe(true);
     expect(m.strength).toBeGreaterThanOrEqual(MASTERED_STRENGTH);
+  });
+
+  it('summarises assessed-game mistakes into one honest rep', () => {
+    // Exposure only (no assessed game) records nothing.
+    expect(summariseLetterPerformance([])).toBeNull();
+    // Clean run, and a run averaging at most one mistake per game, pass.
+    expect(summariseLetterPerformance([0, 0, 0])).toBe(true);
+    expect(summariseLetterPerformance([0, 2])).toBe(true);
+    // Struggling through games (more mistakes than games) does not.
+    expect(summariseLetterPerformance([3, 2])).toBe(false);
+    expect(summariseLetterPerformance([5])).toBe(false);
+  });
+
+  it('ensureIntroduced adds a fresh letter without touching existing ones', () => {
+    const empty: MasteryMap = {};
+    const withOne = ensureIntroduced(empty, 7, day('2026-01-01'));
+    expect(withOne[7].strength).toBe(1);
+    expect(withOne[7].correct).toBe(0);
+    expect(isDue(withOne[7], day('2026-01-01'))).toBe(true);
+    // Already-known letters are returned unchanged (same reference).
+    expect(ensureIntroduced(withOne, 7, day('2026-06-01'))).toBe(withOne);
   });
 
   it('orders due letters weakest-first and counts stats', () => {

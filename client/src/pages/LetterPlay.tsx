@@ -8,12 +8,13 @@
  * Later letters = progressively add previously learned letters as distractors.
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { arabicLetters, getLettersForLesson, lessons, getAvailableDistractorCount, getProgressiveDistractors } from '@/lib/curriculum';
 import { getProgressiveGameSequence, GameConfig, playCelebrationSound } from '@/lib/gameEngine';
 import { useProgress } from '@/contexts/ProgressContext';
+import { summariseLetterPerformance } from '@/lib/mastery';
 import LetterIntroGame from './games/LetterIntroGame';
 import WordCardsGame from './games/WordCardsGame';
 import BubblePopGame from './games/BubblePopGame';
@@ -36,7 +37,7 @@ import { MASCOT } from '@/lib/assets';
 export default function LetterPlay() {
   const params = useParams<{ lessonId: string; letterIndex: string }>();
   const [, navigate] = useLocation();
-  const { addStars, completeActivity, completeLesson, completedLessons, recordLetterResult } = useProgress();
+  const { addStars, completeActivity, completeLesson, completedLessons, recordLetterResult, introduceLetter } = useProgress();
   
   const lessonId = parseInt(params.lessonId || '1');
   const letterIdx = parseInt(params.letterIndex || '0');
@@ -72,7 +73,18 @@ export default function LetterPlay() {
 
   const currentGame = gameSequence[gameIndex];
 
-  const handleGameComplete = useCallback((starsEarned: number = 1) => {
+  // Mistakes reported by each assessed game for the current letter.
+  // Exposure games (intro, word cards, tracing) report nothing, so a
+  // letter played through only those records no mastery rep.
+  const mistakesRef = useRef<number[]>([]);
+  useEffect(() => {
+    mistakesRef.current = [];
+  }, [currentLetter.id]);
+
+  const handleGameComplete = useCallback((starsEarned: number = 1, mistakes?: number) => {
+    if (typeof mistakes === 'number') {
+      mistakesRef.current.push(mistakes);
+    }
     setTotalStars(prev => prev + starsEarned);
     addStars(starsEarned);
     
@@ -85,9 +97,18 @@ export default function LetterPlay() {
     } else {
       // All games for this letter complete
       completeActivity(lessonId, `letter-${currentLetter.id}`);
-      // Count finishing the letter as one good rep toward mastery; the
-      // spaced-repetition Review will keep it fresh from here.
-      recordLetterResult(currentLetter.id, true);
+      // Record ONE mastery rep summarised from the assessed games'
+      // actual mistakes — finishing alone used to count as a correct
+      // rep even when the child tapped randomly until games completed.
+      // Exposure-only runs just introduce the letter so Review can
+      // assess it honestly later.
+      const result = summariseLetterPerformance(mistakesRef.current);
+      mistakesRef.current = [];
+      if (result === null) {
+        introduceLetter(currentLetter.id);
+      } else {
+        recordLetterResult(currentLetter.id, result);
+      }
       
       if (letterIdx < lessonLetters.length - 1) {
         setShowTransition(true);
@@ -103,7 +124,7 @@ export default function LetterPlay() {
         setShowLessonComplete(true);
       }
     }
-  }, [gameIndex, gameSequence.length, letterIdx, lessonLetters.length, lessonId, currentLetter.id, addStars, completeActivity, completeLesson, recordLetterResult, navigate]);
+  }, [gameIndex, gameSequence.length, letterIdx, lessonLetters.length, lessonId, currentLetter.id, addStars, completeActivity, completeLesson, recordLetterResult, introduceLetter, navigate]);
 
   const handleSkip = useCallback(() => {
     if (gameIndex < gameSequence.length - 1) {

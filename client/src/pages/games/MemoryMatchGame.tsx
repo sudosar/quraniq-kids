@@ -26,7 +26,7 @@ interface Props {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -189,7 +189,10 @@ export default function MemoryMatchGame({ letter, distractorLetters, distractorC
             setCompleted(true);
             setTimeout(() => {
               const stars = moves <= totalPairs + 2 ? 2 : 1;
-              onComplete(stars);
+              // Extra pair-flips beyond a perfect run count as mistakes
+              // (moves is the count before this final, matching, move).
+              const mistakes = Math.max(0, moves + 1 - totalPairs);
+              onComplete(stars, mistakes);
             }, 1500);
           }
         }, 600);

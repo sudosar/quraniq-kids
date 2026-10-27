@@ -26,7 +26,7 @@ interface Props {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -246,7 +246,7 @@ export default function HarakatGame({ letter, distractorLetters, onComplete }: P
             }, 1500);
           } else {
             // All done
-            setTimeout(() => onComplete(finalScore >= 4 ? 2 : 1), 1500);
+            setTimeout(() => onComplete(finalScore >= 4 ? 2 : 1, QUIZ_ROUNDS - finalScore), 1500);
           }
         } else {
           // Retry
@@ -275,8 +275,8 @@ export default function HarakatGame({ letter, distractorLetters, onComplete }: P
   }, []);
 
   const finishAfterBasic = useCallback(() => {
-    onComplete(2);
-  }, [onComplete]);
+    onComplete(2, QUIZ_ROUNDS - score);
+  }, [onComplete, score]);
 
   // ============ LEVEL COMPLETE (between basic and advanced) ============
   if (phase === 'level-complete') {

@@ -26,7 +26,7 @@ interface Props {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -57,6 +57,7 @@ export default function LetterSlotGame({ letter, distractorLetters, onComplete }
   const [round, setRound] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [wrongChoice, setWrongChoice] = useState<number | null>(null);
+  const mistakesRef = useRef(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const slotRef = useRef<HTMLDivElement>(null);
   
@@ -130,10 +131,11 @@ export default function LetterSlotGame({ letter, distractorLetters, onComplete }
             setShowSuccess(false);
             setWrongChoice(null);
           } else {
-            onComplete(2);
+            onComplete(2, mistakesRef.current);
           }
         }, 2000);
       } else {
+        mistakesRef.current += 1;
         setWrongChoice(choiceIdx);
         playWrongSound();
         setTimeout(() => setWrongChoice(null), 800);
@@ -159,11 +161,12 @@ export default function LetterSlotGame({ letter, distractorLetters, onComplete }
           setShowSuccess(false);
           setWrongChoice(null);
         } else {
-          onComplete(2);
+          onComplete(2, mistakesRef.current);
         }
       }, 2000);
     } else {
-      setWrongChoice(choiceIdx);
+      mistakesRef.current += 1;
+        setWrongChoice(choiceIdx);
       playWrongSound();
       setTimeout(() => setWrongChoice(null), 800);
     }

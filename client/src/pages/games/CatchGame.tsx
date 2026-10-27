@@ -22,7 +22,7 @@ interface Props {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -44,6 +44,7 @@ export default function CatchGame({ letter, distractorLetters, distractorCount, 
   const [gameStarted, setGameStarted] = useState(false);
   const [showInstruction, setShowInstruction] = useState(true);
   const [completed, setCompleted] = useState(false);
+  const mistakesRef = useRef(0);
   const spawnInterval = useRef<NodeJS.Timeout>(null);
   const cleanupInterval = useRef<NodeJS.Timeout>(null);
 
@@ -102,7 +103,7 @@ export default function CatchGame({ letter, distractorLetters, distractorCount, 
       if (spawnInterval.current) clearInterval(spawnInterval.current);
       if (cleanupInterval.current) clearInterval(cleanupInterval.current);
       playCorrectSound();
-      setTimeout(() => onComplete(2), 1800);
+      setTimeout(() => onComplete(2, mistakesRef.current), 1800);
     }
   }, [score, completed, onComplete]);
 
@@ -116,6 +117,7 @@ export default function CatchGame({ letter, distractorLetters, distractorCount, 
         f.id === fl.id ? { ...f, caught: true } : f
       ));
     } else {
+      mistakesRef.current += 1;
       playWrongSound();
       setFallingLetters(prev => prev.map(f => 
         f.id === fl.id ? { ...f, wrong: true } : f

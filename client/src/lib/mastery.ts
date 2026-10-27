@@ -99,6 +99,38 @@ export function getDueLetterIds(map: MasteryMap, today: Date = new Date()): numb
     .map(m => m.letterId);
 }
 
+/**
+ * Summarise one letter's assessed-game performance into a single mastery
+ * rep. Games in the learning flow are retry-until-correct scaffolding, so
+ * finishing a game proves nothing by itself — what matters is how many
+ * mistakes it took. Exposure-only activities (intro, word cards, tracing)
+ * report no mistakes and must never create a rep on their own.
+ *
+ * Returns null when no assessed game was played (record nothing), true
+ * for a clean-enough pass (at most one mistake per assessed game on
+ * average), and false when the child struggled through the letter.
+ */
+export function summariseLetterPerformance(mistakesPerGame: number[]): boolean | null {
+  if (mistakesPerGame.length === 0) return null;
+  const totalMistakes = mistakesPerGame.reduce((sum, m) => sum + m, 0);
+  return totalMistakes <= mistakesPerGame.length;
+}
+
+/**
+ * Return a map with the letter introduced (strength 1, due today, no reps
+ * recorded) if it is not already there. Used when a letter was only
+ * exposed to, so it can enter Review without pretending it was answered
+ * correctly.
+ */
+export function ensureIntroduced(
+  map: MasteryMap,
+  letterId: number,
+  today: Date = new Date(),
+): MasteryMap {
+  if (map[letterId]) return map;
+  return { ...map, [letterId]: createMastery(letterId, today) };
+}
+
 export interface MasteryStats {
   introduced: number; // letters the child has met
   mastered: number;   // strength >= MASTERED_STRENGTH
