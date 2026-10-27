@@ -1,0 +1,19 @@
+[Unit]
+Description=QuranIQ Kids bug reporter intake service
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+EnvironmentFile=/etc/bug-reporter.env
+Environment=BUG_DATA_DIR=/var/lib/bug-reporter
+ExecStart=/usr/bin/python3 /usr/local/lib/bug-reporter/bug_reporter.py
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/bug-reporter
+
+[Install]
+WantedBy=multi-user.target
