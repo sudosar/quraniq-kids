@@ -1,3 +1,5 @@
+import { clipUrlForText } from './audioClips';
+
 /**
  * QuranIQ Kids - Game Engine
  * 
@@ -250,8 +252,44 @@ export function setVoiceMuted(muted: boolean) {
   if (muted) cancelSpeech();
   window.dispatchEvent(new CustomEvent('quraniq-voice-muted-changed', { detail: muted }));
 }
+// ---- Recorded / generated clip playback ----
+// One clip at a time; starting a new clip (or cancelling speech)
+// stops the previous one so sounds never pile up.
+let currentClip: HTMLAudioElement | null = null;
+
+/** Stop the currently playing audio clip, if any. */
+export function stopAudioClip() {
+  if (currentClip) {
+    currentClip.pause();
+    currentClip = null;
+  }
+}
+
+/**
+ * Play an audio clip URL. Resolves true when playback got underway,
+ * false when the clip could not be played at all (missing file,
+ * blocked) so callers can fall back to synthetic speech.
+ */
+export function playAudioClip(url: string, rate: number = 1): Promise<boolean> {
+  if (typeof window === 'undefined') return Promise.resolve(false);
+  stopAudioClip();
+  return new Promise(resolve => {
+    try {
+      const audio = new Audio(url);
+      currentClip = audio;
+      audio.playbackRate = Math.min(1.25, Math.max(0.5, rate));
+      audio.onended = () => resolve(true);
+      audio.onerror = () => resolve(false);
+      audio.play().catch(() => resolve(false));
+    } catch {
+      resolve(false);
+    }
+  });
+}
+
 /** Stop any in-progress speech immediately. */
 export function cancelSpeech() {
+  stopAudioClip();
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
 }
@@ -314,13 +352,26 @@ export function narrate(opts: { text: string; audioUrl?: string; rate?: number }
  * Speak Arabic text using the Web Speech API.
  * Handles Chrome desktop quirks with cancel-before-speak pattern.
  */
-export function speakArabic(text: string, rate: number = 0.8) {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-  
-  const synth = window.speechSynthesis;
-  
+export function speakArabic(
+  text: string,
+  rate: number = 0.8,
+  opts?: { audioUrl?: string },
+) {
+  if (typeof window === 'undefined') return;
+  const hasSynth = 'speechSynthesis' in window;
+
+  // Prefer real audio over device TTS, in order: an explicit URL
+  // (e.g. human word-by-word Qur'an audio), a generated clip for
+  // this exact text, and only then synthetic speech. A clip that
+  // fails to play falls through to TTS.
+  const clipUrl = opts?.audioUrl ?? clipUrlForText(text);
+  if (!hasSynth && !clipUrl) return;
+
+  const synth = hasSynth ? window.speechSynthesis : null;
+
   // Helper: speak the Arabic text. Handles voice loading quirks.
   const doSpeak = () => {
+    if (!synth) return;
     // Chrome fix: cancel any pending/stuck speech first
     synth.cancel();
     setTimeout(() => {
@@ -344,19 +395,30 @@ export function speakArabic(text: string, rate: number = 0.8) {
       setTimeout(() => clearInterval(resumeInterval), 10000);
     }, 50); // 50ms delay after cancel — enough for Chrome to reset
   };
+  const attempt = () => {
+    if (clipUrl) {
+      if (synth) synth.cancel();
+      void playAudioClip(clipUrl, rate).then(ok => {
+        if (!ok && hasSynth) doSpeak();
+      });
+    } else {
+      doSpeak();
+    }
+  };
+
   // If English narration (voice guide) is in progress, don't interrupt it.
   // Queue Arabic speech to fire after the English finishes (up to 3s).
-  if (synth.speaking) {
+  if (synth && synth.speaking) {
     let waited = 0;
     const checkInterval = setInterval(() => {
       waited += 100;
       if (!synth.speaking || waited >= 3000) {
         clearInterval(checkInterval);
-        doSpeak();
+        attempt();
       }
     }, 100);
   } else {
-    doSpeak();
+    attempt();
   }
 }
 
