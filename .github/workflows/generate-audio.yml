@@ -1,21 +1,14 @@
 name: Generate audio clips
 
-# Generates the Edge-TTS Arabic clip set and commits it back to the
-# branch it was run from. The clips cannot be produced from a normal
-# PR (they are binary files synthesised by a script), so generation is
-# a deliberate, manually dispatched step:
+# Generates the Arabic clip set (Google Translate TTS — see
+# scripts/generate-audio.py for why not Edge-TTS) and commits it back
+# to the branch it was run from. The clips cannot be produced from a
+# normal PR (they are binary files synthesised by a script), so
+# generation is a deliberate, manually dispatched step:
 #   Actions -> "Generate audio clips" -> Run workflow.
 # A push to main by this workflow then triggers the normal deploy.
 on:
   workflow_dispatch:
-    inputs:
-      voice:
-        description: "Edge-TTS Arabic voice"
-        type: choice
-        options:
-          - ar-SA-ZariyahNeural
-          - ar-SA-HamedNeural
-        default: ar-SA-ZariyahNeural
 
 permissions:
   contents: write
@@ -43,13 +36,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install edge-tts
-        run: pip install edge-tts
-
       - name: Generate clips and manifest
         run: |
           pnpm exec tsx scripts/list-audio-clips.ts > clips.json
-          python3 scripts/generate-audio.py --clips clips.json --voice "${{ inputs.voice }}"
+          python3 scripts/generate-audio.py --clips clips.json
 
       - name: Commit generated audio
         run: |
@@ -59,6 +49,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No audio changes to commit"
           else
-            git commit -m "feat: generate Arabic audio clips (${{ inputs.voice }})"
+            git commit -m "feat: generate Arabic audio clips (Google TTS)"
             git push
           fi
