@@ -43,7 +43,10 @@ chmod 644 "$UNIT"
 chown -R "$RUNUSER" "$DATA"
 
 echo "== env file =="
-if [ ! -f "$ENV_FILE" ]; then
+if [ -n "${BUG_REPORTER_TOKEN:-}" ]; then
+  printf 'GITHUB_TOKEN=%s\n' "$BUG_REPORTER_TOKEN" > "$ENV_FILE"
+  echo "token installed from workflow secret (value not shown)"
+elif [ ! -f "$ENV_FILE" ]; then
   printf 'GITHUB_TOKEN=\n' > "$ENV_FILE"
   echo "created placeholder $ENV_FILE (token not set yet)"
 else
