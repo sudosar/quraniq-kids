@@ -98,10 +98,10 @@ fi
 echo "== public verify =="
 sleep 2
 echo -n "site: "; curl -s -o /dev/null -w "%{http_code}\n" --max-time 15 https://kids.sabaq.net/
-echo -n "health: "; curl -s --max-time 15 https://kids.sabaq.net/api/bug-health; echo
+echo -n "health: "; curl -s --max-time 15 https://kids.sabaq.net/api/bug-health | head -c 300; echo
 echo -n "probe POST: "
 curl -s --max-time 15 -X POST https://kids.sabaq.net/api/bug-report \
   -H 'Content-Type: application/json' \
-  -d '{"description":"__install_probe__","url":"https://kids.sabaq.net/","screen":"0x0","userAgent":"installer"}'
+  -d '{"description":"__install_probe__","url":"https://kids.sabaq.net/","screen":"0x0","userAgent":"installer"}' | head -c 300
 echo
 echo "OVERALL=$OVERALL"
