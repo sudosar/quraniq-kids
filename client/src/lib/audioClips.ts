@@ -1,5 +1,5 @@
 /**
- * Generated Arabic clips (Edge-TTS neural voice, generated once and
+ * Generated Arabic clips (Google Translate TTS, generated once and
  * shipped as static files — see scripts/generate-audio.py).
  *
  * The clip set is closed: every letter sound, harakat syllable, madd
