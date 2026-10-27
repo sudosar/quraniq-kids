@@ -14,6 +14,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { speakArabic, playCorrectSound, playWrongSound, playCelebrationSound } from '@/lib/gameEngine';
+import { phraseWordAudioUrl } from '@/lib/quranAudio';
 import type { ArabicLetter } from '@/lib/curriculum';
 
 interface SentenceReadingGameProps {
@@ -416,7 +417,9 @@ export default function SentenceReadingGame({ letter, onComplete, onSkip }: Sent
     currentPhrase.words.forEach((word, i) => {
       const timeout = setTimeout(() => {
         setHighlightedWord(i);
-        speakArabic(word, 0.65);
+        speakArabic(word, 0.65, {
+          audioUrl: phraseWordAudioUrl(currentPhrase.ayah, currentPhrase.words[0], i) ?? undefined,
+        });
       }, i * wordDelay);
       playTimeoutRef.current.push(timeout);
     });
@@ -444,7 +447,9 @@ export default function SentenceReadingGame({ letter, onComplete, onSkip }: Sent
       // Correct!
       playCorrectSound();
       setHighlightedWord(wordIndex);
-      speakArabic(currentPhrase.words[wordIndex], 0.65);
+      speakArabic(currentPhrase.words[wordIndex], 0.65, {
+        audioUrl: phraseWordAudioUrl(currentPhrase.ayah, currentPhrase.words[0], wordIndex) ?? undefined,
+      });
 
       if (nextExpectedWord === currentPhrase.words.length - 1) {
         // Completed this phrase!
@@ -676,7 +681,9 @@ export default function SentenceReadingGame({ letter, onComplete, onSkip }: Sent
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => {
-                speakArabic(currentPhrase.words[nextExpectedWord], 0.65);
+                speakArabic(currentPhrase.words[nextExpectedWord], 0.65, {
+                  audioUrl: phraseWordAudioUrl(currentPhrase.ayah, currentPhrase.words[0], nextExpectedWord) ?? undefined,
+                });
               }}
               className="flex items-center gap-2 px-5 py-2 rounded-full border-2 text-sm font-medium"
               style={{ borderColor: letter.color, color: letter.color }}
