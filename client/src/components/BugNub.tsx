@@ -10,16 +10,22 @@ interface BugNubState {
   isSubmitting: boolean;
   screenshot: string | null;
   submitted: boolean;
+  issueUrl: string | null;
+  error: string | null;
 }
 
+const INITIAL_STATE: BugNubState = {
+  isOpen: false,
+  isCapturing: false,
+  isSubmitting: false,
+  screenshot: null,
+  submitted: false,
+  issueUrl: null,
+  error: null,
+};
+
 export function BugNub() {
-  const [state, setState] = useState<BugNubState>({
-    isOpen: false,
-    isCapturing: false,
-    isSubmitting: false,
-    screenshot: null,
-    submitted: false,
-  });
+  const [state, setState] = useState<BugNubState>(INITIAL_STATE);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   const captureScreenshot = useCallback(async () => {
@@ -65,10 +71,51 @@ export function BugNub() {
     }
   }, []);
 
-  // No credentials ship in the browser bundle: the report opens as a
-  // pre-filled GitHub issue for the reporter to submit, and the screenshot
-  // is downloaded so they can attach it.
-  const submitBug = useCallback(() => {
+  // Primary path: POST to the bug-reporter service on this origin, which
+  // files the GitHub issue server-side. No account or token in the app.
+  const submitBug = useCallback(async () => {
+    const description = descriptionRef.current?.value?.trim() || "No description provided";
+    setState((s) => ({ ...s, isSubmitting: true, error: null }));
+    try {
+      const resp = await fetch("/api/bug-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description,
+          url: window.location.href,
+          screen: `${window.innerWidth}x${window.innerHeight}`,
+          time: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          screenshot: state.screenshot,
+        }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data.ok) {
+        const code = data?.error as string | undefined;
+        const message =
+          code === "reporter_not_configured"
+            ? "The reporter isn't fully set up yet. You can still send it via GitHub below."
+            : code === "rate_limited"
+              ? "Lots of reports just now — wait a minute and try again, or use GitHub below."
+              : "Couldn't send the report. Check your connection, or use GitHub below.";
+        setState((s) => ({ ...s, isSubmitting: false, error: message }));
+        return;
+      }
+      setState((s) => ({ ...s, isSubmitting: false, submitted: true, issueUrl: data.url || null }));
+      setTimeout(() => setState(INITIAL_STATE), 4000);
+    } catch (err) {
+      console.error("Bug report submit failed:", err);
+      setState((s) => ({
+        ...s,
+        isSubmitting: false,
+        error: "Couldn't send the report. Check your connection, or use GitHub below.",
+      }));
+    }
+  }, [state.screenshot]);
+
+  // Fallback path: open a pre-filled GitHub issue (needs a GitHub
+  // account) and download the screenshot for manual attaching.
+  const submitViaGitHub = useCallback(() => {
     const description = descriptionRef.current?.value?.trim() || "No description provided";
 
     let body = `## Bug Report\n\n`;
@@ -94,16 +141,9 @@ export function BugNub() {
       a.download = `bug-${Date.now()}.png`;
       a.click();
     }
-
-    setState((s) => ({ ...s, submitted: true }));
-    setTimeout(() => {
-      setState({ isOpen: false, isCapturing: false, isSubmitting: false, screenshot: null, submitted: false });
-    }, 2500);
   }, [state.screenshot]);
 
-  const close = () => {
-    setState({ isOpen: false, isCapturing: false, isSubmitting: false, screenshot: null, submitted: false });
-  };
+  const close = () => setState(INITIAL_STATE);
 
   return (
     <div id="bug-nub-container" className="fixed z-[9999]">
@@ -140,8 +180,18 @@ export function BugNub() {
             {state.submitted ? (
               <div className="p-8 text-center">
                 <div className="text-5xl mb-3">✅</div>
-                <p className="text-lg font-semibold text-green-600">Almost done!</p>
-                <p className="text-sm text-gray-500 mt-1">Tap Submit on the GitHub page that opened.</p>
+                <p className="text-lg font-semibold text-green-600">Report sent!</p>
+                <p className="text-sm text-gray-500 mt-1">Thanks — the developers have it now.</p>
+                {state.issueUrl && (
+                  <a
+                    href={state.issueUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-500 underline mt-2 inline-block"
+                  >
+                    View the report
+                  </a>
+                )}
               </div>
             ) : (
               <div className="p-4 space-y-3">
@@ -170,6 +220,12 @@ export function BugNub() {
                   />
                 </div>
 
+                {state.error && (
+                  <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                    {state.error}
+                  </p>
+                )}
+
                 {/* Submit Button */}
                 <button
                   onClick={submitBug}
@@ -178,16 +234,25 @@ export function BugNub() {
                 >
                   {state.isSubmitting ? (
                     <>
-                      <span className="animate-spin">⏳</span> Submitting...
+                      <span className="animate-spin">⏳</span> Sending...
                     </>
                   ) : (
-                    <>📤 Continue on GitHub</>
+                    <>📤 Submit Report</>
                   )}
                 </button>
 
                 <p className="text-xs text-gray-400 text-center">
-                  Page info is filled in for you; the screenshot downloads so you can attach it
+                  Goes straight to the developers — no account needed
                 </p>
+
+                {state.error && (
+                  <button
+                    onClick={submitViaGitHub}
+                    className="w-full text-sm text-gray-500 underline py-1"
+                  >
+                    Or open it on GitHub instead
+                  </button>
+                )}
               </div>
             )}
           </div>
