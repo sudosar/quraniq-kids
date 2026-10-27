@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
-"""Insert the bug-reporter reverse-proxy handles into the kids.sabaq.net
-site block of a Caddyfile — only on an exact, unambiguous match.
+"""Patch the kids.sabaq.net site block in a Caddyfile for the bug reporter.
+
+Two changes, both only on an exact structural match:
+  1. Insert reverse-proxy `handle` blocks for /api/bug-report,
+     /api/bug-shot/* and /api/bug-health (to 127.0.0.1:8791).
+  2. Move the block's TOP-LEVEL try_files / file_server directives
+     (the SPA fallback) into a trailing catch-all `handle { ... }`.
+     Without this, Caddy runs the top-level rewrite before the API
+     handles and /api/* gets swallowed by the SPA fallback.
 
 Usage: caddy_patch.py <Caddyfile path>
-Exit codes: 0 patched, 4 already present, 3 no safe patch point (no changes).
+Exit codes: 0 patched, 4 already correct, 3 no safe patch point (no changes).
 """
-import re
 import sys
 
 MARKER = "127.0.0.1:8791"
@@ -22,11 +28,8 @@ INSERT = (
 )
 
 
-def main() -> int:
-    path = sys.argv[1]
-    lines = open(path, encoding="utf-8").read().splitlines(keepends=True)
-
-    # Find the site block whose header mentions kids.sabaq.net.
+def block_bounds(lines):
+    """(start, end) line indices of the kids.sabaq.net site block."""
     start = None
     for i, line in enumerate(lines):
         stripped = line.strip()
@@ -34,29 +37,78 @@ def main() -> int:
             start = i
             break
     if start is None:
-        print("NO_MATCH: no kids.sabaq.net site block found")
-        return 3
-
-    # Brace-balance to the block's closing line.
+        return None
     depth = 0
-    end = None
     for i in range(start, len(lines)):
         depth += lines[i].count("{") - lines[i].count("}")
         if i > start and depth == 0:
-            end = i
-            break
-    if end is None:
-        print("NO_MATCH: unbalanced block")
+            return start, i
+    return None
+
+
+def depths(lines, start, end):
+    """Brace depth at the START of each line, relative to the block (=1 inside)."""
+    out = {}
+    depth = 0
+    for i in range(start, end + 1):
+        out[i] = depth
+        depth += lines[i].count("{") - lines[i].count("}")
+    return out
+
+
+def main() -> int:
+    path = sys.argv[1]
+    lines = open(path, encoding="utf-8").read().splitlines(keepends=True)
+    bounds = block_bounds(lines)
+    if bounds is None:
+        print("NO_MATCH: no kids.sabaq.net site block found")
         return 3
+    start, end = bounds
+    changed = False
 
-    block = "".join(lines[start:end + 1])
-    if MARKER in block:
-        print("ALREADY: bug-reporter handles present")
+    # 1) API handles.
+    if MARKER not in "".join(lines[start:end + 1]):
+        lines[end:end] = [INSERT]
+        end += 1
+        changed = True
+        print("PATCHED: inserted API handles")
+
+    # 2) Wrap top-level SPA fallback directives into a catch-all handle.
+    d = depths(lines, start, end)
+    groups = []  # (first_idx, last_idx) of depth-1 try_files / file_server
+    i = start + 1
+    while i < end:
+        if d.get(i) == 1:
+            stripped = lines[i].strip()
+            if stripped.startswith("try_files") or stripped.startswith("file_server"):
+                j = i
+                bal = lines[i].count("{") - lines[i].count("}")
+                while bal > 0 and j + 1 < end:
+                    j += 1
+                    bal += lines[j].count("{") - lines[j].count("}")
+                groups.append((i, j))
+                i = j + 1
+                continue
+        i += 1
+
+    if groups:
+        moved = []
+        for a, b in reversed(groups):
+            moved = lines[a:b + 1] + moved
+            del lines[a:b + 1]
+            end -= (b + 1 - a)
+        wrapped = ["\thandle {\n"]
+        for ln in moved:
+            wrapped.append("\t" + ln if ln.strip() else ln)
+        wrapped.append("\t}\n")
+        lines[end:end] = wrapped
+        changed = True
+        print(f"PATCHED: wrapped {len(moved)} fallback line(s) into catch-all handle")
+
+    if not changed:
+        print("ALREADY: API handles present and fallback already wrapped")
         return 4
-
-    lines[end:end] = [INSERT]
     open(path, "w", encoding="utf-8").write("".join(lines))
-    print(f"PATCHED: inserted handles before line {end + 1}")
     return 0
 
 
