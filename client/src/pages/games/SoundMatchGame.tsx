@@ -20,7 +20,7 @@ interface Props {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -111,7 +111,7 @@ export default function SoundMatchGame({ letter, distractorLetters, onComplete }
         setShowResult(true);
         const finalScore = correct ? score + 1 : score;
         if (finalScore >= 2) {
-          setTimeout(() => onComplete(finalScore >= 3 ? 2 : 1), 1500);
+          setTimeout(() => onComplete(finalScore >= 3 ? 2 : 1, TOTAL_ROUNDS - finalScore), 1500);
         } else {
           setTimeout(() => {
             setCurrentRound(0);

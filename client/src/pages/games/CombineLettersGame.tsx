@@ -30,7 +30,7 @@ interface Props {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -248,7 +248,7 @@ export default function CombineLettersGame({ letter, distractorLetters, onComple
         setShowResult(true);
         const finalScore = correct ? score + 1 : score;
         if (finalScore >= 3) {
-          setTimeout(() => onComplete(finalScore >= 4 ? 2 : 1), 1500);
+          setTimeout(() => onComplete(finalScore >= 4 ? 2 : 1, QUIZ_ROUNDS - finalScore), 1500);
         } else {
           setTimeout(() => {
             setCurrentRound(0);

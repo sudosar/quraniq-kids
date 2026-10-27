@@ -41,7 +41,7 @@ interface Props {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -188,6 +188,7 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
   const [gameReady, setGameReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const layoutDone = useRef(false);
+  const mistakesRef = useRef(0);
 
   // Get all forms of the target letter
   const letterFormsData = useMemo(() => getLetterForms(letter.letter), [letter]);
@@ -335,10 +336,11 @@ export default function BubblePopGame({ letter, distractorLetters, distractorCou
       if (newScore >= TARGET_COUNT) {
         setTimeout(() => {
           playCorrectSound();
-          onComplete(2);
+          onComplete(2, mistakesRef.current);
         }, 600);
       }
     } else {
+      mistakesRef.current += 1;
       playWrongSound();
       setBubbles(prev => prev.map(b =>
         b.id === bubble.id ? { ...b, wobble: true } : b

@@ -26,7 +26,7 @@ interface Props {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -155,6 +155,7 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
   const [isDragging, setIsDragging] = useState(false);
   const [score, setScore] = useState(0);
   
+  const mistakesRef = useRef(0);
   const targetRefs = useRef<(HTMLDivElement | null)[]>([]);
   const beginningWords = useMemo(() => getBeginningWords(letter), [letter]);
   const totalRounds = Math.min(3, beginningWords.length);
@@ -251,6 +252,7 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
       if (hit.isCorrect) {
         handleCorrect(hit);
       } else {
+        mistakesRef.current += 1;
         setWrongTarget(hitIndex);
         playWrongSound();
         setTimeout(() => setWrongTarget(null), 800);
@@ -271,7 +273,7 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
         setMatched(false);
         setShowHint(false);
       } else {
-        onComplete(2);
+        onComplete(2, mistakesRef.current);
       }
     }, 1500);
   }, [round, totalRounds, onComplete]);
@@ -283,6 +285,7 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
     if (target.isCorrect) {
       handleCorrect(target);
     } else {
+      mistakesRef.current += 1;
       setWrongTarget(idx);
       playWrongSound();
       setTimeout(() => setWrongTarget(null), 800);

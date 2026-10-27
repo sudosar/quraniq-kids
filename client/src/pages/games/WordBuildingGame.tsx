@@ -19,7 +19,7 @@ interface WordBuildingGameProps {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -320,7 +320,7 @@ export default function WordBuildingGame({ letter, onComplete, onSkip }: WordBui
           <p className="text-sm text-gray-500 mb-6">You're learning to read Quranic words!</p>
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={() => onComplete(moons)}
+            onClick={() => onComplete(moons, totalQuizRounds - score)}
             className="px-8 py-3 rounded-full text-white font-bold text-lg shadow-lg"
             style={{ backgroundColor: letter.color }}
           >

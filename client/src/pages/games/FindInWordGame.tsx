@@ -31,7 +31,7 @@ interface Props {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -215,7 +215,7 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
       setWordIndex(prev => prev + 1);
     } else {
       const stars = mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
-      onComplete(stars);
+      onComplete(stars, mistakes);
     }
   }, [wordIndex, quranicWords.length, mistakes, onComplete]);
 

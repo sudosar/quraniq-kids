@@ -22,7 +22,7 @@ interface SentenceReadingGameProps {
   lessonLetters: ArabicLetter[];
   distractorLetters: ArabicLetter[];
   distractorCount: number;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, mistakes?: number) => void;
   onSkip: () => void;
 }
 
@@ -497,7 +497,7 @@ export default function SentenceReadingGame({ letter, onComplete, onSkip }: Sent
           </p>
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={() => onComplete(moons)}
+            onClick={() => onComplete(moons, mistakes)}
             className="px-8 py-3 rounded-full text-white font-bold text-lg shadow-lg"
             style={{ backgroundColor: letter.color }}
           >

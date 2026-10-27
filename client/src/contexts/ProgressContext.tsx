@@ -8,6 +8,7 @@ import {
   applyResult,
   getDueLetterIds,
   getMasteryStats,
+  ensureIntroduced,
 } from '@/lib/mastery';
 import { getLettersForLesson } from '@/lib/curriculum';
 import { DailyProgress, DAILY_GOAL_MOONS, addDailyMoons, currentDaily, isGoalMet } from '@/lib/garden';
@@ -36,6 +37,7 @@ interface ProgressContextType extends ProgressState {
   getLessonProgress: (lessonId: number) => number; // 0-100
   // Mastery / spaced repetition
   recordLetterResult: (letterId: number, correct: boolean) => void;
+  introduceLetter: (letterId: number) => void;
   getLetterMastery: (letterId: number) => LetterMastery | undefined;
   getDueLetters: () => number[];
   masteryStats: MasteryStats;
@@ -193,6 +195,13 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const introduceLetter = useCallback((letterId: number) => {
+    setState(prev => ({
+      ...prev,
+      letterMastery: ensureIntroduced(prev.letterMastery, letterId),
+    }));
+  }, []);
+
   const getLetterMastery = useCallback(
     (letterId: number) => state.letterMastery[letterId],
     [state.letterMastery],
@@ -232,6 +241,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       isActivityComplete,
       getLessonProgress,
       recordLetterResult,
+      introduceLetter,
       getLetterMastery,
       getDueLetters,
       masteryStats,
