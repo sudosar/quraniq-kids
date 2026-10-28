@@ -57,7 +57,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add client/public/audio client/src/lib/audioClips.generated.ts
+          git add client/public/audio client/src/lib/audioClips.generated.ts client/src/lib/audioClips.sources.json
           if git diff --cached --quiet; then
             echo "No audio changes to commit"
           else

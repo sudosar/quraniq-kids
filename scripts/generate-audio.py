@@ -45,6 +45,10 @@ import edge_tts
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "client" / "public" / "audio" / "clips"
 MANIFEST_TS = ROOT / "client" / "src" / "lib" / "audioClips.generated.ts"
+# Records the text each clip was synthesised from, so a later run can
+# tell "already generated" from "generated from a stale source" and
+# re-synthesise only the clips whose pronunciation changed.
+SOURCES_JSON = ROOT / "client" / "src" / "lib" / "audioClips.sources.json"
 TMP_DIR = ROOT / ".audio-tmp"
 
 VOICE_DEFAULT = "ar-SA-HamedNeural"
@@ -208,21 +212,70 @@ def peak_normalise(mp3: Path) -> None:
     shutil.move(str(boosted), str(mp3))
 
 
-async def synth(clip: dict, voice: str, sem: asyncio.Semaphore) -> bool:
+def source_text(clip: dict) -> str:
+    """The text Edge-TTS is asked to speak for this clip.
+
+    For most clips that is the displayed text. For bare-consonant
+    vocabulary words it is the explicitly vocalised form from
+    client/src/lib/pronunciations.ts ("speak"), because Edge-TTS
+    cannot guess a vowel from a bare skeleton and guesses it wrong
+    (issue #21). The manifest still keys the clip by the DISPLAYED
+    text, so the app is unaffected.
+    """
+    return clip.get("speak") or clip["text"]
+
+
+def load_sources() -> dict:
+    """Previously recorded synthesis sources, id -> text."""
+    if not SOURCES_JSON.exists():
+        return {}
+    try:
+        data = json.loads(SOURCES_JSON.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+async def synth(clip: dict, voice: str, sem: asyncio.Semaphore,
+                sources: dict | None = None) -> bool:
     out = OUT_DIR / f"{clip['id']}.mp3"
     text = clip["text"]
+    spoken = source_text(clip)
     name = LETTER_NAMES.get(text)
-    # Bare letters always regenerate: their recipe changed (name-word
-    # instead of doubled+trimmed), so a stale fragment must not be
-    # kept just because the file exists.
-    if name is None and out.exists() and out.stat().st_size > 0:
-        return True
+
+    if out.exists() and out.stat().st_size > 0:
+        recorded = (sources or {}).get(clip["id"])
+        if name is not None:
+            # Bare letters always regenerate: their recipe changed
+            # (name-word instead of doubled+trimmed), so a stale
+            # fragment must not be kept just because the file exists.
+            print(f"  re-synthesising {clip['id']} (bare letter)", file=sys.stderr)
+            out.unlink()
+        elif recorded is None:
+            # No provenance recorded for this clip.
+            if spoken == text:
+                return True  # synthesised from the displayed text — keep it
+            # Explicit pronunciation override with unknown provenance:
+            # the existing audio may have been made from the bare form,
+            # so regenerate it.
+            print(f"  re-synthesising {clip['id']} ({clip['text']}): "
+                  f"unknown source -> {spoken!r}", file=sys.stderr)
+            out.unlink()
+        elif recorded == spoken:
+            return True
+        else:
+            # The recorded source text changed, so a corrected
+            # pronunciation actually replaces the old audio.
+            print(f"  re-synthesising {clip['id']} ({clip['text']}): "
+                  f"{recorded!r} -> {spoken!r}", file=sys.stderr)
+            out.unlink()
+
     if name is not None:
         syllable = False
         speak = name
     else:
         syllable = is_syllable(text)
-        speak = f"{text} {text}" if syllable else text
+        speak = f"{spoken} {spoken}" if syllable else spoken
     rate = RATE_SYLLABLE if syllable else RATE_WORD
     async with sem:
         for attempt in (1, 2):
@@ -258,6 +311,15 @@ def write_manifest(clips: list) -> None:
     MANIFEST_TS.write_text("\n".join(lines), encoding="utf-8")
 
 
+def write_sources(clips: list) -> None:
+    """Record the synthesis source of every clip, for the next run."""
+    sources = {clip["id"]: source_text(clip) for clip in clips}
+    SOURCES_JSON.write_text(
+        json.dumps(sources, ensure_ascii=False, indent=1, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
 async def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--clips", required=True, help="JSON clip list from list-audio-clips.ts")
@@ -274,8 +336,11 @@ async def main() -> int:
     clips = json.loads(Path(args.clips).read_text(encoding="utf-8"))
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     sem = asyncio.Semaphore(4)
-    results = await asyncio.gather(*(synth(c, args.voice, sem) for c in clips))
+    sources = load_sources()
+    results = await asyncio.gather(
+        *(synth(c, args.voice, sem, sources) for c in clips))
     write_manifest(clips)
+    write_sources(clips)
     failed = [c["id"] for c, ok in zip(clips, results) if not ok]
     print(f"done: {sum(results)}/{len(clips)} clips ok; manifest regenerated")
     if failed:
