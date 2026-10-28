@@ -23,5 +23,7 @@ export function clipUrlForText(text: string): string | undefined {
   const path = AUDIO_CLIPS[normalizeArabicText(text)];
   if (!path) return undefined;
   const base = import.meta.env.BASE_URL || '/';
-  return `${base.replace(/\/?$/, '/')}${path}`;
+  // Manifest paths are relative to public/audio/ (files ship under
+  // /audio/clips/...), so the audio/ segment belongs in the URL.
+  return `${base.replace(/\/?$/, '/')}audio/${path}`;
 }
