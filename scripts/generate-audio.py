@@ -52,6 +52,21 @@ RATE_SYLLABLE = "-25%"
 RATE_WORD = "-15%"
 
 # Combining marks used by the clip list (harakat + tanween + sukoon).
+# Arabic names of the letters (mirrors nameAr in lib/curriculum.ts).
+# Bare-letter clips speak the NAME: a doubled+trimmed lone letter
+# fragments the name ("jeem" was cut to a "jay"-sounding stub), because
+# name pronunciations have internal energy dips the trimmer mistakes
+# for the gap between articulations. Names are ordinary words to the
+# synthesiser, so they take the single-pass word path.
+LETTER_NAMES = {
+    "ا": "ألف", "ب": "باء", "ت": "تاء", "ث": "ثاء", "ج": "جيم",
+    "ح": "حاء", "خ": "خاء", "د": "دال", "ذ": "ذال", "ر": "راء",
+    "ز": "زاي", "س": "سين", "ش": "شين", "ص": "صاد", "ض": "ضاد",
+    "ط": "طاء", "ظ": "ظاء", "ع": "عين", "غ": "غين", "ف": "فاء",
+    "ق": "قاف", "ك": "كاف", "ل": "لام", "م": "ميم", "ن": "نون",
+    "ه": "هاء", "و": "واو", "ي": "ياء",
+}
+
 MARKS = set("ًٌٍَُِّْٰ")
 
 
@@ -195,11 +210,19 @@ def peak_normalise(mp3: Path) -> None:
 
 async def synth(clip: dict, voice: str, sem: asyncio.Semaphore) -> bool:
     out = OUT_DIR / f"{clip['id']}.mp3"
-    if out.exists() and out.stat().st_size > 0:
-        return True
     text = clip["text"]
-    syllable = is_syllable(text)
-    speak = f"{text} {text}" if syllable else text
+    name = LETTER_NAMES.get(text)
+    # Bare letters always regenerate: their recipe changed (name-word
+    # instead of doubled+trimmed), so a stale fragment must not be
+    # kept just because the file exists.
+    if name is None and out.exists() and out.stat().st_size > 0:
+        return True
+    if name is not None:
+        syllable = False
+        speak = name
+    else:
+        syllable = is_syllable(text)
+        speak = f"{text} {text}" if syllable else text
     rate = RATE_SYLLABLE if syllable else RATE_WORD
     async with sem:
         for attempt in (1, 2):
