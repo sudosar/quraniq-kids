@@ -424,21 +424,32 @@ export default function DragToMatchGame({ letter, distractorLetters, onComplete 
         </AnimatePresence>
       </div>
       
-      {showHint && !matched && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center text-amber-600 text-sm mt-3 font-medium"
-        >
-          💡 Hint: Look for the picture that starts with "{letter.name}"!
-        </motion.p>
-      )}
-      
-      {!isDragging && !matched && !showHint && (
-        <p className="text-center text-gray-400 text-xs mt-3">
-          Drag the letter to the picture, or tap the correct one!
-        </p>
-      )}
+      {/*
+        Footer slot — fixed minimum height, always mounted. The old code
+        unmounted this text while dragging (and swapped it for the hint),
+        and with the column's justify-between that moved the picture grid
+        down off the screen on every touch-and-hold. Content now only
+        swaps/fades inside the slot, so the grid never moves.
+      */}
+      <div className="mt-3 min-h-[2.5rem] flex items-start justify-center px-2">
+        {showHint && !matched ? (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center text-amber-600 text-sm font-medium"
+          >
+            💡 Hint: which picture starts with "{letter.name}"?
+          </motion.p>
+        ) : (
+          <p
+            className={`text-center text-gray-400 text-xs transition-opacity ${
+              isDragging || matched ? 'opacity-0' : 'opacity-100'
+            }`}
+          >
+            Drag the letter to the picture, or tap the correct one!
+          </p>
+        )}
+      </div>
     </div>
   );
 }
