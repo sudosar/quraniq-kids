@@ -4,6 +4,7 @@ import {
   applyResult,
   isDue,
   isMastered,
+  hasPassed,
   getDueLetterIds,
   getMasteryStats,
   summariseLetterPerformance,
@@ -81,5 +82,18 @@ describe('mastery spaced repetition', () => {
     const today = day('2026-01-02');
     expect(getDueLetterIds(map, today)).toEqual([2, 1]); // weakest first, #3 not due
     expect(getMasteryStats(map, today)).toEqual({ introduced: 3, mastered: 1, due: 2 });
+  });
+
+  it('hasPassed needs one lifetime correct rep and never decays on misses', () => {
+    expect(hasPassed(undefined)).toBe(false);
+    // Freshly introduced or exposure-only: no correct rep, not passed.
+    expect(hasPassed(createMastery(1, day('2026-01-01')))).toBe(false);
+    let m = createMastery(1, day('2026-01-01'));
+    m = applyResult(m, true, day('2026-01-01')); // one clean rep
+    expect(hasPassed(m)).toBe(true);
+    // Later misses drop strength but must not re-lock the letter.
+    m = applyResult(m, false, day('2026-01-03'));
+    expect(m.strength).toBe(1);
+    expect(hasPassed(m)).toBe(true);
   });
 });
