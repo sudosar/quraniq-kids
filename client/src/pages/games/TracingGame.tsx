@@ -55,8 +55,10 @@ interface StrokeProgress {
 
 // Configuration
 const CANVAS_SIZE = 320;
-const STROKE_THRESHOLD = 0.85; // 85% of samples must be covered
-const MAX_DISTANCE_TOLERANCE = 0.07; // How far from path is still "on track"
+const STROKE_THRESHOLD = 0.75; // 75% of samples must be covered (kid-forgiving)
+const MAX_DISTANCE_TOLERANCE = 0.08; // How far from path is still "on track"
+const START_TOLERANCE = 0.11; // Softer gate for starting a stroke (finger is wide)
+const DOT_TAP_TOLERANCE = 0.11; // A dot completes on one tap within this distance
 const ARROW_SPEED = 1.5; // Seconds to travel full stroke
 const MIN_TRACING_LENGTH = 0.15; // Minimum fraction of stroke that must be traced
 
@@ -156,6 +158,31 @@ export default function TracingGame({ letter, onComplete }: Props) {
 
       const points = stroke.points;
       if (points.length < 2) return;
+
+      // Dots are round tap targets, not lines: draw a filled circle at the
+      // midpoint of the dot's tiny segment instead of a dash.
+      if (stroke.type === 'dot') {
+        const cx = ((points[0].x + points[points.length - 1].x) / 2) * canvasSize;
+        const cy = ((points[0].y + points[points.length - 1].y) / 2) * canvasSize;
+        const r = canvasSize * 0.032;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = isCompleted
+          ? letter.color
+          : isCurrent
+            ? `${letter.color}60`
+            : `${letter.color}15`;
+        ctx.fill();
+        if (isCurrent) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, r * 0.45, 0, Math.PI * 2);
+          ctx.fillStyle = letter.color;
+          ctx.fill();
+        }
+        ctx.restore();
+        return;
+      }
 
       // Convert normalized to canvas coordinates
       const toCanvas = (p: StrokePoint) => ({
@@ -330,7 +357,7 @@ export default function TracingGame({ letter, onComplete }: Props) {
   }, [canvasSize]);
 
   // Check if point is near current stroke path
-  const checkPathProximity = useCallback((point: { x: number; y: number }): {
+  const checkPathProximity = useCallback((point: { x: number; y: number }, tolerance: number = MAX_DISTANCE_TOLERANCE): {
     onPath: boolean;
     distance: number;
     closestSampleIdx: number;
@@ -353,11 +380,53 @@ export default function TracingGame({ letter, onComplete }: Props) {
     }
 
     return {
-      onPath: minDist <= MAX_DISTANCE_TOLERANCE,
+      onPath: minDist <= tolerance,
       distance: minDist,
       closestSampleIdx: closestIdx,
     };
   }, [strokeData]);
+
+  // Centre of a dot stroke (dots are tiny segments; the circle is drawn
+  // at their midpoint)
+  const getDotCenter = useCallback((stroke: LetterStroke) => {
+    const first = stroke.points[0];
+    const last = stroke.points[stroke.points.length - 1];
+    return { x: (first.x + last.x) / 2, y: (first.y + last.y) / 2 };
+  }, []);
+
+  // Advance after a stroke completes (shared by drag completion and dot taps)
+  const advanceAfterStroke = useCallback(() => {
+    const strokeIdx = currentStrokeRef.current;
+    playCorrectSound();
+    setUserPath([]);
+    userPathRef.current = [];
+
+    if (strokeIdx < totalStrokes - 1) {
+      // Move to next stroke
+      setTimeout(() => {
+        setCurrentStrokeIdx(prev => prev + 1);
+        setShowHint(true);
+      }, 400);
+    } else {
+      // All strokes complete!
+      setCompleted(true);
+      speakArabic(letter.letter);
+      setTimeout(() => onComplete(3), 2000);
+    }
+  }, [totalStrokes, letter, onComplete]);
+
+  // Complete a dot stroke on one tap (no dragging along a dash)
+  const completeDotStroke = useCallback(() => {
+    const strokeIdx = currentStrokeRef.current;
+    if (strokeProgressesRef.current[strokeIdx]?.isComplete) return;
+    const updated = [...strokeProgressesRef.current];
+    updated[strokeIdx] = { coveredSamples: new Set([0]), isComplete: true };
+    strokeProgressesRef.current = updated;
+    setStrokeProgresses(updated);
+    setIsDrawing(false);
+    isDrawingRef.current = false;
+    advanceAfterStroke();
+  }, [advanceAfterStroke]);
 
   // Start drawing
   const startDrawing = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -367,13 +436,21 @@ export default function TracingGame({ letter, onComplete }: Props) {
     const point = getCanvasPoint(e);
     if (!point) return;
 
-    // Check if starting near the current stroke
-    const proximity = checkPathProximity(point);
     const currentStroke = strokeData.strokes[currentStrokeRef.current];
-    
+
     if (!currentStroke) return;
 
-    // Must start near the current stroke
+    // Dots complete on one tap — no dragging along a line
+    if (currentStroke.type === 'dot') {
+      const center = getDotCenter(currentStroke);
+      if (Math.hypot(point.x - center.x, point.y - center.y) <= DOT_TAP_TOLERANCE) {
+        completeDotStroke();
+      }
+      return;
+    }
+
+    // Must start near the current stroke (softer gate: a finger is wide)
+    const proximity = checkPathProximity(point, START_TOLERANCE);
     if (!proximity.onPath) return;
 
     setIsDrawing(true);
@@ -382,7 +459,7 @@ export default function TracingGame({ letter, onComplete }: Props) {
     setUserPath([point]);
     userPathRef.current = [point];
     setOffPathWarning(false);
-  }, [completed, getCanvasPoint, checkPathProximity, strokeData]);
+  }, [completed, getCanvasPoint, checkPathProximity, strokeData, getDotCenter, completeDotStroke]);
 
   // Draw / trace
   const draw = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -391,6 +468,16 @@ export default function TracingGame({ letter, onComplete }: Props) {
 
     const point = getCanvasPoint(e);
     if (!point) return;
+
+    // Dots complete on contact — no dragging along a dash
+    const currentStroke = strokeData.strokes[currentStrokeRef.current];
+    if (currentStroke?.type === 'dot') {
+      const center = getDotCenter(currentStroke);
+      if (Math.hypot(point.x - center.x, point.y - center.y) <= DOT_TAP_TOLERANCE) {
+        completeDotStroke();
+      }
+      return;
+    }
 
     // Check proximity to path
     const proximity = checkPathProximity(point);
@@ -445,7 +532,7 @@ export default function TracingGame({ letter, onComplete }: Props) {
         setParticles(prev => [...prev.slice(-20), ...newParticles]);
       }
     }
-  }, [completed, getCanvasPoint, checkPathProximity, strokeData, canvasSize, letter.color]);
+  }, [completed, getCanvasPoint, checkPathProximity, strokeData, canvasSize, letter.color, getDotCenter, completeDotStroke]);
 
   // Stop drawing and evaluate
   const stopDrawing = useCallback(() => {
@@ -459,31 +546,14 @@ export default function TracingGame({ letter, onComplete }: Props) {
     
     if (progress?.isComplete) {
       // Stroke completed! Move to next
-      playCorrectSound();
-      
-      // Clear user path
-      setUserPath([]);
-      userPathRef.current = [];
-
-      if (strokeIdx < totalStrokes - 1) {
-        // Move to next stroke
-        setTimeout(() => {
-          setCurrentStrokeIdx(prev => prev + 1);
-          setShowHint(true);
-        }, 400);
-      } else {
-        // All strokes complete!
-        setCompleted(true);
-        speakArabic(letter.letter);
-        setTimeout(() => onComplete(3), 2000);
-      }
+      advanceAfterStroke();
     } else {
       // Stroke not complete - reset path but keep progress
       setUserPath([]);
       userPathRef.current = [];
       setShowHint(true);
     }
-  }, [totalStrokes, letter, onComplete]);
+  }, [advanceAfterStroke]);
 
   // Get arrow position on current stroke path
   const getArrowPosition = useMemo(() => {
