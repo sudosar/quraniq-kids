@@ -63,7 +63,11 @@ RATE_WORD = "-15%"
 # for the gap between articulations. Names are ordinary words to the
 # synthesiser, so they take the single-pass word path.
 LETTER_NAMES = {
-    "ا": "ألف", "ب": "باء", "ت": "تاء", "ث": "ثاء", "ج": "جيم",
+    # Alif is vocalised WITH sukun: bare "ألف" is also the word for
+    # "thousand" and Edge reads it as "alf", not the letter name
+    # "alif". "أَلِفْ" decodes unambiguously as the name (verified
+    # by unbiased transcription, 30 Oct 2026).
+    "ا": "أَلِفْ", "ب": "باء", "ت": "تاء", "ث": "ثاء", "ج": "جيم",
     "ح": "حاء", "خ": "خاء", "د": "دال", "ذ": "ذال", "ر": "راء",
     "ز": "زاي", "س": "سين", "ش": "شين", "ص": "صاد", "ض": "ضاد",
     "ط": "طاء", "ظ": "ظاء", "ع": "عين", "غ": "غين", "ف": "فاء",
