@@ -86,6 +86,17 @@ export function isMastered(m: LetterMastery): boolean {
   return m.strength >= MASTERED_STRENGTH;
 }
 
+/**
+ * Progression gate: a letter counts as PASSED once the child has earned
+ * at least one lifetime correct rep. Unlike strength, this never decays
+ * on later misses, so a bad day in Review can never re-lock letters the
+ * child already earned their way past. Review still uses strength and
+ * due dates to pull weak letters back for practice.
+ */
+export function hasPassed(m: LetterMastery | undefined): boolean {
+  return !!m && m.correct > 0;
+}
+
 export type MasteryMap = Record<number, LetterMastery>;
 
 /**

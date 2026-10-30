@@ -9,14 +9,14 @@ import { motion } from 'framer-motion';
 import { useLocation } from 'wouter';
 import { useProgress } from '@/contexts/ProgressContext';
 import ProgressRing from '@/components/ProgressRing';
-import { levels, lessons, isLessonUnlocked } from '@/lib/curriculum';
+import { levels, lessons, isLessonUnlocked, getLettersForLesson } from '@/lib/curriculum';
 import { Star, Lock, ChevronLeft, CheckCircle2, BookOpen, Map, RotateCw } from 'lucide-react';
 import { MASCOT, PATTERN_TILE } from '@/lib/assets';
 
 
 export default function LevelMap() {
   const [, navigate] = useLocation();
-  const { completedLessons, stars, masteryStats, dailyMoons, dailyGoal, dailyGoalMet } = useProgress();
+  const { completedLessons, stars, masteryStats, dailyMoons, dailyGoal, dailyGoalMet, isLetterPassed } = useProgress();
 
   const totalLessons = lessons.length;
   const completedCount = completedLessons.length;
@@ -169,7 +169,16 @@ export default function LevelMap() {
             <div className="grid grid-cols-2 gap-3">
               {level.lessons.map((lessonId) => {
                 const lesson = lessons.find(l => l.id === lessonId)!;
-                const unlocked = isLessonUnlocked(lessonId, completedLessons);
+                // PROGRESSION GATE: besides the previous lesson being
+                // finished, every letter of that lesson must have been
+                // passed (a clean assessed run). Finishing by skipping
+                // through no longer unlocks the next lesson.
+                const prereq = lesson.unlockAfter
+                  ? lessons.find(l => l.id === lesson.unlockAfter)
+                  : undefined;
+                const prereqPassed = !prereq
+                  || getLettersForLesson(prereq.id).every(l => isLetterPassed(l.id));
+                const unlocked = isLessonUnlocked(lessonId, completedLessons) && prereqPassed;
                 const completed = completedLessons.includes(lessonId);
 
                 return (

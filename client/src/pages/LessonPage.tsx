@@ -19,7 +19,7 @@ import { MASCOT } from '@/lib/assets';
 export default function LessonPage() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const { isActivityComplete, completedLessons } = useProgress();
+  const { completedLessons, isLetterPassed } = useProgress();
   
   const lessonId = parseInt(params.id || '1');
   const lesson = lessons.find(l => l.id === lessonId);
@@ -81,8 +81,11 @@ export default function LessonPage() {
     );
   }
 
-  // Count completed letters
-  const completedCount = lessonLetters.filter(l => isActivityComplete(lessonId, `letter-${l.id}`)).length;
+  // "Completed" here means PASSED (at least one clean assessed run),
+  // not merely played through: the next letter stays locked until this
+  // one is passed, and a played-but-weak letter shows as current so the
+  // child can practise it again (or catch it in Review).
+  const completedCount = lessonLetters.filter(l => isLetterPassed(l.id)).length;
   const isLessonDone = completedLessons.includes(lessonId);
 
   return (
@@ -127,9 +130,11 @@ export default function LessonPage() {
       <div className="flex-1 px-4 pb-6 overflow-y-auto">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {lessonLetters.map((letterObj, index) => {
-            const isComplete = isActivityComplete(lessonId, `letter-${letterObj.id}`);
-            // A letter is unlocked if it's the first or the previous one is complete
-            const isUnlocked = index === 0 || isActivityComplete(lessonId, `letter-${lessonLetters[index - 1].id}`);
+            const isComplete = isLetterPassed(letterObj.id);
+            // PROGRESSION GATE: a letter unlocks only when the previous
+            // letter has been passed (a clean assessed run), never just
+            // because its games were played or skipped through.
+            const isUnlocked = index === 0 || isLetterPassed(lessonLetters[index - 1].id);
             const isCurrent = isUnlocked && !isComplete;
 
             return (

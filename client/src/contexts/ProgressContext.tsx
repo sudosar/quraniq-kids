@@ -9,6 +9,7 @@ import {
   getDueLetterIds,
   getMasteryStats,
   ensureIntroduced,
+  hasPassed,
 } from '@/lib/mastery';
 import { getLettersForLesson } from '@/lib/curriculum';
 import { DailyProgress, DAILY_GOAL_MOONS, addDailyMoons, currentDaily, isGoalMet } from '@/lib/garden';
@@ -41,6 +42,10 @@ interface ProgressContextType extends ProgressState {
   getLetterMastery: (letterId: number) => LetterMastery | undefined;
   getDueLetters: () => number[];
   masteryStats: MasteryStats;
+  // Progression gate: true once the letter has at least one clean
+  // assessed pass (see hasPassed in mastery.ts). Unlocks use this,
+  // never raw completion, so skipping through cannot advance a child.
+  isLetterPassed: (letterId: number) => boolean;
   // Daily goal
   dailyMoons: number;
   dailyGoal: number;
@@ -71,8 +76,10 @@ function seedMasteryFromLessons(completedLessons: number[]): MasteryMap {
   for (const lessonId of completedLessons) {
     for (const letter of getLettersForLesson(lessonId)) {
       if (!map[letter.id]) {
-        // Treat prior completion as one good rep (strength 2), due today.
-        map[letter.id] = { ...createMastery(letter.id), strength: 2 };
+        // Treat prior completion as one good rep (strength 2, one
+        // correct rep) so the progression gate does not retro-lock
+        // letters a returning child already finished.
+        map[letter.id] = { ...createMastery(letter.id), strength: 2, correct: 1 };
       }
     }
   }
@@ -207,6 +214,11 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     [state.letterMastery],
   );
 
+  const isLetterPassed = useCallback(
+    (letterId: number) => hasPassed(state.letterMastery[letterId]),
+    [state.letterMastery],
+  );
+
   const getDueLetters = useCallback(
     () => getDueLetterIds(state.letterMastery),
     [state.letterMastery],
@@ -245,6 +257,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       getLetterMastery,
       getDueLetters,
       masteryStats,
+      isLetterPassed,
       dailyMoons,
       dailyGoal: DAILY_GOAL_MOONS,
       dailyGoalMet,

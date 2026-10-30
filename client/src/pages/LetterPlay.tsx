@@ -37,7 +37,7 @@ import { MASCOT } from '@/lib/assets';
 export default function LetterPlay() {
   const params = useParams<{ lessonId: string; letterIndex: string }>();
   const [, navigate] = useLocation();
-  const { addStars, completeActivity, completeLesson, completedLessons, recordLetterResult, introduceLetter } = useProgress();
+  const { addStars, completeActivity, completeLesson, completedLessons, recordLetterResult, introduceLetter, isLetterPassed } = useProgress();
   
   const lessonId = parseInt(params.lessonId || '1');
   const letterIdx = parseInt(params.letterIndex || '0');
@@ -70,8 +70,28 @@ export default function LetterPlay() {
   const [showTransition, setShowTransition] = useState(false);
   const [totalStars, setTotalStars] = useState(0);
   const [showLessonComplete, setShowLessonComplete] = useState(false);
+  const [practiceAgain, setPracticeAgain] = useState(false);
 
   const currentGame = gameSequence[gameIndex];
+
+  // PROGRESSION GATE, also enforced here so a direct link cannot jump
+  // past it: a letter is playable only if the previous letter was
+  // passed, and a lesson only if its prerequisite lesson's letters
+  // were all passed. Locked URLs bounce back to the map/grid.
+  const lessonDef = lessons.find(l => l.id === lessonId);
+  const prereqLesson = lessonDef?.unlockAfter
+    ? lessons.find(l => l.id === lessonDef.unlockAfter)
+    : undefined;
+  const lessonLocked = !!prereqLesson && (
+    !completedLessons.includes(prereqLesson.id) ||
+    !getLettersForLesson(prereqLesson.id).every(l => isLetterPassed(l.id))
+  );
+  const prevLetter = letterIdx > 0 ? lessonLetters[letterIdx - 1] : undefined;
+  const letterLocked = !!prevLetter && !isLetterPassed(prevLetter.id);
+  useEffect(() => {
+    if (lessonLocked) navigate('/levels');
+    else if (letterLocked) navigate(`/lesson/${lessonId}`);
+  }, [lessonLocked, letterLocked, navigate, lessonId]);
 
   // Mistakes reported by each assessed game for the current letter.
   // Exposure games (intro, word cards, tracing) report nothing, so a
@@ -79,6 +99,7 @@ export default function LetterPlay() {
   const mistakesRef = useRef<number[]>([]);
   useEffect(() => {
     mistakesRef.current = [];
+    setPracticeAgain(false);
   }, [currentLetter.id]);
 
   const handleGameComplete = useCallback((starsEarned: number = 1, mistakes?: number) => {
@@ -108,6 +129,20 @@ export default function LetterPlay() {
         introduceLetter(currentLetter.id);
       } else {
         recordLetterResult(currentLetter.id, result);
+      }
+
+      // PROGRESSION GATE: only a clean assessed pass advances the
+      // child. A weak or exposure-only run does not unlock the next
+      // letter or complete the lesson — the child returns to the
+      // lesson grid, where this letter is current and replayable,
+      // and Review can also strengthen it.
+      if (result !== true) {
+        setPracticeAgain(true);
+        setShowTransition(true);
+        setTimeout(() => {
+          navigate(`/lesson/${lessonId}`);
+        }, 3000);
+        return;
       }
       
       if (letterIdx < lessonLetters.length - 1) {
@@ -314,9 +349,15 @@ export default function LetterPlay() {
                 🌙
               </motion.div>
               <h2 className="text-2xl font-bold text-teal-700" style={{ fontFamily: 'var(--font-heading)' }}>
-                {gameIndex < gameSequence.length - 1 ? 'Great job!' : 
+                {practiceAgain ? `Let's practise ${currentLetter.name} once more!` :
+                 gameIndex < gameSequence.length - 1 ? 'Great job!' : 
                  letterIdx < lessonLetters.length - 1 ? `Next: ${lessonLetters[letterIdx + 1]?.name}!` : 'All done!'}
               </h2>
+              {practiceAgain && (
+                <p className="text-gray-600 mt-2 text-center px-6">
+                  Play the games again — a clean run unlocks the next letter.
+                </p>
+              )}
             </motion.div>
           ) : (
             <motion.div
