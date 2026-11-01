@@ -32,7 +32,7 @@ interface Props {
 // Configuration
 const CANVAS_SIZE = 320;
 const MASK_SIZE = 160; // offscreen ink-mask resolution
-const COVERAGE_THRESHOLD = 0.6; // fraction of the letter's ink to trace
+const COVERAGE_THRESHOLD = 0.75; // fraction of the letter's ink to trace before the game finishes
 const BRUSH_RADIUS = 0.055; // normalized finger brush radius for coverage
 const GLYPH_SCALE = 0.72; // glyph size relative to canvas
 
