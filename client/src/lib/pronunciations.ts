@@ -29,6 +29,13 @@
 
 /** Bare word -> vocalised form used for speech synthesis. */
 export const PRONUNCIATIONS: Record<string, string> = {
+  // --- Qur'anic wasla words (issue #32) ---
+  // Written with a wasla alef (ٱ), which Edge-TTS reads as silent —
+  // the opening vowel is dropped, so "ٱللَّه" came out "lallah".
+  // The speak form uses a plain vocalised alef (اَ) so the opening
+  // "A" is spoken; the displayed text is unchanged.
+  'ٱللَّه': 'اَللَّه',       // Allah (God)
+  'ٱلْحَمْدُ': 'اَلْحَمْدُ',   // All praise
   // --- ا ---
   'أثاث': 'أَثَاث',       // furniture
   'أرنب': 'أَرْنَب',       // rabbit

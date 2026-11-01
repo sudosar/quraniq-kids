@@ -48,10 +48,13 @@ function isBare(text: string): boolean {
   return !Array.from(text).some((ch) => HARAKAT.has(ch));
 }
 
-/** The letters of a word, with harakat removed. */
+/** The letters of a word, with harakat removed. A wasla alef (ٱ) counts
+ *  as a plain alef (ا): Qur'anic spelling uses the wasla form, but it is
+ *  the same letter, so a speak form may vocalise it (issue #32). */
 function lettersOf(text: string): string {
   return Array.from(text)
     .filter((ch) => !HARAKAT.has(ch))
+    .map((ch) => (ch === '\u0671' ? '\u0627' : ch))
     .join('');
 }
 
