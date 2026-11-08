@@ -39,32 +39,23 @@ export default function SoundMatchGame({ letter, distractorLetters, onComplete }
 
   const TOTAL_ROUNDS = 3;
 
-  // Build rounds using ONLY previously learned letters as distractors
+  // Build rounds: the current letter first, then previously learned
+  // letters, cycling through the pool so no two rounds in a row play
+  // the same sound (issue #30: rounds 1-2 always targeted the current
+  // letter and round 3 was a coin flip, so all three rounds could play
+  // the same letter). Distractors are the other pool letters only.
   const rounds = useMemo(() => {
+    const pool = [letter, ...shuffleArray(distractorLetters.slice(0, 3))];
     const result: Round[] = [];
-    const available = distractorLetters.slice(0, Math.min(distractorLetters.length, 3));
-    
+
     for (let i = 0; i < TOTAL_ROUNDS; i++) {
-      let target: ArabicLetter;
-      let distractors: ArabicLetter[];
-      
-      if (i < 2) {
-        target = letter;
-        distractors = shuffleArray(available).slice(0, Math.min(3, available.length));
-      } else {
-        // Round 3: review a previously learned letter
-        if (available.length > 0 && Math.random() > 0.5) {
-          target = available[Math.floor(Math.random() * available.length)];
-          distractors = shuffleArray([letter, ...available.filter(d => d.id !== target.id)]).slice(0, 3);
-        } else {
-          target = letter;
-          distractors = shuffleArray(available).slice(0, Math.min(3, available.length));
-        }
-      }
-      
+      const target = pool[i % pool.length];
+      const distractors = shuffleArray(
+        pool.filter((d) => d.id !== target.id),
+      ).slice(0, 3);
       result.push({ target, options: shuffleArray([target, ...distractors]) });
     }
-    
+
     return result;
   }, [letter, distractorLetters]);
 
