@@ -13,6 +13,13 @@
  * 
  * TECHNICAL APPROACH:
  * - Inline <span> elements preserve Arabic ligatures
+ * - Every grapheme span MUST stay display:inline in ALL states (rest, hover/touch,
+ *   replay, found). Switching a span to inline-block — e.g. to scale it up — puts
+ *   it in its own shaping context, so it renders in isolated form and its
+ *   neighbours lose their joining context (same bug as the June 2026 ya-connector
+ *   fix, which only covered the found state). Grow a letter with font-size, never
+ *   with transform: transform is a no-op on inline spans anyway, so it only ever
+ *   worked by way of the inline-block flip that breaks the joining.
  * - normalizeArabicLetter handles Alif variants for matching
  * - getPositionInWord() determines if a grapheme is initial/medial/final
  * - Letter form guide highlights the specific shape used in the current word
@@ -379,20 +386,26 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                     position: 'relative',
                     cursor: found ? 'default' : 'pointer',
                     userSelect: 'none',
-                    transform: isReplayActive ? 'scale(1.35) translateY(-4px)' :
-                               isHovered ? 'scale(1.4) translateY(-4px)' : 
-                               isFound ? 'scale(1.3)' : 'scale(1)',
-                    transformOrigin: 'center bottom',
-                    transition: 'transform 0.25s ease, color 0.2s ease, background-color 0.25s ease, box-shadow 0.25s ease',
+                    // Grow the active letter with font-size, NOT transform/scale.
+                    // Transform is a no-op on inline spans, and the old trick of
+                    // flipping to inline-block so the scale would apply broke
+                    // Arabic joining: the touched letter rendered in isolated
+                    // form and its neighbours lost their joining context.
+                    // Font-size keeps the word joined in every state.
+                    fontSize: isReplayActive ? '1.35em' :
+                              isHovered ? '1.4em' :
+                              isFound ? '1.3em' : undefined,
+                    transition: 'font-size 0.25s ease, color 0.2s ease, background-color 0.25s ease, box-shadow 0.25s ease',
+                    // Keep display:inline here too: the highlight is background +
+                    // padding only, never inline-block (see header comment).
                     ...(isHovered || isWrong || isReplayActive ? {
-                      display: 'inline-block',
                       borderRadius: '8px',
                       padding: '0 4px',
                       zIndex: 10,
                     } : {}),
-                    // Found state: use inline-block for the highlight, but position it as a
-                    // float/overlay so the Arabic text can still form ligatures/cursor joins.
-                    // We use display:inline with a pseudo-element background for the highlight.
+                    // Found state: keep display:inline to preserve Arabic cursive
+                    // connections. inline-block breaks ligatures and causes
+                    // adjacent letters to visually disconnect.
                     ...(isFound ? {
                       position: 'relative',
                       borderRadius: '8px',
