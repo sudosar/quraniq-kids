@@ -20,6 +20,12 @@
  *   fix, which only covered the found state). Grow a letter with font-size, never
  *   with transform: transform is a no-op on inline spans anyway, so it only ever
  *   worked by way of the inline-block flip that breaks the joining.
+ * - Keeping the glyphs in joined form is not enough on its own: the highlight
+ *   must ALSO not draw a box around the letter. Padding on the span pushes the
+ *   neighbours apart and an outline ring draws a pill, so the word still looks
+ *   split while touched even though the letter forms are correct (found live
+ *   18 Nov 2026, PR #36). Highlight = background tint + larger font-size only:
+ *   no padding, no ring, no radius, in every state.
  * - normalizeArabicLetter handles Alif variants for matching
  * - getPositionInWord() determines if a grapheme is initial/medial/final
  * - Letter form guide highlights the specific shape used in the current word
@@ -391,25 +397,30 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                     // flipping to inline-block so the scale would apply broke
                     // Arabic joining: the touched letter rendered in isolated
                     // form and its neighbours lost their joining context.
-                    // Font-size keeps the word joined in every state.
+                    // Font-size keeps the glyphs in joined form — but that alone
+                    // is NOT enough: the first version of this fix kept the
+                    // highlight padding (0 4px) and the outline ring, and the
+                    // word STILL looked split on hover, because the padding
+                    // pushes the neighbours apart and the ring draws a pill
+                    // around the letter. So a highlight here must be background
+                    // tint + larger font-size ONLY: no padding, no ring, no
+                    // radius. The tint paints behind the text, so the cursive
+                    // joins stay visible through it.
                     fontSize: isReplayActive ? '1.35em' :
                               isHovered ? '1.4em' :
                               isFound ? '1.3em' : undefined,
-                    transition: 'font-size 0.25s ease, color 0.2s ease, background-color 0.25s ease, box-shadow 0.25s ease',
-                    // Keep display:inline here too: the highlight is background +
-                    // padding only, never inline-block (see header comment).
+                    transition: 'font-size 0.25s ease, color 0.2s ease, background-color 0.25s ease',
+                    // Hover/touch/replay highlight: background tint only (see above).
+                    // No padding, no ring — anything that draws a box around the
+                    // letter visually cuts the word apart.
                     ...(isHovered || isWrong || isReplayActive ? {
-                      borderRadius: '8px',
-                      padding: '0 4px',
                       zIndex: 10,
                     } : {}),
-                    // Found state: keep display:inline to preserve Arabic cursive
-                    // connections. inline-block breaks ligatures and causes
-                    // adjacent letters to visually disconnect.
+                    // Found state: same rule — tint + bigger size + the check
+                    // badge, no padding and no ring, so the word stays visibly
+                    // joined while the form guide is showing.
                     ...(isFound ? {
                       position: 'relative',
-                      borderRadius: '8px',
-                      padding: '0 6px',
                       zIndex: 10,
                     } : {}),
                     color: isFound ? '#059669' : isReplayActive ? '#0D7377' : isWrong ? '#DC2626' : '#1f2937',
@@ -417,10 +428,6 @@ export default function FindInWordGame({ letter, onComplete }: Props) {
                                      isReplayActive ? '#E0F7FA' :
                                      isHovered ? '#FEF3C7' : 
                                      isWrong ? '#FEE2E2' : 'transparent',
-                    boxShadow: isFound ? '0 0 0 3px #34D399' : 
-                               isReplayActive ? '0 0 0 3px #0D9488, 0 4px 16px rgba(13,115,119,0.25)' :
-                               isHovered ? '0 0 0 2px #FCD34D, 0 4px 12px rgba(0,0,0,0.1)' : 
-                               isWrong ? '0 0 0 2px #F87171' : 'none',
                   }}
                 >
                   {displayForm}
