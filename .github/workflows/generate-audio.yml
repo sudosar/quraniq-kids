@@ -10,12 +10,12 @@ on:
   workflow_dispatch:
     inputs:
       voice:
-        description: "Edge-TTS Arabic voice"
+        description: "Edge-TTS Arabic voice for syllables and bare-letter names (word clips always use Zariyah, Nov 2026, issues #38-#42)"
         type: choice
         options:
           - ar-SA-ZariyahNeural
           - ar-SA-HamedNeural
-        default: ar-SA-ZariyahNeural
+        default: ar-SA-HamedNeural
 
 permissions:
   contents: write
