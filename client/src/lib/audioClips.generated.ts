@@ -2,7 +2,7 @@
 // Maps each normalised Arabic text to its pre-generated clip file.
 // AUDIO_VERSION changes on every generation run; clip URLs carry
 // it as ?v= so a new generation forces a fresh fetch everywhere.
-export const AUDIO_VERSION = "20261122120816";
+export const AUDIO_VERSION = "20261122124803";
 export const AUDIO_CLIPS: Record<string, string> = {
   "ا": "clips/clip-0001.mp3",
   "اَ": "clips/clip-0002.mp3",
