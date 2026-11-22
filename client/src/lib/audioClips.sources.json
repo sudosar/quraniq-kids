@@ -1,461 +1,2297 @@
 {
- "clip-0001": "ا",
- "clip-0002": "اَ",
- "clip-0003": "اِ",
- "clip-0004": "اُ",
- "clip-0005": "اً",
- "clip-0006": "اٍ",
- "clip-0007": "اٌ",
- "clip-0008": "اْ",
- "clip-0009": "اَا",
- "clip-0010": "اَو",
- "clip-0011": "اَي",
- "clip-0012": "أَسَد",
- "clip-0013": "أَرْنَب",
- "clip-0014": "أَنَانَاس",
- "clip-0015": "سَمَاء",
- "clip-0016": "قَائِد",
- "clip-0017": "اَللَّه",
- "clip-0018": "اَلْحَمْدُ",
- "clip-0019": "إِيَّاكَ",
- "clip-0020": "ب",
- "clip-0021": "بَ",
- "clip-0022": "بِ",
- "clip-0023": "بُ",
- "clip-0024": "بً",
- "clip-0025": "بٍ",
- "clip-0026": "بٌ",
- "clip-0027": "بْ",
- "clip-0028": "بَا",
- "clip-0029": "بَو",
- "clip-0030": "بَي",
- "clip-0031": "بَقَرَة",
- "clip-0032": "بَطَّة",
- "clip-0033": "بَيْت",
- "clip-0034": "كِتَاب",
- "clip-0035": "جَبَل",
- "clip-0036": "بِسْمِ",
- "clip-0037": "بِٱللَّهِ",
- "clip-0038": "بَعْدِ",
- "clip-0039": "ت",
- "clip-0040": "تَ",
- "clip-0041": "تِ",
- "clip-0042": "تُ",
- "clip-0043": "تً",
- "clip-0044": "تٍ",
- "clip-0045": "تٌ",
- "clip-0046": "تْ",
- "clip-0047": "تَا",
- "clip-0048": "تَو",
- "clip-0049": "تَي",
- "clip-0050": "تُفَّاح",
- "clip-0051": "تَمْر",
- "clip-0052": "تَاج",
- "clip-0053": "كُتُب",
- "clip-0054": "بِنْت",
- "clip-0055": "تَبَارَكَ",
- "clip-0056": "تَوَّابٌ",
- "clip-0057": "تَعْبُدُونَ",
- "clip-0058": "ث",
- "clip-0059": "ثَ",
- "clip-0060": "ثِ",
- "clip-0061": "ثُ",
- "clip-0062": "ثً",
- "clip-0063": "ثٍ",
- "clip-0064": "ثٌ",
- "clip-0065": "ثْ",
- "clip-0066": "ثَا",
- "clip-0067": "ثَو",
- "clip-0068": "ثَي",
- "clip-0069": "ثَعْلَب",
- "clip-0070": "ثَلْج",
- "clip-0071": "ثَوْب",
- "clip-0072": "أَثَاث",
- "clip-0073": "حَدِيث",
- "clip-0074": "ثُمَّ",
- "clip-0075": "ثَمَرَات",
- "clip-0076": "ثَلَاثَة",
- "clip-0077": "ج",
- "clip-0078": "جَ",
- "clip-0079": "جِ",
- "clip-0080": "جُ",
- "clip-0081": "جً",
- "clip-0082": "جٍ",
- "clip-0083": "جٌ",
- "clip-0084": "جْ",
- "clip-0085": "جَا",
- "clip-0086": "جَو",
- "clip-0087": "جَي",
- "clip-0088": "جَمَل",
- "clip-0089": "جَزَر",
- "clip-0090": "جُبْن",
- "clip-0091": "نَجْم",
- "clip-0092": "جَنَّة",
- "clip-0093": "جَعَلَ",
- "clip-0094": "جَاءَ",
- "clip-0095": "ح",
- "clip-0096": "حَ",
- "clip-0097": "حِ",
- "clip-0098": "حُ",
- "clip-0099": "حً",
- "clip-0100": "حٍ",
- "clip-0101": "حٌ",
- "clip-0102": "حْ",
- "clip-0103": "حَا",
- "clip-0104": "حَو",
- "clip-0105": "حَي",
- "clip-0106": "حِصَان",
- "clip-0107": "حُوت",
- "clip-0108": "حَلِيب",
- "clip-0109": "بَحْر",
- "clip-0110": "مِلْح",
- "clip-0111": "حَمْدُ",
- "clip-0112": "حَكِيم",
- "clip-0113": "حَقّ",
- "clip-0114": "خ",
- "clip-0115": "خَ",
- "clip-0116": "خِ",
- "clip-0117": "خُ",
- "clip-0118": "خً",
- "clip-0119": "خٍ",
- "clip-0120": "خٌ",
- "clip-0121": "خْ",
- "clip-0122": "خَا",
- "clip-0123": "خَو",
- "clip-0124": "خَي",
- "clip-0125": "خَرُوف",
- "clip-0126": "خَبْز",
- "clip-0127": "خَيْمَة",
- "clip-0128": "نَخْل",
- "clip-0129": "طَبْخ",
- "clip-0130": "خَلَقَ",
- "clip-0131": "خَيْر",
- "clip-0132": "خَاشِعِينَ",
- "clip-0133": "د",
- "clip-0134": "دَ",
- "clip-0135": "دِ",
- "clip-0136": "دُ",
- "clip-0137": "دً",
- "clip-0138": "دٍ",
- "clip-0139": "دٌ",
- "clip-0140": "دْ",
- "clip-0141": "دَا",
- "clip-0142": "دَو",
- "clip-0143": "دَي",
- "clip-0144": "دُبّ",
- "clip-0145": "دَجَاجَة",
- "clip-0146": "دَلْفِين",
- "clip-0147": "مَدْرَسَة",
- "clip-0148": "دِين",
- "clip-0149": "دُعَاء",
- "clip-0150": "دَرَجَات",
- "clip-0151": "ذ",
- "clip-0152": "ذَ",
- "clip-0153": "ذِ",
- "clip-0154": "ذُ",
- "clip-0155": "ذً",
- "clip-0156": "ذٍ",
- "clip-0157": "ذٌ",
- "clip-0158": "ذْ",
- "clip-0159": "ذَا",
- "clip-0160": "ذَو",
- "clip-0161": "ذَي",
- "clip-0162": "ذِئْب",
- "clip-0163": "ذُرَّة",
- "clip-0164": "ذَهَب",
- "clip-0165": "لَذِيذ",
- "clip-0166": "تِلْمِيذ",
- "clip-0167": "ذَلِكَ",
- "clip-0168": "ذِكْر",
- "clip-0169": "ذُنُوب",
- "clip-0170": "ر",
- "clip-0171": "رَ",
- "clip-0172": "رِ",
- "clip-0173": "رُ",
- "clip-0174": "رً",
- "clip-0175": "رٍ",
- "clip-0176": "رٌ",
- "clip-0177": "رْ",
- "clip-0178": "رَا",
- "clip-0179": "رَو",
- "clip-0180": "رَي",
- "clip-0181": "رُمَّان",
- "clip-0182": "رَجُل",
- "clip-0183": "رِيشَة",
- "clip-0184": "شَجَرَة",
- "clip-0185": "قَمَر",
- "clip-0186": "رَبِّ",
- "clip-0187": "رَحْمَن",
- "clip-0188": "رَحِيم",
- "clip-0189": "ز",
- "clip-0190": "زَ",
- "clip-0191": "زِ",
- "clip-0192": "زُ",
- "clip-0193": "زً",
- "clip-0194": "زٍ",
- "clip-0195": "زٌ",
- "clip-0196": "زْ",
- "clip-0197": "زَا",
- "clip-0198": "زَو",
- "clip-0199": "زَي",
- "clip-0200": "زَرَافَة",
- "clip-0201": "زَهْرَة",
- "clip-0202": "زَيْتُون",
- "clip-0203": "زَيْتُون",
- "clip-0204": "س",
- "clip-0205": "سَ",
- "clip-0206": "سِ",
- "clip-0207": "سُ",
- "clip-0208": "سً",
- "clip-0209": "سٍ",
- "clip-0210": "سٌ",
- "clip-0211": "سْ",
- "clip-0212": "سَا",
- "clip-0213": "سَو",
- "clip-0214": "سَي",
- "clip-0215": "سَمَكَة",
- "clip-0216": "سَيَّارَة",
- "clip-0217": "سُلْحَفَاة",
- "clip-0218": "سَلَام",
- "clip-0219": "ش",
- "clip-0220": "شَ",
- "clip-0221": "شِ",
- "clip-0222": "شُ",
- "clip-0223": "شً",
- "clip-0224": "شٍ",
- "clip-0225": "شٌ",
- "clip-0226": "شْ",
- "clip-0227": "شَا",
- "clip-0228": "شَو",
- "clip-0229": "شَي",
- "clip-0230": "شَمْس",
- "clip-0231": "شَاي",
- "clip-0232": "شَهْر",
- "clip-0233": "ص",
- "clip-0234": "صَ",
- "clip-0235": "صِ",
- "clip-0236": "صُ",
- "clip-0237": "صً",
- "clip-0238": "صٍ",
- "clip-0239": "صٌ",
- "clip-0240": "صْ",
- "clip-0241": "صَا",
- "clip-0242": "صَو",
- "clip-0243": "صَي",
- "clip-0244": "صَقْر",
- "clip-0245": "صَارُوخ",
- "clip-0246": "صَنْدُوق",
- "clip-0247": "صِرَاط",
- "clip-0248": "ض",
- "clip-0249": "ضَ",
- "clip-0250": "ضِ",
- "clip-0251": "ضُ",
- "clip-0252": "ضً",
- "clip-0253": "ضٍ",
- "clip-0254": "ضٌ",
- "clip-0255": "ضْ",
- "clip-0256": "ضَا",
- "clip-0257": "ضَو",
- "clip-0258": "ضَي",
- "clip-0259": "ضِفْدَع",
- "clip-0260": "ضَوْء",
- "clip-0261": "ضَبَاب",
- "clip-0262": "ضَلَال",
- "clip-0263": "ط",
- "clip-0264": "طَ",
- "clip-0265": "طِ",
- "clip-0266": "طُ",
- "clip-0267": "طً",
- "clip-0268": "طٍ",
- "clip-0269": "طٌ",
- "clip-0270": "طْ",
- "clip-0271": "طَا",
- "clip-0272": "طَو",
- "clip-0273": "طَي",
- "clip-0274": "طَائِر",
- "clip-0275": "طَبْل",
- "clip-0276": "طَمَاطِم",
- "clip-0277": "طَيْر",
- "clip-0278": "ظ",
- "clip-0279": "ظَ",
- "clip-0280": "ظِ",
- "clip-0281": "ظُ",
- "clip-0282": "ظً",
- "clip-0283": "ظٍ",
- "clip-0284": "ظٌ",
- "clip-0285": "ظْ",
- "clip-0286": "ظَا",
- "clip-0287": "ظَو",
- "clip-0288": "ظَي",
- "clip-0289": "ظَرْف",
- "clip-0290": "ظِلّ",
- "clip-0291": "ظَبِي",
- "clip-0292": "ظُلُمَات",
- "clip-0293": "ع",
- "clip-0294": "عَ",
- "clip-0295": "عِ",
- "clip-0296": "عُ",
- "clip-0297": "عً",
- "clip-0298": "عٍ",
- "clip-0299": "عٌ",
- "clip-0300": "عْ",
- "clip-0301": "عَا",
- "clip-0302": "عَو",
- "clip-0303": "عَي",
- "clip-0304": "عِنَب",
- "clip-0305": "عُصْفُور",
- "clip-0306": "عَسَل",
- "clip-0307": "عَلِيم",
- "clip-0308": "غ",
- "clip-0309": "غَ",
- "clip-0310": "غِ",
- "clip-0311": "غُ",
- "clip-0312": "غً",
- "clip-0313": "غٍ",
- "clip-0314": "غٌ",
- "clip-0315": "غْ",
- "clip-0316": "غَا",
- "clip-0317": "غَو",
- "clip-0318": "غَي",
- "clip-0319": "غَزَال",
- "clip-0320": "غَيْمَة",
- "clip-0321": "غُرَاب",
- "clip-0322": "غَفُور",
- "clip-0323": "ف",
- "clip-0324": "فَ",
- "clip-0325": "فِ",
- "clip-0326": "فُ",
- "clip-0327": "فً",
- "clip-0328": "فٍ",
- "clip-0329": "فٌ",
- "clip-0330": "فْ",
- "clip-0331": "فَا",
- "clip-0332": "فَو",
- "clip-0333": "فَي",
- "clip-0334": "فِيل",
- "clip-0335": "فَرَاشَة",
- "clip-0336": "فَرَاوَلَة",
- "clip-0337": "فَلَق",
- "clip-0338": "ق",
- "clip-0339": "قَ",
- "clip-0340": "قِ",
- "clip-0341": "قُ",
- "clip-0342": "قً",
- "clip-0343": "قٍ",
- "clip-0344": "قٌ",
- "clip-0345": "قْ",
- "clip-0346": "قَا",
- "clip-0347": "قَو",
- "clip-0348": "قَي",
- "clip-0349": "قِطَّة",
- "clip-0350": "قَلَم",
- "clip-0351": "قُلْ",
- "clip-0352": "ك",
- "clip-0353": "كَ",
- "clip-0354": "كِ",
- "clip-0355": "كُ",
- "clip-0356": "كً",
- "clip-0357": "كٍ",
- "clip-0358": "كٌ",
- "clip-0359": "كْ",
- "clip-0360": "كَا",
- "clip-0361": "كَو",
- "clip-0362": "كَي",
- "clip-0363": "كَلْب",
- "clip-0364": "كُرَة",
- "clip-0365": "كَوْثَر",
- "clip-0366": "ل",
- "clip-0367": "لَ",
- "clip-0368": "لِ",
- "clip-0369": "لُ",
- "clip-0370": "لً",
- "clip-0371": "لٍ",
- "clip-0372": "لٌ",
- "clip-0373": "لْ",
- "clip-0374": "لَا",
- "clip-0375": "لَو",
- "clip-0376": "لَي",
- "clip-0377": "لَيْمُون",
- "clip-0378": "لُعْبَة",
- "clip-0379": "لَحْم",
- "clip-0380": "لَهُ",
- "clip-0381": "م",
- "clip-0382": "مَ",
- "clip-0383": "مِ",
- "clip-0384": "مُ",
- "clip-0385": "مً",
- "clip-0386": "مٍ",
- "clip-0387": "مٌ",
- "clip-0388": "مْ",
- "clip-0389": "مَا",
- "clip-0390": "مَو",
- "clip-0391": "مَي",
- "clip-0392": "مَوْز",
- "clip-0393": "مِفْتَاح",
- "clip-0394": "مَاء",
- "clip-0395": "مَالِك",
- "clip-0396": "ن",
- "clip-0397": "نَ",
- "clip-0398": "نِ",
- "clip-0399": "نُ",
- "clip-0400": "نً",
- "clip-0401": "نٍ",
- "clip-0402": "نٌ",
- "clip-0403": "نْ",
- "clip-0404": "نَا",
- "clip-0405": "نَو",
- "clip-0406": "نَي",
- "clip-0407": "نَحْلَة",
- "clip-0408": "نَجْمَة",
- "clip-0409": "نَمِر",
- "clip-0410": "نَاس",
- "clip-0411": "ه",
- "clip-0412": "هَ",
- "clip-0413": "هِ",
- "clip-0414": "هُ",
- "clip-0415": "هً",
- "clip-0416": "هٍ",
- "clip-0417": "هٌ",
- "clip-0418": "هْ",
- "clip-0419": "هَا",
- "clip-0420": "هَو",
- "clip-0421": "هَي",
- "clip-0422": "هِلَال",
- "clip-0423": "هَدِيَّة",
- "clip-0424": "هِرَّة",
- "clip-0425": "هُوَ",
- "clip-0426": "و",
- "clip-0427": "وَ",
- "clip-0428": "وِ",
- "clip-0429": "وُ",
- "clip-0430": "وً",
- "clip-0431": "وٍ",
- "clip-0432": "وٌ",
- "clip-0433": "وْ",
- "clip-0434": "وَا",
- "clip-0435": "وَو",
- "clip-0436": "وَي",
- "clip-0437": "وَرْدَة",
- "clip-0438": "وَجْه",
- "clip-0439": "وَلَد",
- "clip-0440": "وَالْعَصْر",
- "clip-0441": "ي",
- "clip-0442": "يَ",
- "clip-0443": "يِ",
- "clip-0444": "يُ",
- "clip-0445": "يً",
- "clip-0446": "يٍ",
- "clip-0447": "يٌ",
- "clip-0448": "يْ",
- "clip-0449": "يَا",
- "clip-0450": "يَو",
- "clip-0451": "يَي",
- "clip-0452": "يَد",
- "clip-0453": "يَمَامَة",
- "clip-0454": "يَقْطِين",
- "clip-0455": "يَوْم",
- "clip-0456": "اللَّهِ",
- "clip-0457": "كِتَاب",
- "clip-0458": "قَلَم",
- "clip-0459": "نُور"
+ "clip-0001": {
+  "carrier": false,
+  "speak": "ا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0002": {
+  "carrier": false,
+  "speak": "اَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0003": {
+  "carrier": false,
+  "speak": "اِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0004": {
+  "carrier": false,
+  "speak": "اُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0005": {
+  "carrier": false,
+  "speak": "اً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0006": {
+  "carrier": false,
+  "speak": "اٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0007": {
+  "carrier": false,
+  "speak": "اٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0008": {
+  "carrier": false,
+  "speak": "اْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0009": {
+  "carrier": false,
+  "speak": "اَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0010": {
+  "carrier": false,
+  "speak": "اَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0011": {
+  "carrier": false,
+  "speak": "اَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0012": {
+  "carrier": false,
+  "speak": "أَسَد",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0013": {
+  "carrier": false,
+  "speak": "أَرْنَب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0014": {
+  "carrier": false,
+  "speak": "أَنَانَاس",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0015": {
+  "carrier": false,
+  "speak": "سَمَاء",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0016": {
+  "carrier": false,
+  "speak": "قَائِد",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0017": {
+  "carrier": false,
+  "speak": "اَللَّه",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0018": {
+  "carrier": true,
+  "speak": "اَلْحَمْدُ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0019": {
+  "carrier": true,
+  "speak": "إِيَّاكَ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0020": {
+  "carrier": false,
+  "speak": "ب",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0021": {
+  "carrier": false,
+  "speak": "بَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0022": {
+  "carrier": false,
+  "speak": "بِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0023": {
+  "carrier": false,
+  "speak": "بُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0024": {
+  "carrier": false,
+  "speak": "بً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0025": {
+  "carrier": false,
+  "speak": "بٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0026": {
+  "carrier": false,
+  "speak": "بٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0027": {
+  "carrier": false,
+  "speak": "بْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0028": {
+  "carrier": false,
+  "speak": "بَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0029": {
+  "carrier": false,
+  "speak": "بَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0030": {
+  "carrier": false,
+  "speak": "بَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0031": {
+  "carrier": false,
+  "speak": "بَقَرَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0032": {
+  "carrier": false,
+  "speak": "بَطَّة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0033": {
+  "carrier": false,
+  "speak": "بَيْت",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0034": {
+  "carrier": false,
+  "speak": "كِتَاب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0035": {
+  "carrier": false,
+  "speak": "جَبَل",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0036": {
+  "carrier": true,
+  "speak": "بِسْمِ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0037": {
+  "carrier": true,
+  "speak": "بِٱللَّهِ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0038": {
+  "carrier": true,
+  "speak": "بَعْدِ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0039": {
+  "carrier": false,
+  "speak": "ت",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0040": {
+  "carrier": false,
+  "speak": "تَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0041": {
+  "carrier": false,
+  "speak": "تِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0042": {
+  "carrier": false,
+  "speak": "تُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0043": {
+  "carrier": false,
+  "speak": "تً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0044": {
+  "carrier": false,
+  "speak": "تٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0045": {
+  "carrier": false,
+  "speak": "تٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0046": {
+  "carrier": false,
+  "speak": "تْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0047": {
+  "carrier": false,
+  "speak": "تَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0048": {
+  "carrier": false,
+  "speak": "تَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0049": {
+  "carrier": false,
+  "speak": "تَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0050": {
+  "carrier": false,
+  "speak": "تُفَّاح",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0051": {
+  "carrier": false,
+  "speak": "تَمْر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0052": {
+  "carrier": false,
+  "speak": "تَاج",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0053": {
+  "carrier": false,
+  "speak": "كُتُب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0054": {
+  "carrier": false,
+  "speak": "بِنْت",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0055": {
+  "carrier": true,
+  "speak": "تَبَارَكَ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0056": {
+  "carrier": true,
+  "speak": "تَوَّابٌ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0057": {
+  "carrier": true,
+  "speak": "تَعْبُدُونَ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0058": {
+  "carrier": false,
+  "speak": "ث",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0059": {
+  "carrier": false,
+  "speak": "ثَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0060": {
+  "carrier": false,
+  "speak": "ثِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0061": {
+  "carrier": false,
+  "speak": "ثُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0062": {
+  "carrier": false,
+  "speak": "ثً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0063": {
+  "carrier": false,
+  "speak": "ثٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0064": {
+  "carrier": false,
+  "speak": "ثٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0065": {
+  "carrier": false,
+  "speak": "ثْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0066": {
+  "carrier": false,
+  "speak": "ثَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0067": {
+  "carrier": false,
+  "speak": "ثَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0068": {
+  "carrier": false,
+  "speak": "ثَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0069": {
+  "carrier": false,
+  "speak": "ثَعْلَب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0070": {
+  "carrier": false,
+  "speak": "ثَلْج",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0071": {
+  "carrier": false,
+  "speak": "ثَوْب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0072": {
+  "carrier": false,
+  "speak": "أَثَاث",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0073": {
+  "carrier": false,
+  "speak": "حَدِيث",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0074": {
+  "carrier": false,
+  "speak": "ثُمَّ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0075": {
+  "carrier": false,
+  "speak": "ثَمَرَات",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0076": {
+  "carrier": false,
+  "speak": "ثَلَاثَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0077": {
+  "carrier": false,
+  "speak": "ج",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0078": {
+  "carrier": false,
+  "speak": "جَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0079": {
+  "carrier": false,
+  "speak": "جِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0080": {
+  "carrier": false,
+  "speak": "جُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0081": {
+  "carrier": false,
+  "speak": "جً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0082": {
+  "carrier": false,
+  "speak": "جٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0083": {
+  "carrier": false,
+  "speak": "جٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0084": {
+  "carrier": false,
+  "speak": "جْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0085": {
+  "carrier": false,
+  "speak": "جَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0086": {
+  "carrier": false,
+  "speak": "جَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0087": {
+  "carrier": false,
+  "speak": "جَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0088": {
+  "carrier": false,
+  "speak": "جَمَل",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0089": {
+  "carrier": false,
+  "speak": "جَزَر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0090": {
+  "carrier": false,
+  "speak": "جُبْن",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0091": {
+  "carrier": false,
+  "speak": "نَجْم",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0092": {
+  "carrier": false,
+  "speak": "جَنَّة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0093": {
+  "carrier": true,
+  "speak": "جَعَلَ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0094": {
+  "carrier": true,
+  "speak": "جَاءَ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0095": {
+  "carrier": false,
+  "speak": "ح",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0096": {
+  "carrier": false,
+  "speak": "حَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0097": {
+  "carrier": false,
+  "speak": "حِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0098": {
+  "carrier": false,
+  "speak": "حُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0099": {
+  "carrier": false,
+  "speak": "حً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0100": {
+  "carrier": false,
+  "speak": "حٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0101": {
+  "carrier": false,
+  "speak": "حٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0102": {
+  "carrier": false,
+  "speak": "حْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0103": {
+  "carrier": false,
+  "speak": "حَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0104": {
+  "carrier": false,
+  "speak": "حَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0105": {
+  "carrier": false,
+  "speak": "حَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0106": {
+  "carrier": false,
+  "speak": "حِصَان",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0107": {
+  "carrier": false,
+  "speak": "حُوت",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0108": {
+  "carrier": false,
+  "speak": "حَلِيب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0109": {
+  "carrier": false,
+  "speak": "بَحْر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0110": {
+  "carrier": false,
+  "speak": "مِلْح",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0111": {
+  "carrier": true,
+  "speak": "حَمْدُ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0112": {
+  "carrier": false,
+  "speak": "حَكِيم",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0113": {
+  "carrier": false,
+  "speak": "حَقّ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0114": {
+  "carrier": false,
+  "speak": "خ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0115": {
+  "carrier": false,
+  "speak": "خَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0116": {
+  "carrier": false,
+  "speak": "خِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0117": {
+  "carrier": false,
+  "speak": "خُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0118": {
+  "carrier": false,
+  "speak": "خً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0119": {
+  "carrier": false,
+  "speak": "خٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0120": {
+  "carrier": false,
+  "speak": "خٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0121": {
+  "carrier": false,
+  "speak": "خْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0122": {
+  "carrier": false,
+  "speak": "خَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0123": {
+  "carrier": false,
+  "speak": "خَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0124": {
+  "carrier": false,
+  "speak": "خَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0125": {
+  "carrier": false,
+  "speak": "خَرُوف",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0126": {
+  "carrier": false,
+  "speak": "خَبْز",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0127": {
+  "carrier": false,
+  "speak": "خَيْمَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0128": {
+  "carrier": false,
+  "speak": "نَخْل",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0129": {
+  "carrier": false,
+  "speak": "طَبْخ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0130": {
+  "carrier": true,
+  "speak": "خَلَقَ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0131": {
+  "carrier": false,
+  "speak": "خَيْر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0132": {
+  "carrier": true,
+  "speak": "خَاشِعِينَ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0133": {
+  "carrier": false,
+  "speak": "د",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0134": {
+  "carrier": false,
+  "speak": "دَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0135": {
+  "carrier": false,
+  "speak": "دِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0136": {
+  "carrier": false,
+  "speak": "دُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0137": {
+  "carrier": false,
+  "speak": "دً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0138": {
+  "carrier": false,
+  "speak": "دٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0139": {
+  "carrier": false,
+  "speak": "دٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0140": {
+  "carrier": false,
+  "speak": "دْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0141": {
+  "carrier": false,
+  "speak": "دَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0142": {
+  "carrier": false,
+  "speak": "دَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0143": {
+  "carrier": false,
+  "speak": "دَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0144": {
+  "carrier": false,
+  "speak": "دُبّ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0145": {
+  "carrier": false,
+  "speak": "دَجَاجَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0146": {
+  "carrier": false,
+  "speak": "دَلْفِين",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0147": {
+  "carrier": false,
+  "speak": "مَدْرَسَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0148": {
+  "carrier": false,
+  "speak": "دِين",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0149": {
+  "carrier": false,
+  "speak": "دُعَاء",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0150": {
+  "carrier": false,
+  "speak": "دَرَجَات",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0151": {
+  "carrier": false,
+  "speak": "ذ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0152": {
+  "carrier": false,
+  "speak": "ذَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0153": {
+  "carrier": false,
+  "speak": "ذِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0154": {
+  "carrier": false,
+  "speak": "ذُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0155": {
+  "carrier": false,
+  "speak": "ذً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0156": {
+  "carrier": false,
+  "speak": "ذٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0157": {
+  "carrier": false,
+  "speak": "ذٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0158": {
+  "carrier": false,
+  "speak": "ذْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0159": {
+  "carrier": false,
+  "speak": "ذَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0160": {
+  "carrier": false,
+  "speak": "ذَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0161": {
+  "carrier": false,
+  "speak": "ذَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0162": {
+  "carrier": false,
+  "speak": "ذِئْب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0163": {
+  "carrier": false,
+  "speak": "ذُرَّة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0164": {
+  "carrier": false,
+  "speak": "ذَهَب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0165": {
+  "carrier": false,
+  "speak": "لَذِيذ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0166": {
+  "carrier": false,
+  "speak": "تِلْمِيذ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0167": {
+  "carrier": true,
+  "speak": "ذَلِكَ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0168": {
+  "carrier": false,
+  "speak": "ذِكْر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0169": {
+  "carrier": false,
+  "speak": "ذُنُوب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0170": {
+  "carrier": false,
+  "speak": "ر",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0171": {
+  "carrier": false,
+  "speak": "رَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0172": {
+  "carrier": false,
+  "speak": "رِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0173": {
+  "carrier": false,
+  "speak": "رُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0174": {
+  "carrier": false,
+  "speak": "رً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0175": {
+  "carrier": false,
+  "speak": "رٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0176": {
+  "carrier": false,
+  "speak": "رٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0177": {
+  "carrier": false,
+  "speak": "رْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0178": {
+  "carrier": false,
+  "speak": "رَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0179": {
+  "carrier": false,
+  "speak": "رَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0180": {
+  "carrier": false,
+  "speak": "رَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0181": {
+  "carrier": false,
+  "speak": "رُمَّان",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0182": {
+  "carrier": false,
+  "speak": "رَجُل",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0183": {
+  "carrier": false,
+  "speak": "رِيشَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0184": {
+  "carrier": false,
+  "speak": "شَجَرَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0185": {
+  "carrier": false,
+  "speak": "قَمَر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0186": {
+  "carrier": false,
+  "speak": "رَبِّ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0187": {
+  "carrier": false,
+  "speak": "رَحْمَن",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0188": {
+  "carrier": false,
+  "speak": "رَحِيم",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0189": {
+  "carrier": false,
+  "speak": "ز",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0190": {
+  "carrier": false,
+  "speak": "زَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0191": {
+  "carrier": false,
+  "speak": "زِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0192": {
+  "carrier": false,
+  "speak": "زُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0193": {
+  "carrier": false,
+  "speak": "زً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0194": {
+  "carrier": false,
+  "speak": "زٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0195": {
+  "carrier": false,
+  "speak": "زٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0196": {
+  "carrier": false,
+  "speak": "زْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0197": {
+  "carrier": false,
+  "speak": "زَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0198": {
+  "carrier": false,
+  "speak": "زَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0199": {
+  "carrier": false,
+  "speak": "زَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0200": {
+  "carrier": false,
+  "speak": "زَرَافَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0201": {
+  "carrier": false,
+  "speak": "زَهْرَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0202": {
+  "carrier": false,
+  "speak": "زَيْتُون",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0203": {
+  "carrier": false,
+  "speak": "زَيْتُون",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0204": {
+  "carrier": false,
+  "speak": "س",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0205": {
+  "carrier": false,
+  "speak": "سَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0206": {
+  "carrier": false,
+  "speak": "سِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0207": {
+  "carrier": false,
+  "speak": "سُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0208": {
+  "carrier": false,
+  "speak": "سً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0209": {
+  "carrier": false,
+  "speak": "سٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0210": {
+  "carrier": false,
+  "speak": "سٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0211": {
+  "carrier": false,
+  "speak": "سْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0212": {
+  "carrier": false,
+  "speak": "سَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0213": {
+  "carrier": false,
+  "speak": "سَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0214": {
+  "carrier": false,
+  "speak": "سَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0215": {
+  "carrier": false,
+  "speak": "سَمَكَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0216": {
+  "carrier": false,
+  "speak": "سَيَّارَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0217": {
+  "carrier": false,
+  "speak": "سُلْحَفَاة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0218": {
+  "carrier": false,
+  "speak": "سَلَام",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0219": {
+  "carrier": false,
+  "speak": "ش",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0220": {
+  "carrier": false,
+  "speak": "شَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0221": {
+  "carrier": false,
+  "speak": "شِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0222": {
+  "carrier": false,
+  "speak": "شُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0223": {
+  "carrier": false,
+  "speak": "شً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0224": {
+  "carrier": false,
+  "speak": "شٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0225": {
+  "carrier": false,
+  "speak": "شٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0226": {
+  "carrier": false,
+  "speak": "شْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0227": {
+  "carrier": false,
+  "speak": "شَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0228": {
+  "carrier": false,
+  "speak": "شَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0229": {
+  "carrier": false,
+  "speak": "شَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0230": {
+  "carrier": false,
+  "speak": "شَمْس",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0231": {
+  "carrier": false,
+  "speak": "شَاي",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0232": {
+  "carrier": false,
+  "speak": "شَهْر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0233": {
+  "carrier": false,
+  "speak": "ص",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0234": {
+  "carrier": false,
+  "speak": "صَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0235": {
+  "carrier": false,
+  "speak": "صِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0236": {
+  "carrier": false,
+  "speak": "صُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0237": {
+  "carrier": false,
+  "speak": "صً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0238": {
+  "carrier": false,
+  "speak": "صٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0239": {
+  "carrier": false,
+  "speak": "صٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0240": {
+  "carrier": false,
+  "speak": "صْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0241": {
+  "carrier": false,
+  "speak": "صَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0242": {
+  "carrier": false,
+  "speak": "صَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0243": {
+  "carrier": false,
+  "speak": "صَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0244": {
+  "carrier": false,
+  "speak": "صَقْر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0245": {
+  "carrier": false,
+  "speak": "صَارُوخ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0246": {
+  "carrier": false,
+  "speak": "صَنْدُوق",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0247": {
+  "carrier": false,
+  "speak": "صِرَاط",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0248": {
+  "carrier": false,
+  "speak": "ض",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0249": {
+  "carrier": false,
+  "speak": "ضَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0250": {
+  "carrier": false,
+  "speak": "ضِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0251": {
+  "carrier": false,
+  "speak": "ضُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0252": {
+  "carrier": false,
+  "speak": "ضً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0253": {
+  "carrier": false,
+  "speak": "ضٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0254": {
+  "carrier": false,
+  "speak": "ضٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0255": {
+  "carrier": false,
+  "speak": "ضْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0256": {
+  "carrier": false,
+  "speak": "ضَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0257": {
+  "carrier": false,
+  "speak": "ضَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0258": {
+  "carrier": false,
+  "speak": "ضَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0259": {
+  "carrier": false,
+  "speak": "ضِفْدَع",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0260": {
+  "carrier": false,
+  "speak": "ضَوْء",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0261": {
+  "carrier": false,
+  "speak": "ضَبَاب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0262": {
+  "carrier": false,
+  "speak": "ضَلَال",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0263": {
+  "carrier": false,
+  "speak": "ط",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0264": {
+  "carrier": false,
+  "speak": "طَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0265": {
+  "carrier": false,
+  "speak": "طِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0266": {
+  "carrier": false,
+  "speak": "طُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0267": {
+  "carrier": false,
+  "speak": "طً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0268": {
+  "carrier": false,
+  "speak": "طٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0269": {
+  "carrier": false,
+  "speak": "طٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0270": {
+  "carrier": false,
+  "speak": "طْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0271": {
+  "carrier": false,
+  "speak": "طَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0272": {
+  "carrier": false,
+  "speak": "طَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0273": {
+  "carrier": false,
+  "speak": "طَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0274": {
+  "carrier": false,
+  "speak": "طَائِر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0275": {
+  "carrier": false,
+  "speak": "طَبْل",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0276": {
+  "carrier": false,
+  "speak": "طَمَاطِم",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0277": {
+  "carrier": false,
+  "speak": "طَيْر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0278": {
+  "carrier": false,
+  "speak": "ظ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0279": {
+  "carrier": false,
+  "speak": "ظَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0280": {
+  "carrier": false,
+  "speak": "ظِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0281": {
+  "carrier": false,
+  "speak": "ظُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0282": {
+  "carrier": false,
+  "speak": "ظً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0283": {
+  "carrier": false,
+  "speak": "ظٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0284": {
+  "carrier": false,
+  "speak": "ظٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0285": {
+  "carrier": false,
+  "speak": "ظْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0286": {
+  "carrier": false,
+  "speak": "ظَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0287": {
+  "carrier": false,
+  "speak": "ظَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0288": {
+  "carrier": false,
+  "speak": "ظَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0289": {
+  "carrier": false,
+  "speak": "ظَرْف",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0290": {
+  "carrier": false,
+  "speak": "ظِلّ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0291": {
+  "carrier": false,
+  "speak": "ظَبِي",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0292": {
+  "carrier": false,
+  "speak": "ظُلُمَات",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0293": {
+  "carrier": false,
+  "speak": "ع",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0294": {
+  "carrier": false,
+  "speak": "عَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0295": {
+  "carrier": false,
+  "speak": "عِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0296": {
+  "carrier": false,
+  "speak": "عُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0297": {
+  "carrier": false,
+  "speak": "عً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0298": {
+  "carrier": false,
+  "speak": "عٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0299": {
+  "carrier": false,
+  "speak": "عٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0300": {
+  "carrier": false,
+  "speak": "عْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0301": {
+  "carrier": false,
+  "speak": "عَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0302": {
+  "carrier": false,
+  "speak": "عَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0303": {
+  "carrier": false,
+  "speak": "عَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0304": {
+  "carrier": false,
+  "speak": "عِنَب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0305": {
+  "carrier": false,
+  "speak": "عُصْفُور",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0306": {
+  "carrier": false,
+  "speak": "عَسَل",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0307": {
+  "carrier": false,
+  "speak": "عَلِيم",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0308": {
+  "carrier": false,
+  "speak": "غ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0309": {
+  "carrier": false,
+  "speak": "غَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0310": {
+  "carrier": false,
+  "speak": "غِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0311": {
+  "carrier": false,
+  "speak": "غُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0312": {
+  "carrier": false,
+  "speak": "غً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0313": {
+  "carrier": false,
+  "speak": "غٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0314": {
+  "carrier": false,
+  "speak": "غٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0315": {
+  "carrier": false,
+  "speak": "غْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0316": {
+  "carrier": false,
+  "speak": "غَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0317": {
+  "carrier": false,
+  "speak": "غَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0318": {
+  "carrier": false,
+  "speak": "غَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0319": {
+  "carrier": false,
+  "speak": "غَزَال",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0320": {
+  "carrier": false,
+  "speak": "غَيْمَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0321": {
+  "carrier": false,
+  "speak": "غُرَاب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0322": {
+  "carrier": false,
+  "speak": "غَفُور",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0323": {
+  "carrier": false,
+  "speak": "ف",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0324": {
+  "carrier": false,
+  "speak": "فَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0325": {
+  "carrier": false,
+  "speak": "فِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0326": {
+  "carrier": false,
+  "speak": "فُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0327": {
+  "carrier": false,
+  "speak": "فً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0328": {
+  "carrier": false,
+  "speak": "فٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0329": {
+  "carrier": false,
+  "speak": "فٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0330": {
+  "carrier": false,
+  "speak": "فْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0331": {
+  "carrier": false,
+  "speak": "فَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0332": {
+  "carrier": false,
+  "speak": "فَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0333": {
+  "carrier": false,
+  "speak": "فَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0334": {
+  "carrier": false,
+  "speak": "فِيل",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0335": {
+  "carrier": false,
+  "speak": "فَرَاشَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0336": {
+  "carrier": false,
+  "speak": "فَرَاوَلَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0337": {
+  "carrier": false,
+  "speak": "فَلَق",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0338": {
+  "carrier": false,
+  "speak": "ق",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0339": {
+  "carrier": false,
+  "speak": "قَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0340": {
+  "carrier": false,
+  "speak": "قِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0341": {
+  "carrier": false,
+  "speak": "قُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0342": {
+  "carrier": false,
+  "speak": "قً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0343": {
+  "carrier": false,
+  "speak": "قٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0344": {
+  "carrier": false,
+  "speak": "قٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0345": {
+  "carrier": false,
+  "speak": "قْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0346": {
+  "carrier": false,
+  "speak": "قَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0347": {
+  "carrier": false,
+  "speak": "قَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0348": {
+  "carrier": false,
+  "speak": "قَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0349": {
+  "carrier": false,
+  "speak": "قِطَّة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0350": {
+  "carrier": false,
+  "speak": "قَلَم",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0351": {
+  "carrier": false,
+  "speak": "قُلْ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0352": {
+  "carrier": false,
+  "speak": "ك",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0353": {
+  "carrier": false,
+  "speak": "كَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0354": {
+  "carrier": false,
+  "speak": "كِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0355": {
+  "carrier": false,
+  "speak": "كُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0356": {
+  "carrier": false,
+  "speak": "كً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0357": {
+  "carrier": false,
+  "speak": "كٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0358": {
+  "carrier": false,
+  "speak": "كٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0359": {
+  "carrier": false,
+  "speak": "كْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0360": {
+  "carrier": false,
+  "speak": "كَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0361": {
+  "carrier": false,
+  "speak": "كَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0362": {
+  "carrier": false,
+  "speak": "كَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0363": {
+  "carrier": false,
+  "speak": "كَلْب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0364": {
+  "carrier": false,
+  "speak": "كُرَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0365": {
+  "carrier": false,
+  "speak": "كَوْثَر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0366": {
+  "carrier": false,
+  "speak": "ل",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0367": {
+  "carrier": false,
+  "speak": "لَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0368": {
+  "carrier": false,
+  "speak": "لِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0369": {
+  "carrier": false,
+  "speak": "لُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0370": {
+  "carrier": false,
+  "speak": "لً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0371": {
+  "carrier": false,
+  "speak": "لٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0372": {
+  "carrier": false,
+  "speak": "لٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0373": {
+  "carrier": false,
+  "speak": "لْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0374": {
+  "carrier": false,
+  "speak": "لَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0375": {
+  "carrier": false,
+  "speak": "لَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0376": {
+  "carrier": false,
+  "speak": "لَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0377": {
+  "carrier": false,
+  "speak": "لَيْمُون",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0378": {
+  "carrier": false,
+  "speak": "لُعْبَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0379": {
+  "carrier": false,
+  "speak": "لَحْم",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0380": {
+  "carrier": true,
+  "speak": "لَهُ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0381": {
+  "carrier": false,
+  "speak": "م",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0382": {
+  "carrier": false,
+  "speak": "مَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0383": {
+  "carrier": false,
+  "speak": "مِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0384": {
+  "carrier": false,
+  "speak": "مُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0385": {
+  "carrier": false,
+  "speak": "مً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0386": {
+  "carrier": false,
+  "speak": "مٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0387": {
+  "carrier": false,
+  "speak": "مٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0388": {
+  "carrier": false,
+  "speak": "مْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0389": {
+  "carrier": false,
+  "speak": "مَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0390": {
+  "carrier": false,
+  "speak": "مَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0391": {
+  "carrier": false,
+  "speak": "مَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0392": {
+  "carrier": false,
+  "speak": "مَوْز",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0393": {
+  "carrier": false,
+  "speak": "مِفْتَاح",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0394": {
+  "carrier": false,
+  "speak": "مَاء",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0395": {
+  "carrier": false,
+  "speak": "مَالِك",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0396": {
+  "carrier": false,
+  "speak": "ن",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0397": {
+  "carrier": false,
+  "speak": "نَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0398": {
+  "carrier": false,
+  "speak": "نِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0399": {
+  "carrier": false,
+  "speak": "نُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0400": {
+  "carrier": false,
+  "speak": "نً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0401": {
+  "carrier": false,
+  "speak": "نٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0402": {
+  "carrier": false,
+  "speak": "نٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0403": {
+  "carrier": false,
+  "speak": "نْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0404": {
+  "carrier": false,
+  "speak": "نَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0405": {
+  "carrier": false,
+  "speak": "نَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0406": {
+  "carrier": false,
+  "speak": "نَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0407": {
+  "carrier": false,
+  "speak": "نَحْلَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0408": {
+  "carrier": false,
+  "speak": "نَجْمَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0409": {
+  "carrier": false,
+  "speak": "نَمِر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0410": {
+  "carrier": false,
+  "speak": "نَاس",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0411": {
+  "carrier": false,
+  "speak": "ه",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0412": {
+  "carrier": false,
+  "speak": "هَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0413": {
+  "carrier": false,
+  "speak": "هِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0414": {
+  "carrier": false,
+  "speak": "هُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0415": {
+  "carrier": false,
+  "speak": "هً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0416": {
+  "carrier": false,
+  "speak": "هٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0417": {
+  "carrier": false,
+  "speak": "هٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0418": {
+  "carrier": false,
+  "speak": "هْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0419": {
+  "carrier": false,
+  "speak": "هَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0420": {
+  "carrier": false,
+  "speak": "هَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0421": {
+  "carrier": false,
+  "speak": "هَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0422": {
+  "carrier": false,
+  "speak": "هِلَال",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0423": {
+  "carrier": false,
+  "speak": "هَدِيَّة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0424": {
+  "carrier": false,
+  "speak": "هِرَّة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0425": {
+  "carrier": true,
+  "speak": "هُوَ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0426": {
+  "carrier": false,
+  "speak": "و",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0427": {
+  "carrier": false,
+  "speak": "وَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0428": {
+  "carrier": false,
+  "speak": "وِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0429": {
+  "carrier": false,
+  "speak": "وُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0430": {
+  "carrier": false,
+  "speak": "وً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0431": {
+  "carrier": false,
+  "speak": "وٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0432": {
+  "carrier": false,
+  "speak": "وٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0433": {
+  "carrier": false,
+  "speak": "وْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0434": {
+  "carrier": false,
+  "speak": "وَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0435": {
+  "carrier": false,
+  "speak": "وَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0436": {
+  "carrier": false,
+  "speak": "وَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0437": {
+  "carrier": false,
+  "speak": "وَرْدَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0438": {
+  "carrier": false,
+  "speak": "وَجْه",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0439": {
+  "carrier": false,
+  "speak": "وَلَد",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0440": {
+  "carrier": false,
+  "speak": "وَالْعَصْر",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0441": {
+  "carrier": false,
+  "speak": "ي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0442": {
+  "carrier": false,
+  "speak": "يَ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0443": {
+  "carrier": false,
+  "speak": "يِ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0444": {
+  "carrier": false,
+  "speak": "يُ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0445": {
+  "carrier": false,
+  "speak": "يً",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0446": {
+  "carrier": false,
+  "speak": "يٍ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0447": {
+  "carrier": false,
+  "speak": "يٌ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0448": {
+  "carrier": false,
+  "speak": "يْ",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0449": {
+  "carrier": false,
+  "speak": "يَا",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0450": {
+  "carrier": false,
+  "speak": "يَو",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0451": {
+  "carrier": false,
+  "speak": "يَي",
+  "voice": "ar-SA-HamedNeural"
+ },
+ "clip-0452": {
+  "carrier": false,
+  "speak": "يَد",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0453": {
+  "carrier": false,
+  "speak": "يَمَامَة",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0454": {
+  "carrier": false,
+  "speak": "يَقْطِين",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0455": {
+  "carrier": false,
+  "speak": "يَوْم",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0456": {
+  "carrier": true,
+  "speak": "اللَّهِ",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0457": {
+  "carrier": false,
+  "speak": "كِتَاب",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0458": {
+  "carrier": false,
+  "speak": "قَلَم",
+  "voice": "ar-SA-ZariyahNeural"
+ },
+ "clip-0459": {
+  "carrier": false,
+  "speak": "نُور",
+  "voice": "ar-SA-ZariyahNeural"
+ }
 }
